@@ -34,6 +34,7 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   late FocusNode _focusNode;
+  final GlobalKey<FormFieldState> _fieldKey = GlobalKey<FormFieldState>();
   bool _hasLostFocus = false;
 
   @override
@@ -72,6 +73,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          key: _fieldKey,
           controller: widget.controller,
           obscureText: widget.obscureText,
           keyboardType: widget.keyboardType,
@@ -81,12 +83,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
               ? AutovalidateMode.onUserInteraction 
               : AutovalidateMode.disabled,
           onChanged: (value) {
-            // If the user starts typing and we already have an error showing 
-            // (e.g. from submit button), we want it to validate interactively.
-            // A simple way is to enable autovalidation on first keystroke 
-            // ONLY IF the field was empty before or it's a subsequent edit.
-            // But to keep it simple and match request: 
-            // we will just let it validate interactively after focus loss or submit.
+            if (_fieldKey.currentState?.hasError ?? false) {
+              if (!_hasLostFocus) {
+                setState(() {
+                  _hasLostFocus = true;
+                });
+                // Force a re-validation immediately so the error clears or updates
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _fieldKey.currentState?.validate();
+                });
+              }
+            }
           },
           style: GoogleFonts.outfit(
             color: AppColors.textPrimary,

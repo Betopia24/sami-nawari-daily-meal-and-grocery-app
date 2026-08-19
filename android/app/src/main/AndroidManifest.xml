@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="daily_meal_and_grocery_app"
+        android:label="MatPrep"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

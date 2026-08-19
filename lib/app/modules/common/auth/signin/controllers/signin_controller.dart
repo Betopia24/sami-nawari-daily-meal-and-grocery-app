@@ -59,6 +59,10 @@ class SigninController extends GetxController {
     Get.offNamed(Routes.signup);
   }
 
+  void goToForgotPassword() {
+    Get.toNamed(Routes.forgotpassword);
+  }
+
   void continueWithGoogle() {
     // Implement Google sign in
   }

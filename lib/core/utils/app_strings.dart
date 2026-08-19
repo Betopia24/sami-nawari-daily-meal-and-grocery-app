@@ -2,20 +2,24 @@ class AppStrings {
   AppStrings._();
 
   static const String appName = 'MatPrep';
-  
+
   // Onboarding Strings
   static const String onboardingLabel1 = 'Meal Planning';
   static const String onboardingTitle1 = 'Plan your meals smarter';
-  static const String onboardingDesc1 = 'Create grocery lists effortlessly and stay on top of your weekly meals — all in one place.';
-  
+  static const String onboardingDesc1 =
+      'Create grocery lists effortlessly and stay on top of your weekly meals — all in one place.';
+
   static const String onboardingLabel2 = 'Smart Recipes';
   static const String onboardingTitle2 = 'Discover recipes you can make now.';
-  static const String onboardingDesc2 = 'Find recipes based on ingredients you already have. Reduce food waste and save time every week.';
-  
+  static const String onboardingDesc2 =
+      'Find recipes based on ingredients you already have. Reduce food waste and save time every week.';
+
   static const String onboardingLabel3 = 'Local Discovery';
-  static const String onboardingTitle3 = 'Explore local food and share with family.';
-  static const String onboardingDesc3 = 'Find homemade food nearby, share grocery lists with your family, and get personalized recommendations.';
-  
+  static const String onboardingTitle3 =
+      'Explore local food and share with family.';
+  static const String onboardingDesc3 =
+      'Find homemade food nearby, share grocery lists with your family, and get personalized recommendations.';
+
   static const String skip = 'Skip';
   static const String next = 'Next';
   static const String getStarted = 'Get Started';
@@ -28,7 +32,8 @@ class AppStrings {
   static const String usersCount = '2M+';
   static const String usersLabel = 'Users';
   static const String welcomeTitle = 'Your complete\nkitchen companion.';
-  static const String welcomeSubtitle = 'Plan meals, discover recipes, manage groceries, and find homemade food near you.';
+  static const String welcomeSubtitle =
+      'Plan meals, discover recipes, manage groceries, and find homemade food near you.';
   static const String signIn = 'Sign In';
   static const String createAccount = 'Create Account';
   static const String continueAsGuest = 'Continue as Guest';
@@ -57,6 +62,22 @@ class AppStrings {
   static const String confirmPasswordHint = 'Re-enter your password';
   static const String signupButton = 'Create Account';
   static const String alreadyHaveAccount = 'Already have an account? ';
+
+  // Forgot Password Strings
+  static const String forgotPasswordTitle = 'Forgot Password?';
+  static const String forgotPasswordSubtitle =
+      'No worries! Enter your email and we\'ll send you a reset link.';
+  static const String sendResetLink = 'Send Reset Link';
+  static const String backtoText = 'Back to ';
+
+  // OTP Strings
+  static const String otpTitle = 'Check your email';
+  static const String otpSubtitle = 'We sent a 6-digit code to us***@gmail.com';
+  static const String resendCodeIn = 'Resend code in ';
+  static const String resendCode = 'Resend Code';
+  static const String verifyEmail = 'Verify Email';
+  static const String checkSpam = 'Didn\'t receive it? Check your spam folder.';
+
   static const String orSignUpWith = 'or sign up with';
   static const String google = 'Google';
   static const String apple = 'Apple';

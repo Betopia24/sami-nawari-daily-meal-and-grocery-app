@@ -115,9 +115,7 @@ class SigninView extends GetView<SigninController> {
                         ],
                       ),
                       TextButton(
-                        onPressed: () {
-                          // Implement forgot password
-                        },
+                        onPressed: controller.goToForgotPassword,
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
                           minimumSize: Size.zero,

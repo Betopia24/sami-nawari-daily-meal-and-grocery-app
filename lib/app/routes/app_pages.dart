@@ -9,6 +9,10 @@ import '../modules/common/auth/signup/bindings/signup_binding.dart';
 import '../modules/common/auth/signup/views/signup_view.dart';
 import '../modules/common/auth/signin/bindings/signin_binding.dart';
 import '../modules/common/auth/signin/views/signin_view.dart';
+import '../modules/common/auth/forgotpassword/bindings/forgotpassword_binding.dart';
+import '../modules/common/auth/forgotpassword/views/forgotpassword_view.dart';
+import '../modules/common/auth/otp/bindings/otp_binding.dart';
+import '../modules/common/auth/otp/views/otp_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -41,6 +45,16 @@ class AppPages {
       name: Routes.signin,
       page: () => const SigninView(),
       binding: SigninBinding(),
+    ),
+    GetPage(
+      name: Routes.forgotpassword,
+      page: () => const ForgotpasswordView(),
+      binding: ForgotpasswordBinding(),
+    ),
+    GetPage(
+      name: Routes.otp,
+      page: () => const OtpView(),
+      binding: OtpBinding(),
     ),
   ];
 }
