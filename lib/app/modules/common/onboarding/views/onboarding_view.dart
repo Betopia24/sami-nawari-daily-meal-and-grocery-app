@@ -44,7 +44,7 @@ class OnboardingView extends GetView<OnboardingController> {
               ),
             ],
           ),
-          
+
           // Top Navigation (Back & Skip)
           SafeArea(
             child: Padding(
@@ -55,7 +55,9 @@ class OnboardingView extends GetView<OnboardingController> {
                   // Back Button (Hide on first page)
                   Obx(() {
                     if (controller.currentIndex.value == 0) {
-                      return SizedBox(width: 40.w); // Placeholder to keep spacing
+                      return SizedBox(
+                        width: 40.w,
+                      ); // Placeholder to keep spacing
                     }
                     return GestureDetector(
                       onTap: controller.previous,
@@ -79,7 +81,10 @@ class OnboardingView extends GetView<OnboardingController> {
                   GestureDetector(
                     onTap: controller.skip,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 7.h,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(16.r),
@@ -98,7 +103,7 @@ class OnboardingView extends GetView<OnboardingController> {
               ),
             ),
           ),
-          
+
           // Bottom Navigation (Dots and Next Button)
           Positioned(
             left: 24.w,
@@ -110,10 +115,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 Obx(
                   () => Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      3,
-                      (index) => _buildDot(index),
-                    ),
+                    children: List.generate(3, (index) => _buildDot(index)),
                   ),
                 ),
                 SizedBox(height: 24.h),

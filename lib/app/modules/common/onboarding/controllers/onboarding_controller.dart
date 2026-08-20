@@ -32,7 +32,9 @@ class OnboardingController extends GetxController {
 
   void next() {
     if (currentIndex.value == 2) {
-      Get.offAllNamed('/home'); // We'll implement home later, this will just crash or do nothing if route doesn't exist. Let's just use a print or a snackbar for now.
+      Get.offAllNamed(
+        '/home',
+      ); // We'll implement home later, this will just crash or do nothing if route doesn't exist. Let's just use a print or a snackbar for now.
       Get.snackbar('Welcome', 'Going to home page');
     } else {
       pageController.nextPage(
@@ -41,7 +43,7 @@ class OnboardingController extends GetxController {
       );
     }
   }
-  
+
   void skip() {
     Get.offAllNamed('/home');
     Get.snackbar('Welcome', 'Going to home page');

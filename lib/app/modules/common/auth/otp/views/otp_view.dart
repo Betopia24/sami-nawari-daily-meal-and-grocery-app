@@ -8,6 +8,7 @@ import '../../../../../../core/utils/app_assets.dart';
 import '../../../../../../core/utils/app_colors.dart';
 import '../../../../../../core/utils/app_strings.dart';
 import '../../../../../widgets/primary_button.dart';
+import '../../widgets/icon_auth_header.dart';
 import '../controllers/otp_controller.dart';
 
 class OtpView extends GetView<OtpController> {
@@ -74,56 +75,10 @@ class OtpView extends GetView<OtpController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 32),
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Center(
-                              child: Transform.scale(
-                                scale: 5,
-                                child: SvgPicture.asset(
-                                  AppAssets.logoSvg,
-                                  width: 24,
-                                  height: 24,
-                                  colorFilter: const ColorFilter.mode(
-                                    AppColors.primary,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            AppStrings.otpTitle,
-                            style: GoogleFonts.outfit(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          RichText(
-                            text: TextSpan(
-                              style: GoogleFonts.outfit(
-                                fontSize: 16,
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
-                              children: [
-                                const TextSpan(text: 'We sent a 6-digit code to '),
-                                TextSpan(
-                                  text: controller.maskedEmail,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          IconAuthHeader(
+                            title: AppStrings.otpTitle,
+                            subtitle: AppStrings.otpSubtitle,
+                            subtitleHighlight: controller.maskedEmail,
                           ),
                           const SizedBox(height: 32),
                           // Pinput

@@ -5,7 +5,7 @@ import '../../../../../routes/app_routes.dart';
 
 class SignupController extends GetxController {
   final formKey = GlobalKey<FormState>();
-  
+
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();

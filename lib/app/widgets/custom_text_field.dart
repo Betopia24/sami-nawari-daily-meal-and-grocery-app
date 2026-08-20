@@ -79,8 +79,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
           keyboardType: widget.keyboardType,
           validator: widget.validator,
           focusNode: _focusNode,
-          autovalidateMode: _hasLostFocus 
-              ? AutovalidateMode.onUserInteraction 
+          autovalidateMode: _hasLostFocus
+              ? AutovalidateMode.onUserInteraction
               : AutovalidateMode.disabled,
           onChanged: (value) {
             if (_fieldKey.currentState?.hasError ?? false) {
@@ -95,10 +95,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               }
             }
           },
-          style: GoogleFonts.outfit(
-            color: AppColors.textPrimary,
-            fontSize: 16,
-          ),
+          style: GoogleFonts.outfit(color: AppColors.textPrimary, fontSize: 16),
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: GoogleFonts.outfit(
@@ -147,7 +144,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),

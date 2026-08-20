@@ -58,140 +58,153 @@ class SigninView extends GetView<SigninController> {
                       children: [
                         const SizedBox(height: 32),
                         // Header
-                  const AuthHeader(
-                    title: AppStrings.signinTitle,
-                    subtitle: AppStrings.signinSubtitle,
-                  ),
-                  const SizedBox(height: 32),
-                  // Email Field
-                  CustomTextField(
-                    label: AppStrings.emailLabel,
-                    hint: AppStrings.emailHint,
-                    prefixIcon: AppAssets.mailIcon,
-                    controller: controller.emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: controller.validateEmail,
-                  ),
-                  const SizedBox(height: 16),
-                  // Password Field
-                  Obx(() => CustomTextField(
-                        label: AppStrings.passwordLabel,
-                        hint: AppStrings.passwordSignInHint,
-                        prefixIcon: AppAssets.lockIcon,
-                        controller: controller.passwordController,
-                        isPassword: true,
-                        obscureText: controller.isPasswordHidden.value,
-                        onToggleVisibility: controller.togglePasswordVisibility,
-                        validator: controller.validatePassword,
-                      )),
-                  const SizedBox(height: 16),
-                  // Remember me & Forgot Password
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Obx(() => SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: Checkbox(
-                                  value: controller.rememberMe.value,
-                                  onChanged: controller.toggleRememberMe,
-                                  activeColor: AppColors.primary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
+                        const AuthHeader(
+                          title: AppStrings.signinTitle,
+                          subtitle: AppStrings.signinSubtitle,
+                        ),
+                        const SizedBox(height: 32),
+                        // Email Field
+                        CustomTextField(
+                          label: AppStrings.emailLabel,
+                          hint: AppStrings.emailHint,
+                          prefixIcon: AppAssets.mailIcon,
+                          controller: controller.emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: controller.validateEmail,
+                        ),
+                        const SizedBox(height: 16),
+                        // Password Field
+                        Obx(
+                          () => CustomTextField(
+                            label: AppStrings.passwordLabel,
+                            hint: AppStrings.passwordSignInHint,
+                            prefixIcon: AppAssets.lockIcon,
+                            controller: controller.passwordController,
+                            isPassword: true,
+                            obscureText: controller.isPasswordHidden.value,
+                            onToggleVisibility:
+                                controller.togglePasswordVisibility,
+                            validator: controller.validatePassword,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Remember me & Forgot Password
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Obx(
+                                  () => SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: Checkbox(
+                                      value: controller.rememberMe.value,
+                                      onChanged: controller.toggleRememberMe,
+                                      activeColor: AppColors.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      side: const BorderSide(
+                                        color: Color(0xFFE5E7EB),
+                                      ),
+                                    ),
                                   ),
-                                  side: const BorderSide(color: Color(0xFFE5E7EB)),
                                 ),
-                              )),
-                          const SizedBox(width: 8),
-                          Text(
-                            AppStrings.rememberMe,
-                            style: GoogleFonts.outfit(
-                              color: AppColors.textSecondary,
-                              fontSize: 14,
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppStrings.rememberMe,
+                                  style: GoogleFonts.outfit(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      TextButton(
-                        onPressed: controller.goToForgotPassword,
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            TextButton(
+                              onPressed: controller.goToForgotPassword,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                AppStrings.forgotPassword,
+                                style: GoogleFonts.outfit(
+                                  color: AppColors.primary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          AppStrings.forgotPassword,
-                          style: GoogleFonts.outfit(
-                            color: AppColors.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        const SizedBox(height: 32),
+                        // Sign In Button
+                        PrimaryButton(
+                          text: AppStrings.signIn,
+                          onPressed: controller.signin,
+                          showArrow: false,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  // Sign In Button
-                  PrimaryButton(
-                    text: AppStrings.signIn,
-                    onPressed: controller.signin,
-                    showArrow: false,
-                  ),
-                  const SizedBox(height: 24),
-                  // Divider
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(color: Color(0xFFE5E7EB))),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          AppStrings.orContinueWith,
-                          style: GoogleFonts.outfit(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
-                          ),
+                        const SizedBox(height: 24),
+                        // Divider
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Divider(color: Color(0xFFE5E7EB)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                AppStrings.orContinueWith,
+                                style: GoogleFonts.outfit(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const Expanded(
+                              child: Divider(color: Color(0xFFE5E7EB)),
+                            ),
+                          ],
                         ),
-                      ),
-                      const Expanded(child: Divider(color: Color(0xFFE5E7EB))),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Social Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SocialAuthButton(
-                          iconPath: AppAssets.googleIcon,
-                          text: AppStrings.google,
-                          onPressed: controller.continueWithGoogle,
+                        const SizedBox(height: 24),
+                        // Social Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SocialAuthButton(
+                                iconPath: AppAssets.googleIcon,
+                                text: AppStrings.google,
+                                onPressed: controller.continueWithGoogle,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: SocialAuthButton(
+                                iconPath: AppAssets.appleIcon,
+                                text: AppStrings.apple,
+                                onPressed: controller.continueWithApple,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: SocialAuthButton(
-                          iconPath: AppAssets.appleIcon,
-                          text: AppStrings.apple,
-                          onPressed: controller.continueWithApple,
+                        const SizedBox(height: 32),
+                        // Footer
+                        AuthFooter(
+                          text: AppStrings.dontHaveAccount,
+                          actionText: AppStrings.createAccount,
+                          onActionPressed: controller.goToSignUp,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 32),
-                  // Footer
-                  AuthFooter(
-                    text: AppStrings.dontHaveAccount,
-                    actionText: AppStrings.createAccount,
-                    onActionPressed: controller.goToSignUp,
-                  ),
-                  const SizedBox(height: 32),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-        ),
           ],
         ),
       ),

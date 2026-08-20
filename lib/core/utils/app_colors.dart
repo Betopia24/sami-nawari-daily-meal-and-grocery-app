@@ -12,7 +12,7 @@ class AppColors {
   static const Color textSecondary = Color(0xFF7A7570);
   static const Color error = Color(0xFFF44336);
   static const Color success = Color(0xFF4CAF50);
-  
+
   static const Color dotInactive = Color(0xFFE8E4DF);
   static const Color labelBackground = Color(0xFFEEF7F2);
 }

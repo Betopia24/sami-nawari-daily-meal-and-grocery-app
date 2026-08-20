@@ -2,13 +2,15 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../../../../routes/app_routes.dart';
+
 class OtpController extends GetxController {
   final pinController = TextEditingController();
   final focusNode = FocusNode();
-  
+
   final _hasError = false.obs;
   bool get hasError => _hasError.value;
-  
+
   final _timerValue = 59.obs;
   int get timerValue => _timerValue.value;
   Timer? _timer;
@@ -64,8 +66,7 @@ class OtpController extends GetxController {
     if (pinController.text.length == 6) {
       // Implement verification logic
       print("Verifying OTP: ${pinController.text}");
-      // TODO: Navigate to next screen when implemented
-      // Get.offAllNamed(Routes.home);
+      Get.offAllNamed(Routes.resetpassword, arguments: email);
     } else {
       _hasError.value = true;
     }

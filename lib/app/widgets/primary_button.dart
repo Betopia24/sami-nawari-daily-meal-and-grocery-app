@@ -13,6 +13,8 @@ class PrimaryButton extends StatelessWidget {
   final bool showArrow;
 
   final bool isOutlined;
+  final IconData? prefixIcon;
+  final String? svgPrefix;
 
   const PrimaryButton({
     super.key,
@@ -22,6 +24,8 @@ class PrimaryButton extends StatelessWidget {
     this.height,
     this.showArrow = true,
     this.isOutlined = false,
+    this.prefixIcon,
+    this.svgPrefix,
   });
 
   @override
@@ -45,6 +49,22 @@ class PrimaryButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (prefixIcon != null) ...[
+              Icon(prefixIcon, size: 20.sp, color: isOutlined ? AppColors.primary : Colors.white),
+              SizedBox(width: 8.w),
+            ],
+            if (svgPrefix != null) ...[
+              SvgPicture.asset(
+                svgPrefix!,
+                width: 20.sp,
+                height: 20.sp,
+                colorFilter: ColorFilter.mode(
+                  isOutlined ? AppColors.primary : Colors.white,
+                  BlendMode.srcIn,
+                ),
+              ),
+              SizedBox(width: 8.w),
+            ],
             Text(
               text,
               style: GoogleFonts.outfit(

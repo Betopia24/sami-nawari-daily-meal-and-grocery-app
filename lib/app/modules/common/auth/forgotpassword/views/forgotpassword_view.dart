@@ -9,6 +9,7 @@ import '../../../../../../core/utils/app_strings.dart';
 import '../../../../../widgets/custom_text_field.dart';
 import '../../../../../widgets/primary_button.dart';
 import '../../widgets/auth_footer.dart';
+import '../../widgets/icon_auth_header.dart';
 import '../controllers/forgotpassword_controller.dart';
 
 class ForgotpasswordView extends GetView<ForgotpasswordController> {
@@ -58,45 +59,9 @@ class ForgotpasswordView extends GetView<ForgotpasswordController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 32),
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Center(
-                                child: Transform.scale(
-                                  scale: 5,
-                                  child: SvgPicture.asset(
-                                    AppAssets.logoSvg,
-                                    width: 24,
-                                    height: 24,
-                                    colorFilter: const ColorFilter.mode(
-                                      AppColors.primary,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              AppStrings.forgotPasswordTitle,
-                              style: GoogleFonts.outfit(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              AppStrings.forgotPasswordSubtitle,
-                              style: GoogleFonts.outfit(
-                                fontSize: 16,
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
+                            IconAuthHeader(
+                              title: AppStrings.forgotPasswordTitle,
+                              subtitle: AppStrings.forgotPasswordSubtitle,
                             ),
                             const SizedBox(height: 32),
                             // Email Field

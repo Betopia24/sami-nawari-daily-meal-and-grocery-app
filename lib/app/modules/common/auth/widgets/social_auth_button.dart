@@ -32,11 +32,7 @@ class SocialAuthButton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(
-            iconPath,
-            width: 24,
-            height: 24,
-          ),
+          SvgPicture.asset(iconPath, width: 24, height: 24),
           const SizedBox(width: 12),
           Text(
             text,

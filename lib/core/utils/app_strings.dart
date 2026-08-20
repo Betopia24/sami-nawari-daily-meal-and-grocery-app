@@ -70,9 +70,15 @@ class AppStrings {
   static const String sendResetLink = 'Send Reset Link';
   static const String backtoText = 'Back to ';
 
+  // Reset Password Strings
+  static const String resetPasswordTitle = 'Set new password';
+  static const String resetPasswordSubtitle = 'Reset link sent to ';
+  static const String resetPasswordButton = 'Reset Password';
+  static const String newPasswordLabel = 'New Password';
+
   // OTP Strings
   static const String otpTitle = 'Check your email';
-  static const String otpSubtitle = 'We sent a 6-digit code to us***@gmail.com';
+  static const String otpSubtitle = 'We sent a 6-digit code to ';
   static const String resendCodeIn = 'Resend code in ';
   static const String resendCode = 'Resend Code';
   static const String verifyEmail = 'Verify Email';

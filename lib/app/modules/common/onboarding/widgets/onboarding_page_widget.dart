@@ -27,14 +27,9 @@ class OnboardingPageWidget extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
+              Image.asset(imagePath, fit: BoxFit.cover),
               // Dark overlay
-              Container(
-                color: Colors.black.withOpacity(0.5),
-              ),
+              Container(color: Colors.black.withOpacity(0.5)),
               // Label and Title overlay
               Positioned(
                 left: 24.w,
@@ -44,7 +39,10 @@ class OnboardingPageWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 6.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.labelBackground,
                         borderRadius: BorderRadius.circular(16.r),
