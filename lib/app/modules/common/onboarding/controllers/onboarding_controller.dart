@@ -1,3 +1,4 @@
+import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,10 +33,7 @@ class OnboardingController extends GetxController {
 
   void next() {
     if (currentIndex.value == 2) {
-      Get.offAllNamed(
-        '/home',
-      ); // We'll implement home later, this will just crash or do nothing if route doesn't exist. Let's just use a print or a snackbar for now.
-      Get.snackbar('Welcome', 'Going to home page');
+      Get.offAllNamed(Routes.welcomeauth);
     } else {
       pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -45,7 +43,6 @@ class OnboardingController extends GetxController {
   }
 
   void skip() {
-    Get.offAllNamed('/home');
-    Get.snackbar('Welcome', 'Going to home page');
+    Get.offAllNamed(Routes.welcomeauth);
   }
 }

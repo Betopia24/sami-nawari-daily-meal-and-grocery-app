@@ -23,6 +23,7 @@ class MealCategoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 104,
+        clipBehavior: Clip.antiAlias,
         padding: const EdgeInsets.only(bottom: 8.0),
         decoration: BoxDecoration(
           color: color,
@@ -33,13 +34,16 @@ class MealCategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Opacity(
-              opacity: 0.8,
-              child: Image.asset(
-                imagePath,
-                width: 91,
-                height: 64,
-                fit: BoxFit.cover,
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+              child: Opacity(
+                opacity: 0.8,
+                child: Image.asset(
+                  imagePath,
+                  width: double.infinity,
+                  height: 64,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             Text(
