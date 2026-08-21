@@ -87,4 +87,47 @@ class AppStrings {
   static const String orSignUpWith = 'or sign up with';
   static const String google = 'Google';
   static const String apple = 'Apple';
+
+  // Share App Strings
+  static const String shareAppTitle = 'Share App';
+  static const String inviteYourPeople = 'Invite Your People';
+  static const String shareAppDescription =
+      'Share Daily Meal with your friends & family and explore better ways to plan, cook & eat.';
+  static const String scanToJoin = 'Scan to join Daily Meal';
+  static const String shareButton = 'Share';
+  static const String copyLinkButton = 'Copy Link';
+  static const String storeView = 'Store View';
+  static const String exploreView = 'Explore View';
+  static const String cartView = 'Cart View';
+  static const String lunchRecipes = 'Lunch Recipes';
+  static const String snacksRecipes = 'Snacks Recipes';
+  static const String breakfastRecipes = 'Breakfast Recipes';
+  static const String dinnerRecipes = 'Dinner Recipes';
+  static const String avocadoToastWithPoached =
+      'Avocado Toast with Poached Egg';
+  static const String american = 'American';
+  static const String stepbystepInstructions = 'STEP-BY-STEP INSTRUCTIONS';
+  static const String proTips = 'Pro Tips';
+  static const String homemadeFoodNearYou = 'Homemade Food Near You';
+  static const String neighborKitchensPickupOr =
+      'Neighbor kitchens - pickup or seller delivery';
+  static const String recommendedForYou = 'Recommended For You';
+  static const String basedOnYourPreferences =
+      'Based on your preferences, saves and favorites';
+  static const String chickenBiriyaniTiffin = 'Chicken Biriyani Tiffin';
+  static const String description = 'DESCRIPTION';
+  static const String hummusBabaGhanoushTabbouleh =
+      'Hummus, baba ghanoush, tabbouleh, olives, and fresh pita for 2. A taste of the Mediterranean coast.';
+  static const String popularDishes = 'Popular Dishes';
+  static const String ingredients = 'INGREDIENTS';
+  static const String classicMezzePlatter = 'Classic Mezze Platter';
+  static const String chickenShawarma = 'Chicken Shawarma';
+  static const String mezzePlattersFreshPita = 'Mezze platters & fresh pita';
+  static const String addToCart = 'Add to Cart';
+  static const String viewCart = 'View Cart';
+  static const String open = 'Open';
+  static const String popular1 = 'Popular';
+  static const String whatAreYouCooking = 'What are you cooking today?';
+  static const String pickAMealTo = 'Pick a meal to see matching recipes';
+  static const String breakfast1 = 'Breakfast';
 }

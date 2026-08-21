@@ -24,11 +24,7 @@ class ProTipsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              SvgPicture.asset(
-                AppAssets.tipsIcon,
-                width: 24,
-                height: 24,
-              ),
+              SvgPicture.asset(AppAssets.tipsIcon, width: 24, height: 24),
               const SizedBox(width: 8),
               Text(
                 'Pro Tips',
@@ -41,41 +37,39 @@ class ProTipsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ...tips.map((tip) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 22,
-                      height: 22,
-                      margin: const EdgeInsets.only(top: 2),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primary,
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 14,
-                        ),
+          ...tips.map(
+            (tip) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 22,
+                    height: 22,
+                    margin: const EdgeInsets.only(top: 2),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary,
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.check, color: Colors.white, size: 14),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      tip,
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        tip,
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -34,7 +34,10 @@ class RecipeIngredientItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(8),
-            child: Image.asset(imagePath, fit: BoxFit.contain), // Assumes transparent png/icon
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+            ), // Assumes transparent png/icon
           ),
           const SizedBox(width: 16),
           Expanded(

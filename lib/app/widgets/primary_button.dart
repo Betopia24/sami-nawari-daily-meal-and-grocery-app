@@ -50,7 +50,11 @@ class PrimaryButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (prefixIcon != null) ...[
-              Icon(prefixIcon, size: 20.sp, color: isOutlined ? AppColors.primary : Colors.white),
+              Icon(
+                prefixIcon,
+                size: 20.sp,
+                color: isOutlined ? AppColors.primary : Colors.white,
+              ),
               SizedBox(width: 8.w),
             ],
             if (svgPrefix != null) ...[

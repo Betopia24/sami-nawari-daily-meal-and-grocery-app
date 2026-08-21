@@ -19,6 +19,29 @@ abstract class Routes {
   static const dinnerreceipes = _Paths.dinnerreceipes;
   static const snacksreceipes = _Paths.snacksreceipes;
   static const receipedetails = _Paths.receipedetails;
+
+  static const success = _Paths.success;
+  static const systempreference = _Paths.systempreference;
+  static const orderhistory = _Paths.orderhistory;
+  static const savedreceipe = _Paths.savedreceipe;
+  static const favouriteseller = _Paths.favouriteseller;
+
+  static const locationaccess = '/locationaccess';
+  static const foodpreferences = '/foodpreferences';
+  static const questionprefs = '/questionprefs';
+  static const notificationaccess = '/notificationaccess';
+
+  static const appsharing = '/appsharing';
+  static const languageandregion = '/languageandregion';
+  static const updatepassword = '/updatepassword';
+  static const familyinvite = '/familyinvite';
+  static const dietarypref = '/dietarypref';
+  static const privacypolicy = '/privacypolicy';
+  static const helpandsupport = '/helpandsupport';
+  static const rateapp = '/rateapp';
+  static const termandcondition = '/termandcondition';
+  static const alergiesandintolerence = '/alergiesandintolerence';
+  static const editbuyerprofile = '/editbuyerprofile';
 }
 
 abstract class _Paths {
@@ -42,4 +65,27 @@ abstract class _Paths {
   static const dinnerreceipes = '/dinnerreceipes';
   static const snacksreceipes = '/snacksreceipes';
   static const receipedetails = '/receipedetails';
+
+  static const success = '/success';
+  static const systempreference = '/systempreference';
+  static const orderhistory = '/orderhistory';
+  static const savedreceipe = '/savedreceipe';
+  static const favouriteseller = '/favouriteseller';
+
+  static const locationaccess = '/locationaccess';
+  static const foodpreferences = '/foodpreferences';
+  static const questionprefs = '/questionprefs';
+  static const notificationaccess = '/notificationaccess';
+
+  static const appsharing = '/appsharing';
+  static const languageandregion = '/languageandregion';
+  static const updatepassword = '/updatepassword';
+  static const familyinvite = '/familyinvite';
+  static const dietarypref = '/dietarypref';
+  static const privacypolicy = '/privacypolicy';
+  static const helpandsupport = '/helpandsupport';
+  static const rateapp = '/rateapp';
+  static const termandcondition = '/termandcondition';
+  static const alergiesandintolerence = '/alergiesandintolerence';
+  static const editbuyerprofile = '/editbuyerprofile';
 }

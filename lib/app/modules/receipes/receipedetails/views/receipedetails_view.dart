@@ -65,9 +65,16 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text('•', style: TextStyle(color: AppColors.surface)),
+                        const Text(
+                          '•',
+                          style: TextStyle(color: AppColors.surface),
+                        ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.star, color: AppColors.secondary, size: 16),
+                        const Icon(
+                          Icons.star,
+                          color: AppColors.secondary,
+                          size: 16,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '4.8',

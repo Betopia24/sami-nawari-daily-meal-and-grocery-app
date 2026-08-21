@@ -69,10 +69,6 @@ class NutritionSummaryCard extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Container(
-      height: 30,
-      width: 1,
-      color: Colors.grey.shade200,
-    );
+    return Container(height: 30, width: 1, color: Colors.grey.shade200);
   }
 }

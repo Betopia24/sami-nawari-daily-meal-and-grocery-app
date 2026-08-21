@@ -96,7 +96,8 @@ class FooddetailsView extends GetView<FooddetailsController> {
                                 children: [
                                   const Icon(
                                     Icons.star,
-                                    color: AppColors.secondary, // Uses orange/amber from AppColors
+                                    color: AppColors
+                                        .secondary, // Uses orange/amber from AppColors
                                     size: 16,
                                   ),
                                   const SizedBox(width: 4),
@@ -156,53 +157,55 @@ class FooddetailsView extends GetView<FooddetailsController> {
                   ),
                 ),
               ),
-              
+
               // Remaining Content
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                        const SizedBox(height: 72), // Adjusted for 55px card overhang
-                        // Tab Bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: TabBar(
-                              controller: controller.tabController,
-                              indicator: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              indicatorPadding: const EdgeInsets.all(4),
-                              dividerColor: Colors
-                                  .transparent, // Removes the default grey line at the bottom
-                              labelColor: Colors.white,
-                              unselectedLabelColor: AppColors.textSecondary,
-                              labelStyle: GoogleFonts.outfit(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              unselectedLabelStyle: GoogleFonts.outfit(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              tabs: const [
-                                Tab(text: 'Details'),
-                                Tab(text: 'Ingredients'),
-                              ],
-                            ),
-                          ),
+                    const SizedBox(
+                      height: 72,
+                    ), // Adjusted for 55px card overhang
+                    // Tab Bar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
-                        const SizedBox(height: 16),
-                      ],
+                        child: TabBar(
+                          controller: controller.tabController,
+                          indicator: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicatorPadding: const EdgeInsets.all(4),
+                          dividerColor: Colors
+                              .transparent, // Removes the default grey line at the bottom
+                          labelColor: Colors.white,
+                          unselectedLabelColor: AppColors.textSecondary,
+                          labelStyle: GoogleFonts.outfit(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          unselectedLabelStyle: GoogleFonts.outfit(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          tabs: const [
+                            Tab(text: 'Details'),
+                            Tab(text: 'Ingredients'),
+                          ],
+                        ),
+                      ),
                     ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
               SliverFillRemaining(
                 child: Padding(

@@ -49,9 +49,9 @@ class SigninController extends GetxController {
   }
 
   void signin() {
-    if (formKey.currentState!.validate()) {
+    if (formKey.currentState?.validate() ?? false) {
       // Implement sign in logic here
-      Get.offAllNamed(Routes.home); // Navigate to home on success
+      Get.offAllNamed(Routes.navbar); // Navigate to navbar on success
     }
   }
 

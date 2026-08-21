@@ -1,3 +1,4 @@
+import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -63,7 +64,10 @@ class DashboardView extends GetView<DashboardController> {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFFFFF8EE), Color(0xFFFEF3EA)],
+                                colors: [
+                                  Color(0xFFFFF8EE),
+                                  AppColors.backgroundNotification,
+                                ],
                               ),
                               onTap: () =>
                                   Get.toNamed(Routes.breakfastreceipes),
@@ -141,8 +145,8 @@ class DashboardView extends GetView<DashboardController> {
                           ),
                           RecipeCard(
                             title: 'Lemon Lentil Soup',
-                            imagePath:
-                                'assets/images/does_not_exist.png', // Invalid path to show fallback
+                            imagePath: AppAssets
+                                .doesNotExist, // Invalid path to show fallback
                             tag: 'Previously viewed',
                             time: '25m',
                             calories: '290 kcal',
@@ -189,8 +193,8 @@ class DashboardView extends GetView<DashboardController> {
                           HomemadeFoodCard(
                             title: 'Steamed Veg Dumplings',
                             subtitle: 'Mei\'s Dumpling Table',
-                            imagePath:
-                                'assets/images/does_not_exist.png', // Invalid path to show fallback
+                            imagePath: AppAssets
+                                .doesNotExist, // Invalid path to show fallback
                             distance: '1.4 km',
                             rating: '4.7 (132)',
                             price: '\$4.00',

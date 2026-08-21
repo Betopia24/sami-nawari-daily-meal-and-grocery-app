@@ -1,3 +1,4 @@
+import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../../core/utils/app_assets.dart';
@@ -22,7 +23,7 @@ class RecommendedfoodView extends GetView<RecommendedfoodController> {
       },
       {
         'title': 'Lemon Lentil Soup',
-        'imagePath': 'assets/images/does_not_exist.png', // Show fallback
+        'imagePath': AppAssets.doesNotExist, // Show fallback
         'tag': 'Previously viewed',
         'time': '25m',
         'calories': '290 kcal',

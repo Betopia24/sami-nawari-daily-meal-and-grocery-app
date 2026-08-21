@@ -69,11 +69,7 @@ class RecipesHeader extends StatelessWidget {
             ],
           ),
         ),
-        Divider(
-          height: 1,
-          thickness: 1,
-          color: Colors.grey.shade200,
-        ),
+        Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
       ],
     );
   }

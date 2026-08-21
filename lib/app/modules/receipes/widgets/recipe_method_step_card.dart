@@ -76,8 +76,12 @@ class RecipeMethodStepCard extends StatelessWidget {
                     description,
                     style: GoogleFonts.outfit(
                       fontSize: 14,
-                      color: isCompleted ? AppColors.textSecondary : AppColors.textPrimary,
-                      decoration: isCompleted ? TextDecoration.lineThrough : TextDecoration.none,
+                      color: isCompleted
+                          ? AppColors.textSecondary
+                          : AppColors.textPrimary,
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
                       height: 1.5,
                     ),
                   ),

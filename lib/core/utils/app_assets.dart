@@ -71,4 +71,81 @@ class AppAssets {
   static const String locationIcon = 'assets/icons/location_icon.svg';
   static const String searchIcon = 'assets/icons/search_icon.svg';
   static const String notificationIcon = 'assets/icons/notification_icon.svg';
+  static const String locationAccessBg = 'assets/graphics/locationaccessbg.svg';
+  static const String storeEmojiIcon = 'assets/emojis/store_emoji.png';
+  static const String cartEmojiIcon = 'assets/emojis/cart_emoji.png';
+  static const String locationEmojiIcon = 'assets/emojis/location_emoji.png';
+
+  // Notification Access Assets
+  static const String notificationAccessBg =
+      'assets/graphics/notificationaccessbg.svg';
+  static const String recipeEmojiIcon = 'assets/emojis/recipe_emoji.png';
+  static const String promoEmojiIcon = 'assets/emojis/promo_emoji.png';
+  static const String communityEmojiIcon = 'assets/emojis/community_emoji.png';
+  // Food Preferences Assets
+  static const String halalEmojiIcon = 'assets/emojis/halal_emoji.png';
+  static const String veganEmojiIcon = 'assets/emojis/vegan_emoji.png';
+  static const String glutenFreeEmojiIcon =
+      'assets/emojis/gluten_free_emoji.png';
+  static const String noPreferenceEmojiIcon =
+      'assets/emojis/no_preference_emoji.png';
+  static const String highProteinEmojiIcon =
+      'assets/emojis/high_protein_emoji.png';
+  static const String lowCarbEmojiIcon = 'assets/emojis/low_carb_emoji.png';
+  static const String ketoEmojiIcon = 'assets/emojis/keto_emoji.png';
+  static const String mediterraneanEmojiIcon =
+      'assets/emojis/mediterranean_emoji.png';
+
+  // Question Preferences Wizard Assets
+  static const String scaleEmojiIcon = 'assets/emojis/scale_emoji.png';
+  static const String boltEmojiIcon = 'assets/emojis/bolt_emoji.png';
+  static const String heartEmojiIcon = 'assets/emojis/heart_emoji.png';
+  static const String sunsetEmojiIcon = 'assets/emojis/sunset_emoji.png';
+  static const String tacoEmojiIcon = 'assets/emojis/taco_emoji.png';
+  static const String burgerEmojiIcon = 'assets/emojis/burger_emoji.png';
+  static const String curryEmojiIcon = 'assets/emojis/curry_emoji.png';
+  static const String noodlesEmojiIcon = 'assets/emojis/noodles_emoji.png';
+  static const String pastaEmojiIcon = 'assets/emojis/pasta_emoji.png';
+  static const String smallFamilyEmojiIcon =
+      'assets/emojis/small_family_emoji.png';
+  static const String largeFamilyEmojiIcon =
+      'assets/emojis/large_family_emoji.png';
+  static const String coupleEmojiIcon = 'assets/emojis/couple_emoji.png';
+  static const String moneyBagEmojiIcon = 'assets/emojis/money_bag_emoji.png';
+  static const String calendarEmojiIcon = 'assets/emojis/calendar_emoji.png';
+  static const String fireEmojiIcon = 'assets/emojis/fire_emoji.png';
+  static const String saladEmojiIcon = 'assets/emojis/salad_emoji.png';
+  static const String takeoutEmojiIcon = 'assets/emojis/takeout_emoji.png';
+  static const String personEmojiIcon = 'assets/emojis/person_emoji.png';
+  static const String oliveEmojiIcon = 'assets/emojis/olive_emoji.png';
+
+  // System Preference Icons
+  static const String allergiesAndIntoleranceIcon =
+      'assets/icons/allergiesandinrolerence_icon.png';
+  static const String bookmarkFilledIcon =
+      'assets/icons/bookmarkfilled_icon.svg';
+  static const String dietaryPrefIcon = 'assets/icons/dietarypref_icon.png';
+  static const String helpAndSupportIcon =
+      'assets/icons/helpandsupport_icon.png';
+  static const String inviteFamilyIcon = 'assets/icons/invitefamily_icon.png';
+  static const String languageIcon = 'assets/icons/language_icon.png';
+  static const String notification1Icon = 'assets/icons/notificaiton1_icon.png';
+  static const String passwordLockIcon = 'assets/icons/passwordlock_icon.png';
+  static const String orderHistoryIcon = 'assets/icons/orderhistory_icon.png';
+  static const String privacyPolicyIcon = 'assets/icons/privacypolicy_icon.png';
+  static const String rateTheAppIcon = 'assets/icons/ratetheapp_icon.png';
+  static const String sellerStoreIcon = 'assets/icons/sellerstore_icon.svg';
+  static const String shareIcon = 'assets/icons/share_icon.svg';
+  static const String signedOutIcon = 'assets/icons/signedout_icon.svg';
+  static const String starIcon = 'assets/icons/star_icon.png';
+  static const String termsAndConditionIcon =
+      'assets/icons/termandcondition_icon.png';
+  static const String editIcon = 'assets/icons/edit_icon.svg';
+  static const String calendarIcon = 'assets/icons/calender_icon.svg';
+
+  // Shared Graphics
+  static const String shareGraphic = 'assets/graphics/sharegraphic.svg';
+
+  // Fallbacks
+  static const String doesNotExist = 'assets/images/does_not_exist.png';
 }

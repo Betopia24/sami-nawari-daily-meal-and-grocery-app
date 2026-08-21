@@ -37,10 +37,13 @@ class FloatingSeamSliverHeader extends StatelessWidget {
           final double safeAreaTop = MediaQuery.of(context).padding.top;
           final double top = constraints.maxHeight;
 
-          final double scrollRange = expandedHeight - (toolbarHeight + safeAreaTop);
+          final double scrollRange =
+              expandedHeight - (toolbarHeight + safeAreaTop);
           final double expansionFraction = scrollRange > 0
-              ? ((top - (toolbarHeight + safeAreaTop)) / scrollRange)
-                  .clamp(0.0, 1.0)
+              ? ((top - (toolbarHeight + safeAreaTop)) / scrollRange).clamp(
+                  0.0,
+                  1.0,
+                )
               : 0.0;
 
           final double imageTop = top - expandedHeight;
@@ -61,10 +64,7 @@ class FloatingSeamSliverHeader extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      imagePath,
-                      fit: BoxFit.cover,
-                    ),
+                    Image.asset(imagePath, fit: BoxFit.cover),
                     // Dark gradient at the bottom for text readability
                     Positioned(
                       bottom: 0,
@@ -92,10 +92,7 @@ class FloatingSeamSliverHeader extends StatelessWidget {
                       bottom: titleBottomOffset,
                       left: 24,
                       right: 24,
-                      child: Opacity(
-                        opacity: textOpacity,
-                        child: titleWidget,
-                      ),
+                      child: Opacity(opacity: textOpacity, child: titleWidget),
                     ),
                   ],
                 ),
