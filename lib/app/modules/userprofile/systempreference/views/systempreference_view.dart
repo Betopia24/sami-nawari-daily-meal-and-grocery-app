@@ -76,6 +76,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
                             ProfileMenuTile(
                               iconPath: AppAssets.storeIcon,
                               title: 'Favorite Sellers',
+                              textColor: AppColors.textPrimary,
                               onTap: () => Get.toNamed(Routes.favouriteseller),
                               showBottomDivider: false,
                             ),

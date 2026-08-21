@@ -88,16 +88,16 @@ class SignupController extends GetxController {
   void signup() {
     if (formKey.currentState!.validate()) {
       // Implement sign up logic here
-      print('Signup clicked: ${emailController.text}');
+      Get.offAllNamed(Routes.locationaccess);
     }
   }
 
   void continueWithGoogle() {
-    print('Google sign up clicked');
+    Get.offAllNamed(Routes.locationaccess);
   }
 
   void continueWithApple() {
-    print('Apple sign up clicked');
+    Get.offAllNamed(Routes.locationaccess);
   }
 
   void goToSignIn() {

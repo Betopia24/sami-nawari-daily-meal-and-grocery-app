@@ -27,10 +27,10 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
           CustomScrollView(
             slivers: [
               FloatingSeamSliverHeader(
-                expandedHeight: 350,
+                expandedHeight: 380,
                 toolbarHeight: 121,
                 floatingCardOverhang: 37,
-                titleBottomOffset: 40,
+                titleBottomOffset: 16,
                 imagePath: AppAssets.homeRecipeCardImage1,
                 titleWidget: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

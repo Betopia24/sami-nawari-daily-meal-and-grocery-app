@@ -87,23 +87,24 @@ class FloatingSeamSliverHeader extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Title Text container
-                    Positioned(
-                      bottom: titleBottomOffset,
-                      left: 24,
-                      right: 24,
-                      child: Opacity(opacity: textOpacity, child: titleWidget),
-                    ),
                   ],
                 ),
               ),
 
-              // Floating Card
+              // Attached Title and Floating Card
               Positioned(
                 bottom: -floatingCardOverhang,
                 left: 24,
                 right: 24,
-                child: floatingCard,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Opacity(opacity: textOpacity, child: titleWidget),
+                    SizedBox(height: titleBottomOffset),
+                    floatingCard,
+                  ],
+                ),
               ),
             ],
           );

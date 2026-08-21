@@ -35,7 +35,7 @@ class FooddetailsView extends GetView<FooddetailsController> {
           CustomScrollView(
             slivers: [
               FloatingSeamSliverHeader(
-                expandedHeight: 335,
+                expandedHeight: 360,
                 toolbarHeight: 127,
                 floatingCardOverhang: 55,
                 titleBottomOffset: 20,
