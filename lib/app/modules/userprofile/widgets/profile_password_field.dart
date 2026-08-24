@@ -7,6 +7,7 @@ class ProfilePasswordField extends StatefulWidget {
   final String hintText;
   final TextEditingController? controller;
   final bool showVisibilityToggle;
+  final String? Function(String?)? validator;
 
   const ProfilePasswordField({
     super.key,
@@ -14,6 +15,7 @@ class ProfilePasswordField extends StatefulWidget {
     required this.hintText,
     this.controller,
     this.showVisibilityToggle = true,
+    this.validator,
   });
 
   @override
@@ -32,6 +34,7 @@ class _ProfilePasswordFieldState extends State<ProfilePasswordField> {
       prefixIcon: AppAssets.lockIcon,
       isPassword: widget.showVisibilityToggle,
       obscureText: _obscureText,
+      validator: widget.validator,
       onToggleVisibility: widget.showVisibilityToggle
           ? () {
               setState(() {

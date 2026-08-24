@@ -8,6 +8,7 @@ import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../userprofile/systempreference/views/systempreference_view.dart';
+import '../../cart/mycarts/views/mycarts_view.dart';
 import '../controllers/navbar_controller.dart';
 
 class NavbarView extends GetView<NavbarController> {
@@ -24,7 +25,7 @@ class NavbarView extends GetView<NavbarController> {
             const DashboardView(),
             const Center(child: Text('Store View')),
             const Center(child: Text('Explore View')),
-            const Center(child: Text('Cart View')),
+            const MycartsView(),
             const SystempreferenceView(),
           ],
         ),

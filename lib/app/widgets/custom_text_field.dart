@@ -7,7 +7,7 @@ import '../../../core/utils/app_colors.dart';
 class CustomTextField extends StatefulWidget {
   final String label;
   final String hint;
-  final String prefixIcon;
+  final String? prefixIcon;
   final TextEditingController controller;
   final bool isPassword;
   final bool obscureText;
@@ -19,7 +19,7 @@ class CustomTextField extends StatefulWidget {
     super.key,
     required this.label,
     required this.hint,
-    required this.prefixIcon,
+    this.prefixIcon,
     required this.controller,
     this.isPassword = false,
     this.obscureText = false,
@@ -102,16 +102,18 @@ class _CustomTextFieldState extends State<CustomTextField> {
               color: AppColors.textSecondary,
               fontSize: 16,
             ),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: SvgPicture.asset(
-                widget.prefixIcon,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.textSecondary,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
+            prefixIcon: widget.prefixIcon != null
+                ? Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: SvgPicture.asset(
+                      widget.prefixIcon!,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.textSecondary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  )
+                : null,
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: widget.obscureText

@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
 
 class LanguageandregionController extends GetxController {
-  final RxString language = 'English (US)'.obs;
-  final RxString country = 'United States'.obs;
-  final RxString timeZone = 'America/New_York'.obs;
+  final RxString language = 'Select your language'.obs;
+  final RxString country = 'Select your country'.obs;
+  final RxString timeZone = 'Select your time zone'.obs;
 
   final RxString dateFormat = 'MM/DD/YYYY'.obs;
   final RxString timeFormat = '12-hour (3:30 PM)'.obs;

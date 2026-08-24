@@ -75,6 +75,19 @@ import '../modules/userprofile/editbuyerprofile/bindings/editbuyerprofile_bindin
 import '../modules/userprofile/editbuyerprofile/views/editbuyerprofile_view.dart';
 import '../modules/userprofile/languageandregion/bindings/languageandregion_binding.dart';
 import '../modules/userprofile/languageandregion/views/languageandregion_view.dart';
+import '../modules/cart/mycarts/bindings/mycarts_binding.dart';
+import '../modules/cart/mycarts/views/mycarts_view.dart';
+import '../modules/cart/revieworder/bindings/revieworder_binding.dart';
+import '../modules/cart/revieworder/views/revieworder_view.dart';
+
+import '../modules/cart/deliveryselection/bindings/deliveryselection_binding.dart';
+import '../modules/cart/deliveryselection/views/deliveryselection_view.dart';
+import '../modules/cart/deliveryaddress/bindings/deliveryaddress_binding.dart';
+import '../modules/cart/deliveryaddress/views/deliveryaddress_view.dart';
+import '../modules/cart/placeorder/bindings/placeorder_binding.dart';
+import '../modules/cart/placeorder/views/placeorder_view.dart';
+import '../modules/cart/orderplaced/bindings/orderplaced_binding.dart';
+import '../modules/cart/orderplaced/views/orderplaced_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -273,6 +286,36 @@ class AppPages {
       name: Routes.languageandregion,
       page: () => const LanguageandregionView(),
       binding: LanguageandregionBinding(),
+    ),
+    GetPage(
+      name: Routes.mycarts,
+      page: () => const MycartsView(),
+      binding: MycartsBinding(),
+    ),
+    GetPage(
+      name: Routes.revieworder,
+      page: () => const RevieworderView(),
+      binding: RevieworderBinding(),
+    ),
+    GetPage(
+      name: Routes.deliveryselection,
+      page: () => const DeliveryselectionView(),
+      binding: DeliveryselectionBinding(),
+    ),
+    GetPage(
+      name: Routes.deliveryaddress,
+      page: () => const DeliveryaddressView(),
+      binding: DeliveryaddressBinding(),
+    ),
+    GetPage(
+      name: Routes.placeorder,
+      page: () => const PlaceorderView(),
+      binding: PlaceorderBinding(),
+    ),
+    GetPage(
+      name: Routes.orderplaced,
+      page: () => const OrderplacedView(),
+      binding: OrderplacedBinding(),
     ),
   ];
 }

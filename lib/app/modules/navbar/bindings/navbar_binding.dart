@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../controllers/navbar_controller.dart';
 import '../../dashboard/controllers/dashboard_controller.dart';
 import '../../userprofile/systempreference/controllers/systempreference_controller.dart';
+import '../../cart/mycarts/controllers/mycarts_controller.dart';
 
 class NavbarBinding extends Bindings {
   @override
@@ -9,5 +10,6 @@ class NavbarBinding extends Bindings {
     Get.lazyPut<NavbarController>(() => NavbarController());
     Get.lazyPut<DashboardController>(() => DashboardController());
     Get.lazyPut<SystempreferenceController>(() => SystempreferenceController());
+    Get.lazyPut<MycartsController>(() => MycartsController());
   }
 }

@@ -42,6 +42,12 @@ abstract class Routes {
   static const termandcondition = '/termandcondition';
   static const alergiesandintolerence = '/alergiesandintolerence';
   static const editbuyerprofile = '/editbuyerprofile';
+  static const mycarts = '/mycarts';
+  static const revieworder = '/revieworder';
+  static const deliveryselection = '/deliveryselection';
+  static const deliveryaddress = '/deliveryaddress';
+  static const placeorder = '/placeorder';
+  static const orderplaced = '/orderplaced';
 }
 
 abstract class _Paths {
@@ -88,4 +94,11 @@ abstract class _Paths {
   static const termandcondition = '/termandcondition';
   static const alergiesandintolerence = '/alergiesandintolerence';
   static const editbuyerprofile = '/editbuyerprofile';
+  static const mycarts = '/mycarts';
+  static const revieworder = '/revieworder';
+  static const deliveryselection = '/deliveryselection';
+  static const deliveryaddress = '/deliveryaddress';
+  static const placeorder = '/placeorder';
+  static const orderplaced = '/orderplaced';
+  static const trackorder = '/trackorder';
 }

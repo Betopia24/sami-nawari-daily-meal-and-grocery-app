@@ -142,6 +142,16 @@ class AppAssets {
       'assets/icons/termandcondition_icon.png';
   static const String editIcon = 'assets/icons/edit_icon.svg';
   static const String calendarIcon = 'assets/icons/calender_icon.svg';
+  static const String deleteIcon = 'assets/icons/delete_iconsvg.svg';
+  static const String onlinePayIcon = 'assets/icons/onlinepay_icon.svg';
+  static const String cashOnDeliveryIcon = 'assets/icons/cashondelivery_icon.svg';
+
+  // Order Placed Animation Assets
+  static const String orderPlacedShadow =
+      'assets/graphics/orderplaced_shadow.svg';
+  static const String orderPlacedBg = 'assets/graphics/orderplaced_bg.svg';
+  static const String orderPlacedBag = 'assets/graphics/orderplaced_bag.svg';
+
 
   // Shared Graphics
   static const String shareGraphic = 'assets/graphics/sharegraphic.svg';

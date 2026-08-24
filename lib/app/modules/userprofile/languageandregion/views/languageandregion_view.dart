@@ -24,59 +24,58 @@ class LanguageandregionView extends GetView<LanguageandregionController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ProfileSectionCard(
-              children: [
-                Obx(
-                  () => SelectionDropdown(
-                    label: 'Language',
-                    value: controller.language.value,
-                    options: const [
-                      'English (US)',
-                      'English (UK)',
-                      'Español',
-                      'Français',
-                      'Deutsch',
-                    ],
-                    onChanged: (val) {
-                      if (val != null) controller.setLanguage(val);
-                    },
-                  ),
-                ),
-                Obx(
-                  () => SelectionDropdown(
-                    label: 'Country',
-                    value: controller.country.value,
-                    options: const [
-                      'United States',
-                      'United Kingdom',
-                      'Canada',
-                      'France',
-                      'Australia',
-                    ],
-                    onChanged: (val) {
-                      if (val != null) controller.setCountry(val);
-                    },
-                  ),
-                ),
-                Obx(
-                  () => SelectionDropdown(
-                    label: 'Time Zone',
-                    value: controller.timeZone.value,
-                    options: const [
-                      'America/New_York',
-                      'America/Los_Angeles',
-                      'Europe/London',
-                      'Europe/Paris',
-                      'Asia/Tokyo',
-                      'Asia/Dubai',
-                      'Australia/Sydney',
-                    ],
-                    onChanged: (val) {
-                      if (val != null) controller.setTimeZone(val);
-                    },
-                  ),
-                ),
-              ],
+            Obx(
+              () => SelectionDropdown(
+                label: 'Language',
+                value: controller.language.value,
+                options: const [
+                  'Select your language',
+                  'English (US)',
+                  'English (UK)',
+                  'Español',
+                  'Français',
+                  'Deutsch',
+                ],
+                onChanged: (val) {
+                  if (val != null) controller.setLanguage(val);
+                },
+              ),
+            ),
+            Obx(
+              () => SelectionDropdown(
+                label: 'Country',
+                value: controller.country.value,
+                options: const [
+                  'Select your country',
+                  'United States',
+                  'United Kingdom',
+                  'Canada',
+                  'France',
+                  'Australia',
+                ],
+                onChanged: (val) {
+                  if (val != null) controller.setCountry(val);
+                },
+              ),
+            ),
+            Obx(
+              () => SelectionDropdown(
+                label: 'Time Zone',
+                value: controller.timeZone.value,
+                options: const [
+                  'Select your time zone',
+                  'America/New_York',
+                  'America/Los_Angeles',
+                  'Europe/London',
+                  'Europe/Paris',
+                  'Asia/Tokyo',
+                  'Asia/Dubai',
+                  'Australia/Sydney',
+                ],
+                onChanged: (val) {
+                  if (val != null) controller.setTimeZone(val);
+                },
+              ),
             ),
             const SizedBox(height: 24),
             Text(
