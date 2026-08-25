@@ -47,7 +47,10 @@ abstract class Routes {
   static const deliveryselection = '/deliveryselection';
   static const deliveryaddress = '/deliveryaddress';
   static const placeorder = '/placeorder';
-  static const orderplaced = '/orderplaced';
+  static const orderplaced = _Paths.orderplaced;
+  static const sharedmembers = _Paths.sharedmembers;
+  static const MEMBERINVITE = _Paths.MEMBERINVITE;
+  static const PERMISSIONSET = _Paths.PERMISSIONSET;
 }
 
 abstract class _Paths {
@@ -101,4 +104,7 @@ abstract class _Paths {
   static const placeorder = '/placeorder';
   static const orderplaced = '/orderplaced';
   static const trackorder = '/trackorder';
+  static const sharedmembers = '/sharedmembers';
+  static const MEMBERINVITE = '/memberinvite';
+  static const PERMISSIONSET = '/permissionset';
 }

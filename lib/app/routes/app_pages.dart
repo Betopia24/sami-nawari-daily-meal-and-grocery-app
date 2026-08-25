@@ -88,6 +88,12 @@ import '../modules/cart/placeorder/bindings/placeorder_binding.dart';
 import '../modules/cart/placeorder/views/placeorder_view.dart';
 import '../modules/cart/orderplaced/bindings/orderplaced_binding.dart';
 import '../modules/cart/orderplaced/views/orderplaced_view.dart';
+import '../modules/groceries/sharedmembers/bindings/shared_members_binding.dart';
+import '../modules/groceries/sharedmembers/views/shared_members_view.dart';
+import '../modules/groceries/memberinvite/bindings/member_invite_binding.dart';
+import '../modules/groceries/memberinvite/views/member_invite_view.dart';
+import '../modules/groceries/permissionset/bindings/permissionset_binding.dart';
+import '../modules/groceries/permissionset/views/permissionset_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -316,6 +322,21 @@ class AppPages {
       name: Routes.orderplaced,
       page: () => const OrderplacedView(),
       binding: OrderplacedBinding(),
+    ),
+    GetPage(
+      name: Routes.sharedmembers,
+      page: () => const SharedMembersView(),
+      binding: SharedMembersBinding(),
+    ),
+    GetPage(
+      name: Routes.MEMBERINVITE,
+      page: () => const MemberInviteView(),
+      binding: MemberInviteBinding(),
+    ),
+    GetPage(
+      name: Routes.PERMISSIONSET,
+      page: () => const PermissionSetView(),
+      binding: PermissionSetBinding(),
     ),
   ];
 }
