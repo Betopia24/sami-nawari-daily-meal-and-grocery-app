@@ -71,6 +71,16 @@ class AppAssets {
   static const String locationIcon = 'assets/icons/location_icon.svg';
   static const String searchIcon = 'assets/icons/search_icon.svg';
   static const String notificationIcon = 'assets/icons/notification_icon.svg';
+
+  // Seller Profile Icons
+  static const String bankDetailsIcon = 'assets/icons/bank_details_icon.svg';
+  static const String earnIcon = 'assets/icons/earn_icon.svg';
+  static const String earning2Icon = 'assets/icons/earning2_icon.png';
+  static const String myFoodIcon = 'assets/icons/myfood_icon.png';
+  static const String paymentInformationIcon =
+      'assets/icons/paymentiformation_icon.svg';
+  static const String addFoodIcon = 'assets/icons/addfood_icon.png';
+
   static const String locationAccessBg = 'assets/graphics/locationaccessbg.svg';
   static const String storeEmojiIcon = 'assets/emojis/store_emoji.png';
   static const String cartEmojiIcon = 'assets/emojis/cart_emoji.png';
@@ -144,7 +154,8 @@ class AppAssets {
   static const String calendarIcon = 'assets/icons/calender_icon.svg';
   static const String deleteIcon = 'assets/icons/delete_iconsvg.svg';
   static const String onlinePayIcon = 'assets/icons/onlinepay_icon.svg';
-  static const String cashOnDeliveryIcon = 'assets/icons/cashondelivery_icon.svg';
+  static const String cashOnDeliveryIcon =
+      'assets/icons/cashondelivery_icon.svg';
 
   // Order Placed Animation Assets
   static const String orderPlacedShadow =
@@ -152,10 +163,23 @@ class AppAssets {
   static const String orderPlacedBg = 'assets/graphics/orderplaced_bg.svg';
   static const String orderPlacedBag = 'assets/graphics/orderplaced_bag.svg';
 
-
   // Shared Graphics
   static const String shareGraphic = 'assets/graphics/sharegraphic.svg';
+  static const String sellerHomeGraphic =
+      'assets/graphics/sellerhome_graphic.png';
+
+  // Seller Icons
+  static const String alarmClockIcon = 'assets/icons/alarmclock_icon.svg';
+  static const String connectIcon = 'assets/icons/connect_icon.svg';
+  static const String graphTreeIcon = 'assets/icons/graphtree_icon.svg';
+  static const String withdrawIcon = 'assets/icons/withdraw_icon.svg';
+  static const String availablebalanceIcon =
+      'assets/icons/availablebalance_icon.png';
+  static const String totalearningIcon = 'assets/icons/totalearning_icon.png';
 
   // Fallbacks
   static const String doesNotExist = 'assets/images/does_not_exist.png';
+  static const String reviewBankDetailsGraphic =
+      'assets/graphics/reviewbankdetails_graphic.svg';
+  static const String successGraphic = 'assets/graphics/success_graphic.svg';
 }

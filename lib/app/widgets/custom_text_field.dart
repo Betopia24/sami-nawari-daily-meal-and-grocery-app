@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/app_assets.dart';
@@ -6,6 +7,7 @@ import '../../../core/utils/app_colors.dart';
 
 class CustomTextField extends StatefulWidget {
   final String label;
+  final String? subLabel;
   final String hint;
   final String? prefixIcon;
   final TextEditingController controller;
@@ -14,10 +16,18 @@ class CustomTextField extends StatefulWidget {
   final VoidCallback? onToggleVisibility;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
+  final int maxLines;
+  final int? maxLength;
+  final bool isRequired;
+  final Widget? labelTrailing;
+  final List<TextInputFormatter>? inputFormatters;
+  final void Function(String)? onChanged;
+  final bool readOnly;
 
   const CustomTextField({
     super.key,
     required this.label,
+    this.subLabel,
     required this.hint,
     this.prefixIcon,
     required this.controller,
@@ -26,6 +36,13 @@ class CustomTextField extends StatefulWidget {
     this.onToggleVisibility,
     this.validator,
     this.keyboardType = TextInputType.text,
+    this.maxLines = 1,
+    this.maxLength,
+    this.isRequired = false,
+    this.labelTrailing,
+    this.inputFormatters,
+    this.onChanged,
+    this.readOnly = false,
   });
 
   @override
@@ -63,20 +80,57 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: GoogleFonts.outfit(
-            color: AppColors.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  text: widget.label,
+                  style: GoogleFonts.outfit(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  children: widget.isRequired
+                      ? [
+                          TextSpan(
+                            text: '*',
+                            style: GoogleFonts.outfit(
+                              color: AppColors.error,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ]
+                      : [],
+                ),
+              ),
+            ),
+            if (widget.labelTrailing != null) widget.labelTrailing!,
+          ],
         ),
+        if (widget.subLabel != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            widget.subLabel!,
+            style: GoogleFonts.outfit(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         TextFormField(
           key: _fieldKey,
           controller: widget.controller,
+          readOnly: widget.readOnly,
           obscureText: widget.obscureText,
           keyboardType: widget.keyboardType,
+          maxLines: widget.maxLines,
+          maxLength: widget.maxLength,
+          inputFormatters: widget.inputFormatters,
           validator: widget.validator,
           focusNode: _focusNode,
           autovalidateMode: _hasLostFocus
@@ -94,6 +148,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 });
               }
             }
+            if (widget.onChanged != null) {
+              widget.onChanged!(value);
+            }
           },
           style: GoogleFonts.outfit(color: AppColors.textPrimary, fontSize: 16),
           decoration: InputDecoration(
@@ -101,6 +158,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
             hintStyle: GoogleFonts.outfit(
               color: AppColors.textSecondary,
               fontSize: 16,
+            ),
+            counterStyle: GoogleFonts.outfit(
+              color: AppColors.textSecondary,
+              fontSize: 12,
             ),
             prefixIcon: widget.prefixIcon != null
                 ? Padding(

@@ -25,6 +25,7 @@ abstract class Routes {
   static const orderhistory = _Paths.orderhistory;
   static const savedreceipe = _Paths.savedreceipe;
   static const favouriteseller = _Paths.favouriteseller;
+  static const notification = _Paths.notification;
 
   static const locationaccess = '/locationaccess';
   static const foodpreferences = '/foodpreferences';
@@ -42,6 +43,7 @@ abstract class Routes {
   static const termandcondition = '/termandcondition';
   static const alergiesandintolerence = '/alergiesandintolerence';
   static const editbuyerprofile = '/editbuyerprofile';
+  static const editSellerProfile = _Paths.editSellerProfile;
   static const mycarts = '/mycarts';
   static const revieworder = '/revieworder';
   static const deliveryselection = '/deliveryselection';
@@ -51,6 +53,21 @@ abstract class Routes {
   static const sharedmembers = _Paths.sharedmembers;
   static const MEMBERINVITE = _Paths.MEMBERINVITE;
   static const PERMISSIONSET = _Paths.PERMISSIONSET;
+  static const SELLER_STARTPAGE = _Paths.SELLER_STARTPAGE;
+  static const SELLERREGISTRATION = _Paths.SELLERREGISTRATION;
+  static const orderlist = _Paths.orderlist;
+  static const orderdetails = _Paths.orderdetails;
+  static const addnewfood = _Paths.addnewfood;
+  static const addfooddetails = _Paths.addfooddetails;
+  static const previewfood = _Paths.previewfood;
+  static const earnings = _Paths.earnings;
+  static const earninghistory = _Paths.earninghistory;
+  static const paymentinformation = _Paths.paymentinformation;
+  static const ADDBANKACCOUNT = _Paths.ADDBANKACCOUNT;
+  static const REVIEWBANKDETAILS = _Paths.REVIEWBANKDETAILS;
+  static const BANKDETAILS = _Paths.BANKDETAILS;
+  static const WITHDRAWREQUEST = _Paths.WITHDRAWREQUEST;
+  static const REQUESTSENT = _Paths.REQUESTSENT;
 }
 
 abstract class _Paths {
@@ -80,6 +97,7 @@ abstract class _Paths {
   static const orderhistory = '/orderhistory';
   static const savedreceipe = '/savedreceipe';
   static const favouriteseller = '/favouriteseller';
+  static const notification = '/notification';
 
   static const locationaccess = '/locationaccess';
   static const foodpreferences = '/foodpreferences';
@@ -97,6 +115,7 @@ abstract class _Paths {
   static const termandcondition = '/termandcondition';
   static const alergiesandintolerence = '/alergiesandintolerence';
   static const editbuyerprofile = '/editbuyerprofile';
+  static const editSellerProfile = '/editsellerprofile';
   static const mycarts = '/mycarts';
   static const revieworder = '/revieworder';
   static const deliveryselection = '/deliveryselection';
@@ -107,4 +126,19 @@ abstract class _Paths {
   static const sharedmembers = '/sharedmembers';
   static const MEMBERINVITE = '/memberinvite';
   static const PERMISSIONSET = '/permissionset';
+  static const SELLER_STARTPAGE = '/seller-startpage';
+  static const SELLERREGISTRATION = '/sellerregistration';
+  static const orderlist = '/orderlist';
+  static const orderdetails = '/orderdetails';
+  static const addnewfood = '/addnewfood';
+  static const addfooddetails = '/addfooddetails';
+  static const previewfood = '/previewfood';
+  static const earnings = '/earnings';
+  static const earninghistory = '/earninghistory';
+  static const paymentinformation = '/paymentinformation';
+  static const ADDBANKACCOUNT = '/addbankaccount';
+  static const REVIEWBANKDETAILS = '/reviewbankdetails';
+  static const BANKDETAILS = '/bankdetails';
+  static const WITHDRAWREQUEST = '/withdrawrequest';
+  static const REQUESTSENT = '/requestsent';
 }

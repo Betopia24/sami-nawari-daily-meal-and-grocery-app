@@ -6,6 +6,8 @@ class DashedBorderButton extends StatelessWidget {
   final VoidCallback onTap;
   final Color color;
   final double radius;
+  final Color? textColor;
+  final Color? iconColor;
 
   const DashedBorderButton({
     super.key,
@@ -13,6 +15,8 @@ class DashedBorderButton extends StatelessWidget {
     required this.onTap,
     this.color = const Color(0xFFE5E7EB),
     this.radius = 12.0,
+    this.textColor,
+    this.iconColor,
   });
 
   @override
@@ -33,14 +37,14 @@ class DashedBorderButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add, color: Colors.grey.shade500, size: 20),
+              Icon(Icons.add, color: iconColor ?? Colors.grey.shade500, size: 20),
               const SizedBox(width: 8),
               Text(
                 text,
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
+                  color: textColor ?? Colors.grey.shade600,
                 ),
               ),
             ],

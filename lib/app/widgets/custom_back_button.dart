@@ -17,10 +17,11 @@ class CustomBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap ?? () => Get.back(),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
+    return UnconstrainedBox(
+      child: InkWell(
+        onTap: onTap ?? () => Get.back(),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
@@ -32,6 +33,7 @@ class CustomBackButton extends StatelessWidget {
         ),
         child: Center(
           child: Icon(Icons.chevron_left, color: iconColor, size: 24),
+        ),
         ),
       ),
     );

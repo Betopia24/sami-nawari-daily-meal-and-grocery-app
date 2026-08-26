@@ -73,6 +73,8 @@ import '../modules/userprofile/updatepassword/bindings/updatepassword_binding.da
 import '../modules/userprofile/updatepassword/views/updatepassword_view.dart';
 import '../modules/userprofile/editbuyerprofile/bindings/editbuyerprofile_binding.dart';
 import '../modules/userprofile/editbuyerprofile/views/editbuyerprofile_view.dart';
+import '../modules/seller/editsellerprofile/bindings/editsellerprofile_binding.dart';
+import '../modules/seller/editsellerprofile/views/editsellerprofile_view.dart';
 import '../modules/userprofile/languageandregion/bindings/languageandregion_binding.dart';
 import '../modules/userprofile/languageandregion/views/languageandregion_view.dart';
 import '../modules/cart/mycarts/bindings/mycarts_binding.dart';
@@ -94,6 +96,38 @@ import '../modules/groceries/memberinvite/bindings/member_invite_binding.dart';
 import '../modules/groceries/memberinvite/views/member_invite_view.dart';
 import '../modules/groceries/permissionset/bindings/permissionset_binding.dart';
 import '../modules/groceries/permissionset/views/permissionset_view.dart';
+import '../modules/notification/bindings/notification_binding.dart';
+import '../modules/notification/views/notification_view.dart';
+import '../modules/seller/startpage/bindings/startpage_binding.dart';
+import '../modules/seller/startpage/views/startpage_view.dart';
+import '../modules/seller/sellerregistration/bindings/sellerregistration_binding.dart';
+import '../modules/seller/sellerregistration/views/sellerregistration_view.dart';
+import '../modules/seller/orderlist/bindings/orderlist_binding.dart';
+import '../modules/seller/orderlist/views/orderlist_view.dart';
+import '../modules/seller/previewfood/bindings/previewfood_binding.dart';
+import '../modules/seller/previewfood/views/previewfood_view.dart';
+import '../modules/seller/orderdetails/bindings/orderdetails_binding.dart';
+import '../modules/seller/orderdetails/views/orderdetails_view.dart';
+import '../modules/seller/addnewfood/bindings/addnewfood_binding.dart';
+import '../modules/seller/addnewfood/views/addnewfood_view.dart';
+import '../modules/seller/addfooddetails/bindings/addfooddetails_binding.dart';
+import '../modules/seller/addfooddetails/views/addfooddetails_view.dart';
+import '../modules/seller/earnings/bindings/earnings_binding.dart';
+import '../modules/seller/earnings/views/earnings_view.dart';
+import '../modules/seller/earninghistory/bindings/earninghistory_binding.dart';
+import '../modules/seller/earninghistory/views/earninghistory_view.dart';
+import '../modules/seller/paymentinformation/bindings/paymentinformation_binding.dart';
+import '../modules/seller/paymentinformation/views/paymentinformation_view.dart';
+import '../modules/seller/addbankaccount/bindings/addbankaccount_binding.dart';
+import '../modules/seller/addbankaccount/views/addbankaccount_view.dart';
+import '../modules/seller/reviewbankdetails/bindings/reviewbankdetails_binding.dart';
+import '../modules/seller/reviewbankdetails/views/reviewbankdetails_view.dart';
+import '../modules/seller/withdrawrequest/bindings/withdrawrequest_binding.dart';
+import '../modules/seller/withdrawrequest/views/withdrawrequest_view.dart';
+import '../modules/seller/requestsent/bindings/requestsent_binding.dart';
+import '../modules/seller/requestsent/views/requestsent_view.dart';
+import '../modules/seller/bankdetails/bindings/bankdetails_binding.dart';
+import '../modules/seller/bankdetails/views/bankdetails_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -199,6 +233,11 @@ class AppPages {
       binding: SuccessBinding(),
     ),
     GetPage(
+      name: Routes.notification,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+    ),
+    GetPage(
       name: Routes.locationaccess,
       page: () => const LocationaccessView(),
       binding: LocationaccessBinding(),
@@ -289,6 +328,11 @@ class AppPages {
       binding: EditbuyerprofileBinding(),
     ),
     GetPage(
+      name: Routes.editSellerProfile,
+      page: () => const EditsellerprofileView(),
+      binding: EditsellerprofileBinding(),
+    ),
+    GetPage(
       name: Routes.languageandregion,
       page: () => const LanguageandregionView(),
       binding: LanguageandregionBinding(),
@@ -337,6 +381,81 @@ class AppPages {
       name: Routes.PERMISSIONSET,
       page: () => const PermissionSetView(),
       binding: PermissionSetBinding(),
+    ),
+    GetPage(
+      name: Routes.SELLER_STARTPAGE,
+      page: () => const StartpageView(),
+      binding: StartpageBinding(),
+    ),
+    GetPage(
+      name: Routes.SELLERREGISTRATION,
+      page: () => const SellerregistrationView(),
+      binding: SellerregistrationBinding(),
+    ),
+    GetPage(
+      name: Routes.orderlist,
+      page: () => const OrderlistView(),
+      binding: OrderlistBinding(),
+    ),
+    GetPage(
+      name: Routes.orderdetails,
+      page: () => const OrderdetailsView(),
+      binding: OrderdetailsBinding(),
+    ),
+    GetPage(
+      name: Routes.addnewfood,
+      page: () => const AddnewfoodView(),
+      binding: AddnewfoodBinding(),
+    ),
+    GetPage(
+      name: Routes.addfooddetails,
+      page: () => const AddfooddetailsView(),
+      binding: AddfooddetailsBinding(),
+    ),
+    GetPage(
+      name: Routes.previewfood,
+      page: () => const PreviewfoodView(),
+      binding: PreviewfoodBinding(),
+    ),
+    GetPage(
+      name: Routes.earnings,
+      page: () => const EarningsView(),
+      binding: EarningsBinding(),
+    ),
+    GetPage(
+      name: Routes.earninghistory,
+      page: () => const EarninghistoryView(),
+      binding: EarninghistoryBinding(),
+    ),
+    GetPage(
+      name: Routes.paymentinformation,
+      page: () => const PaymentInformationView(),
+      binding: PaymentInformationBinding(),
+    ),
+    GetPage(
+      name: Routes.ADDBANKACCOUNT,
+      page: () => const AddbankaccountView(),
+      binding: AddbankaccountBinding(),
+    ),
+    GetPage(
+      name: Routes.REVIEWBANKDETAILS,
+      page: () => const ReviewbankdetailsView(),
+      binding: ReviewbankdetailsBinding(),
+    ),
+    GetPage(
+      name: Routes.BANKDETAILS,
+      page: () => const BankdetailsView(),
+      binding: BankdetailsBinding(),
+    ),
+    GetPage(
+      name: Routes.WITHDRAWREQUEST,
+      page: () => const WithdrawrequestView(),
+      binding: WithdrawrequestBinding(),
+    ),
+    GetPage(
+      name: Routes.REQUESTSENT,
+      page: () => const RequestsentView(),
+      binding: RequestsentBinding(),
     ),
   ];
 }

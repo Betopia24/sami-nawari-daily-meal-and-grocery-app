@@ -33,7 +33,7 @@ class DashboardView extends GetView<DashboardController> {
               greeting: 'Good Morning',
               name: 'Rafi',
               profileImageUrl: null,
-              onNotificationTap: () {},
+              onNotificationTap: () => Get.toNamed(Routes.notification),
               onProfileTap: () {},
             ),
             LocationBar(location: 'San Francisco, CA', onTap: () {}),

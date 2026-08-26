@@ -35,13 +35,13 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
                   ),
                 ),
               ),
-              child: Column(
+              child: Obx(() => Column(
                 children: [
                   _buildHeader(),
                   const SizedBox(height: 24),
                   _buildStatsRow(),
                 ],
-              ),
+              )),
             ),
             Expanded(
               child: Container(
@@ -49,130 +49,33 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
+                    child: Obx(() => Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _buildBecomeSellerBanner(),
                         const SizedBox(height: 24),
-                        _buildSectionTitle('MARKETPLACE'),
+                        _buildSectionTitle(controller.isSellerMode.value ? 'MANAGE' : 'MARKETPLACE'),
                         const SizedBox(height: 12),
-                        ProfileSectionCard(
-                          children: [
-                            ProfileMenuTile(
-                              iconPath: AppAssets.orderHistoryIcon,
-                              title: 'Order History',
-                              onTap: () => Get.toNamed(Routes.orderhistory),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.bookmarkFilledIcon,
-                              title: 'Saved Recipes',
-                              onTap: () => Get.toNamed(Routes.savedreceipe),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.shareIcon,
-                              title: 'Share App',
-                              onTap: () => Get.toNamed(Routes.appsharing),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.storeIcon,
-                              title: 'Favorite Sellers',
-                              textColor: AppColors.textPrimary,
-                              onTap: () => Get.toNamed(Routes.favouriteseller),
-                              showBottomDivider: false,
-                            ),
-                          ],
-                        ),
+                        controller.isSellerMode.value ? _buildSellerManageSection() : _buildBuyerMarketplaceSection(),
                         const SizedBox(height: 24),
                         _buildSectionTitle('ACCOUNT'),
                         const SizedBox(height: 12),
-                        ProfileSectionCard(
-                          children: [
-                            Obx(
-                              () => ProfileMenuTile(
-                                iconPath: AppAssets.notification1Icon,
-                                title: 'Notifications',
-                                trailing: CupertinoSwitch(
-                                  value: controller.notificationsEnabled.value,
-                                  activeColor: AppColors.primary,
-                                  onChanged: controller.toggleNotifications,
-                                ),
-                              ),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.languageIcon,
-                              title: 'Language & Region',
-                              trailing: _buildTrailingText('English (US)'),
-                              onTap: () =>
-                                  Get.toNamed(Routes.languageandregion),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.lockIcon,
-                              title: 'Update Password',
-                              onTap: () => Get.toNamed(Routes.updatepassword),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.inviteFamilyIcon,
-                              title: 'Invite Family',
-                              onTap: () => Get.toNamed(Routes.familyinvite),
-                              trailing: _buildTrailingText('3 members'),
-                              showBottomDivider: false,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        _buildSectionTitle('PREFERENCES'),
-                        const SizedBox(height: 12),
-                        ProfileSectionCard(
-                          children: [
-                            ProfileMenuTile(
-                              iconPath: AppAssets.dietaryPrefIcon,
-                              title: 'Dietary Preferences',
-                              trailing: _buildTrailingText('No Preference'),
-                              onTap: () => Get.toNamed(Routes.dietarypref),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.allergiesAndIntoleranceIcon,
-                              title: 'Allergies & Intolerances',
-                              trailing: _buildTrailingText('None set'),
-                              onTap: () =>
-                                  Get.toNamed(Routes.alergiesandintolerence),
-                              showBottomDivider: false,
-                            ),
-                          ],
-                        ),
+                        _buildAccountSection(),
+                        if (controller.isSellerMode.value) ...[
+                          const SizedBox(height: 24),
+                          _buildSectionTitle('PAYMENT METHOD'),
+                          const SizedBox(height: 12),
+                          _buildSellerPaymentSection(),
+                        ],
                         const SizedBox(height: 24),
                         _buildSectionTitle('PRIVACY & SECURITY'),
                         const SizedBox(height: 12),
-                        ProfileSectionCard(
-                          children: [
-                            ProfileMenuTile(
-                              iconPath: AppAssets.privacyPolicyIcon,
-                              title: 'Privacy Policy',
-                              onTap: () => Get.toNamed(Routes.privacypolicy),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.helpAndSupportIcon,
-                              title: 'Help & Support',
-                              onTap: () => Get.toNamed(Routes.helpandsupport),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.rateTheAppIcon,
-                              title: 'Rate the App',
-                              onTap: () => Get.toNamed(Routes.rateapp),
-                            ),
-                            ProfileMenuTile(
-                              iconPath: AppAssets.termsAndConditionIcon,
-                              title: 'Terms & Conditions',
-                              onTap: () => Get.toNamed(Routes.termandcondition),
-                              showBottomDivider: false,
-                            ),
-                          ],
-                        ),
+                        _buildPrivacySecuritySection(),
                         const SizedBox(height: 32),
                         _buildSignOutButton(),
                         const SizedBox(height: 140), // Space for bottom navbar
                       ],
-                    ),
+                    )),
                   ),
                 ),
               ),
@@ -225,7 +128,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Rafiul Islam',
+                controller.isSellerMode.value ? 'Rafi\'s Kitchen' : 'Rafiul Islam',
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -234,7 +137,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
               ),
               const SizedBox(height: 4),
               Text(
-                'rafi@email.com',
+                controller.isSellerMode.value ? 'by Rafiul Islam' : 'rafi@email.com',
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -242,7 +145,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Buyer',
+                controller.isSellerMode.value ? 'Seller' : 'Buyer',
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -253,7 +156,13 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
           ),
         ),
         InkWell(
-          onTap: () => Get.toNamed('/editbuyerprofile'),
+          onTap: () {
+            if (controller.isSellerMode.value) {
+              Get.toNamed('/editsellerprofile');
+            } else {
+              Get.toNamed('/editbuyerprofile');
+            }
+          },
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.all(10),
@@ -277,6 +186,17 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
   }
 
   Widget _buildStatsRow() {
+    if (controller.isSellerMode.value) {
+      return Row(
+        children: [
+          _buildStatItem('5', 'Orders'),
+          _buildVerticalDivider(),
+          _buildStatItem('2', 'Pending'),
+          _buildVerticalDivider(),
+          _buildStatItem('12', 'Completed'),
+        ],
+      );
+    }
     return Row(
       children: [
         _buildStatItem('3', 'Recipes Saved'),
@@ -323,46 +243,64 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
   }
 
   Widget _buildBecomeSellerBanner() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            AppAssets.sellerStoreIcon,
-            width: 32,
-            height: 32,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Become a Seller',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+    return InkWell(
+      onTap: () {
+        if (controller.isRegisteredSeller.value) {
+          // If already registered, toggle modes
+          controller.toggleSellerMode();
+        } else {
+          // If not registered, navigate to the start page
+          Get.toNamed(Routes.SELLER_STARTPAGE);
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            controller.isRegisteredSeller.value 
+              ? const Icon(Icons.sync, color: Colors.white, size: 28)
+              : SvgPicture.asset(
+                  AppAssets.sellerStoreIcon,
+                  width: 32,
+                  height: 32,
+                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'Share your homemade food',
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.8),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.isRegisteredSeller.value 
+                        ? (controller.isSellerMode.value ? 'Switch to Buyer' : 'Switch to Seller') 
+                        : 'Become a Seller',
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                  if (!controller.isRegisteredSeller.value) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'Share your homemade food',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.chevron_right, color: Colors.white),
-        ],
+            const Icon(Icons.chevron_right, color: Colors.white),
+          ],
+        ),
       ),
     );
   }
@@ -431,6 +369,161 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
           ],
         ),
       ),
+    );
+  }
+  Widget _buildBuyerMarketplaceSection() {
+    return ProfileSectionCard(
+      children: [
+        ProfileMenuTile(
+          iconPath: AppAssets.orderHistoryIcon,
+          title: 'Order History',
+          onTap: () => Get.toNamed(Routes.orderhistory),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.bookmarkFilledIcon,
+          title: 'Saved Recipes',
+          onTap: () => Get.toNamed(Routes.savedreceipe),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.shareIcon,
+          title: 'Share App',
+          onTap: () => Get.toNamed(Routes.appsharing),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.storeIcon,
+          title: 'Favorite Sellers',
+          textColor: AppColors.textPrimary,
+          onTap: () => Get.toNamed(Routes.favouriteseller),
+          showBottomDivider: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSellerManageSection() {
+    return ProfileSectionCard(
+      children: [
+        ProfileMenuTile(
+          iconPath: AppAssets.addFoodIcon,
+          title: 'Add Food',
+          onTap: () => Get.toNamed(Routes.addnewfood),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.myFoodIcon,
+          title: 'My Food',
+          onTap: () {},
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.orderHistoryIcon,
+          title: 'Orders',
+          onTap: () => Get.toNamed(Routes.orderlist),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.earning2Icon,
+          title: 'Earnings',
+          onTap: () => Get.toNamed(Routes.earnings),
+          showBottomDivider: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountSection() {
+    return ProfileSectionCard(
+      children: [
+        Obx(
+          () => ProfileMenuTile(
+            iconPath: AppAssets.notification1Icon,
+            title: 'Notifications',
+            trailing: CupertinoSwitch(
+              value: controller.notificationsEnabled.value,
+              activeColor: AppColors.primary,
+              onChanged: controller.toggleNotifications,
+            ),
+          ),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.languageIcon,
+          title: 'Language & Region',
+          trailing: _buildTrailingText('English (US)'),
+          onTap: () => Get.toNamed(Routes.languageandregion),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.lockIcon,
+          title: 'Update Password',
+          onTap: () => Get.toNamed(Routes.updatepassword),
+          showBottomDivider: !controller.isSellerMode.value, // Hide if it's the last item in seller mode
+        ),
+        if (!controller.isSellerMode.value) ...[
+          ProfileMenuTile(
+            iconPath: AppAssets.inviteFamilyIcon,
+            title: 'Invite Family',
+            onTap: () => Get.toNamed(Routes.familyinvite),
+            trailing: _buildTrailingText('3 members'),
+          ),
+          ProfileMenuTile(
+            iconPath: AppAssets.dietaryPrefIcon,
+            title: 'Dietary Preferences',
+            trailing: _buildTrailingText('No Preference'),
+            onTap: () => Get.toNamed(Routes.dietarypref),
+          ),
+          ProfileMenuTile(
+            iconPath: AppAssets.allergiesAndIntoleranceIcon,
+            title: 'Allergies & Intolerances',
+            trailing: _buildTrailingText('None set'),
+            onTap: () => Get.toNamed(Routes.alergiesandintolerence),
+            showBottomDivider: false,
+          ),
+        ]
+      ],
+    );
+  }
+
+  Widget _buildSellerPaymentSection() {
+    return ProfileSectionCard(
+      children: [
+        ProfileMenuTile(
+          iconPath: AppAssets.bankDetailsIcon,
+          title: 'Bank Details',
+          onTap: () => Get.toNamed(Routes.BANKDETAILS),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.paymentInformationIcon,
+          title: 'Payment Information',
+          onTap: () {
+            Get.toNamed(Routes.paymentinformation);
+          },
+          showBottomDivider: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrivacySecuritySection() {
+    return ProfileSectionCard(
+      children: [
+        ProfileMenuTile(
+          iconPath: AppAssets.privacyPolicyIcon,
+          title: 'Privacy Policy',
+          onTap: () => Get.toNamed(Routes.privacypolicy),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.helpAndSupportIcon,
+          title: 'Help & Support',
+          onTap: () => Get.toNamed(Routes.helpandsupport),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.rateTheAppIcon,
+          title: 'Rate the App',
+          onTap: () => Get.toNamed(Routes.rateapp),
+        ),
+        ProfileMenuTile(
+          iconPath: AppAssets.termsAndConditionIcon,
+          title: 'Terms & Conditions',
+          onTap: () => Get.toNamed(Routes.termandcondition),
+          showBottomDivider: false,
+        ),
+      ],
     );
   }
 }
