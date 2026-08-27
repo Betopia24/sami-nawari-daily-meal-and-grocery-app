@@ -9,7 +9,13 @@ class ReviewbankdetailsController extends GetxController {
 
   void addBankAccount() {
     // Save logic
-    // For now, go back to Payment Information page or show success
-    Get.until((route) => route.settings.name == '/paymentinformation');
+    // Show success snackbar
+    Get.snackbar(
+      'Success',
+      'Bank account added successfully',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    // Close ReviewBankDetails and AddBankAccount screens to return to the previous screen
+    Get.close(2);
   }
 }

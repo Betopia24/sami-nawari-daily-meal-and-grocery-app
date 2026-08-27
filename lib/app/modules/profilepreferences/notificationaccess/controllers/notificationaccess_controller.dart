@@ -28,11 +28,11 @@ class NotificationaccessController extends GetxController {
 
   void allowNotification() {
     print('Notification allowed');
-    Get.offAllNamed(Routes.foodpreferences);
+    Get.toNamed(Routes.foodpreferences);
   }
 
   void skip() {
     print('Notification skipped');
-    Get.offAllNamed(Routes.foodpreferences);
+    Get.toNamed(Routes.foodpreferences);
   }
 }

@@ -149,7 +149,7 @@ import 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const initial = Routes.navbar;
+  static const initial = Routes.splash;
 
   static final routes = [
     GetPage(

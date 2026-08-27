@@ -16,7 +16,12 @@ class MycartsController extends GetxController with GetSingleTickerProviderState
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 3, vsync: this);
+    int initialIndex = 0;
+    if (Get.arguments != null && Get.arguments is Map && Get.arguments['mycarts_tab'] != null) {
+      initialIndex = Get.arguments['mycarts_tab'];
+    }
+    tabController = TabController(length: 3, vsync: this, initialIndex: initialIndex);
+    currentTabIndex.value = initialIndex;
     tabController.addListener(() {
       currentTabIndex.value = tabController.index;
     });

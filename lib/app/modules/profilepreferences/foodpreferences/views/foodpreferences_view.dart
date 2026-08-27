@@ -22,42 +22,7 @@ class FoodpreferencesView extends GetView<FoodpreferencesController> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 24.0,
-                right: 24.0,
-                top: 8.0,
-                bottom: 8.0,
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Get.back(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.borderGrey),
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          AppAssets.backArrowIcon,
-                          width: 16,
-                          height: 16,
-                          colorFilter: const ColorFilter.mode(
-                            Colors.black,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 16),
 
             // Title and grid
             Expanded(
