@@ -5,6 +5,7 @@ import '../../userprofile/systempreference/controllers/systempreference_controll
 import '../../cart/mycarts/controllers/mycarts_controller.dart';
 
 import '../../groceries/controllers/groceries_controller.dart';
+import '../../explore/exploreboard/controllers/exploreboard_controller.dart';
 
 class NavbarBinding extends Bindings {
   @override
@@ -14,5 +15,6 @@ class NavbarBinding extends Bindings {
     Get.lazyPut<SystempreferenceController>(() => SystempreferenceController());
     Get.lazyPut<MycartsController>(() => MycartsController());
     Get.lazyPut<GroceriesController>(() => GroceriesController());
+    Get.lazyPut<ExploreboardController>(() => ExploreboardController());
   }
 }

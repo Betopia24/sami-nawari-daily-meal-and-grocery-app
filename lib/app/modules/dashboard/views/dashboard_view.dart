@@ -12,7 +12,8 @@ import '../widgets/greeting_header.dart';
 import '../widgets/homemade_food_card.dart';
 import '../widgets/location_bar.dart';
 import '../widgets/meal_category_card.dart';
-import '../widgets/nutrition_card.dart';
+import '../../../widgets/nutrition_goal_card.dart';
+import '../../../data/models/nutrition_instruction_model.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/shared_grocery_card.dart';
@@ -32,9 +33,7 @@ class DashboardView extends GetView<DashboardController> {
             GreetingHeader(
               greeting: 'Good Morning',
               name: 'Rafi',
-              profileImageUrl: null,
               onNotificationTap: () => Get.toNamed(Routes.notification),
-              onProfileTap: () {},
             ),
             LocationBar(location: 'San Francisco, CA', onTap: () {}),
             // Scrollable Content
@@ -117,7 +116,7 @@ class DashboardView extends GetView<DashboardController> {
                       title: 'Today\'s Meal Plan',
                       subtitle: 'Your personalized meals for today',
                     ),
-                    DailyPlanBanner(onViewPlanTap: () {}),
+                    DailyPlanBanner(onViewPlanTap: () => Get.toNamed(Routes.mealplan)),
                     const SizedBox(height: 16),
 
                     _buildSectionHeader(
@@ -211,6 +210,7 @@ class DashboardView extends GetView<DashboardController> {
                       title: 'Nutrition For You',
                       subtitle: 'Personalized nutrition guidance powered by AI',
                       actionLabel: 'See all',
+                      onActionTap: () => Get.toNamed(Routes.nutritionboard),
                     ),
                     const SizedBox(height: 12),
                     Padding(
@@ -218,20 +218,26 @@ class DashboardView extends GetView<DashboardController> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: NutritionCard(
+                            child: NutritionGoalCard(
                               title: 'Weight Loss',
                               subtitle: 'Sustainable, not drastic',
-                              iconPath: AppAssets.weightLossIcon,
-                              onTap: () {},
+                              emoji: '🥗',
+                              onTap: () {
+                                final instruction = NutritionInstructionModel.getInstructionForGoal('Weight Loss');
+                                Get.toNamed(Routes.nutritioninstructions, arguments: instruction);
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: NutritionCard(
+                            child: NutritionGoalCard(
                               title: 'Weight Gain',
                               subtitle: 'Build, don\'t just eat more',
-                              iconPath: AppAssets.weightGainIcon,
-                              onTap: () {},
+                              emoji: '🥜',
+                              onTap: () {
+                                final instruction = NutritionInstructionModel.getInstructionForGoal('Weight Gain');
+                                Get.toNamed(Routes.nutritioninstructions, arguments: instruction);
+                              },
                             ),
                           ),
                         ],
@@ -243,25 +249,32 @@ class DashboardView extends GetView<DashboardController> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: NutritionCard(
+                            child: NutritionGoalCard(
                               title: 'Foods for Children',
                               subtitle: 'Build strong foundation',
-                              iconPath: AppAssets.foodForChildIcon,
-                              onTap: () {},
+                              emoji: '👦',
+                              onTap: () {
+                                final instruction = NutritionInstructionModel.getInstructionForGoal('Foods for Children');
+                                Get.toNamed(Routes.nutritioninstructions, arguments: instruction);
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: NutritionCard(
+                            child: NutritionGoalCard(
                               title: 'Foods for Mother',
                               subtitle: 'Nourish yourself, nourish your child',
-                              iconPath: AppAssets.foodForMotherIcon,
-                              onTap: () {},
+                              emoji: '🤱',
+                              onTap: () {
+                                final instruction = NutritionInstructionModel.getInstructionForGoal('Foods for Mother');
+                                Get.toNamed(Routes.nutritioninstructions, arguments: instruction);
+                              },
                             ),
                           ),
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 40), // Extra bottom padding
                   ],
                 ),

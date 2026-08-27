@@ -165,6 +165,7 @@ class AppAssets {
 
   // Shared Graphics
   static const String shareGraphic = 'assets/graphics/sharegraphic.svg';
+  static const String mealPlanGraphic = 'assets/graphics/mealplan_graphic_extracted.png';
   static const String sellerHomeGraphic =
       'assets/graphics/sellerhome_graphic.png';
 

@@ -1,0 +1,166 @@
+import 'package:daily_meal_and_grocery_app/app/widgets/custom_text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../../core/utils/app_assets.dart';
+import '../../../../../core/utils/app_colors.dart';
+import '../../widgets/restaurant_card.dart';
+import '../controllers/exploreboard_controller.dart';
+import '../widgets/mock_map_view.dart';
+
+class ExploreboardView extends GetView<ExploreboardController> {
+  const ExploreboardView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 24.h),
+              Text(
+                'Explore',
+                style: GoogleFonts.outfit(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textDark,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                'Discover food near you',
+                style: GoogleFonts.outfit(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Search and Filter row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: TextEditingController(),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search restaurants, cuisines...',
+                                    hintStyle: GoogleFonts.outfit(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 14.sp,
+                                    ),
+                                    prefixIcon: Padding(
+                                      padding: EdgeInsets.all(10.w),
+                                      child: SvgPicture.asset(
+                                        AppAssets.searchIcon,
+                                        colorFilter: const ColorFilter.mode(
+                                          AppColors.textSecondary,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE2EBE5),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE2EBE5),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.primary,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16.w,
+                                      vertical: 10.h,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 10.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.tune,
+                                      color: Colors.white,
+                                      size: 18.sp,
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      'Filter',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 24.h),
+
+                          // Mock Map
+                          const MockMapView(),
+                          SizedBox(height: 24.h),
+                        ],
+                      ),
+                    ),
+
+                    // List of Restaurant Cards
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final restaurant = controller.restaurants[index];
+                        return RestaurantCard(restaurant: restaurant);
+                      }, childCount: controller.restaurants.length),
+                    ),
+
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: 100.h),
+                    ), // Bottom padding for navbar
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

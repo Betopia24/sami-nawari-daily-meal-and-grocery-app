@@ -68,6 +68,14 @@ abstract class Routes {
   static const BANKDETAILS = _Paths.BANKDETAILS;
   static const WITHDRAWREQUEST = _Paths.WITHDRAWREQUEST;
   static const REQUESTSENT = _Paths.REQUESTSENT;
+  static const nutritionboard = _Paths.nutritionboard;
+  static const nutritioninstructions = _Paths.nutritioninstructions;
+  static const createmealprogram = _Paths.createmealprogram;
+  static const creationsteps = _Paths.creationsteps;
+  static const planready = _Paths.planready;
+  static const mealplan = _Paths.mealplan;
+  static const exploreboard = _Paths.exploreboard;
+  static const viewmenu = _Paths.viewmenu;
 }
 
 abstract class _Paths {
@@ -141,4 +149,12 @@ abstract class _Paths {
   static const BANKDETAILS = '/bankdetails';
   static const WITHDRAWREQUEST = '/withdrawrequest';
   static const REQUESTSENT = '/requestsent';
+  static const nutritionboard = '/nutritionboard';
+  static const nutritioninstructions = '/nutritioninstructions';
+  static const createmealprogram = '/createmealprogram';
+  static const creationsteps = '/creationsteps';
+  static const planready = '/planready';
+  static const mealplan = '/mealplan';
+  static const exploreboard = '/exploreboard';
+  static const viewmenu = '/viewmenu';
 }

@@ -128,6 +128,22 @@ import '../modules/seller/requestsent/bindings/requestsent_binding.dart';
 import '../modules/seller/requestsent/views/requestsent_view.dart';
 import '../modules/seller/bankdetails/bindings/bankdetails_binding.dart';
 import '../modules/seller/bankdetails/views/bankdetails_view.dart';
+import '../modules/nutritions/nutritionboard/bindings/nutritionboard_binding.dart';
+import '../modules/nutritions/nutritionboard/views/nutritionboard_view.dart';
+import '../modules/nutritions/nutritioninstructions/bindings/nutritioninstructions_binding.dart';
+import '../modules/nutritions/nutritioninstructions/views/nutritioninstructions_view.dart';
+import '../modules/nutritions/createmealprogram/bindings/createmealprogram_binding.dart';
+import '../modules/nutritions/createmealprogram/views/createmealprogram_view.dart';
+import '../modules/nutritions/creationsteps/bindings/creationsteps_binding.dart';
+import '../modules/nutritions/creationsteps/views/creationsteps_view.dart';
+import '../modules/nutritions/planready/bindings/planready_binding.dart';
+import '../modules/nutritions/planready/views/planready_view.dart';
+import '../modules/nutritions/mealplan/bindings/mealplan_binding.dart';
+import '../modules/nutritions/mealplan/views/mealplan_view.dart';
+import '../modules/explore/exploreboard/bindings/exploreboard_binding.dart';
+import '../modules/explore/exploreboard/views/exploreboard_view.dart';
+import '../modules/explore/viewmenu/bindings/viewmenu_binding.dart';
+import '../modules/explore/viewmenu/views/viewmenu_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -456,6 +472,46 @@ class AppPages {
       name: Routes.REQUESTSENT,
       page: () => const RequestsentView(),
       binding: RequestsentBinding(),
+    ),
+    GetPage(
+      name: Routes.nutritionboard,
+      page: () => const NutritionboardView(),
+      binding: NutritionboardBinding(),
+    ),
+    GetPage(
+      name: Routes.nutritioninstructions,
+      page: () => const NutritioninstructionsView(),
+      binding: NutritioninstructionsBinding(),
+    ),
+    GetPage(
+      name: Routes.createmealprogram,
+      page: () => const CreatemealprogramView(),
+      binding: CreatemealprogramBinding(),
+    ),
+    GetPage(
+      name: Routes.creationsteps,
+      page: () => const CreationstepsView(),
+      binding: CreationstepsBinding(),
+    ),
+    GetPage(
+      name: Routes.planready,
+      page: () => const PlanreadyView(),
+      binding: PlanreadyBinding(),
+    ),
+    GetPage(
+      name: Routes.mealplan,
+      page: () => const MealplanView(),
+      binding: MealplanBinding(),
+    ),
+    GetPage(
+      name: Routes.exploreboard,
+      page: () => const ExploreboardView(),
+      binding: ExploreboardBinding(),
+    ),
+    GetPage(
+      name: Routes.viewmenu,
+      page: () => const ViewmenuView(),
+      binding: ViewmenuBinding(),
     ),
   ];
 }

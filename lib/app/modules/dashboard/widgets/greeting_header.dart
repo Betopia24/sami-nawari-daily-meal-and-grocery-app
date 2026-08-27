@@ -8,17 +8,13 @@ import '../../../widgets/profile_avatar.dart';
 class GreetingHeader extends StatelessWidget {
   final String greeting;
   final String name;
-  final String? profileImageUrl;
   final VoidCallback onNotificationTap;
-  final VoidCallback onProfileTap;
 
   const GreetingHeader({
     super.key,
     required this.greeting,
     required this.name,
-    this.profileImageUrl,
     required this.onNotificationTap,
-    required this.onProfileTap,
   });
 
   @override
@@ -76,8 +72,6 @@ class GreetingHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              ProfileAvatar(imageUrl: profileImageUrl, onTap: onProfileTap),
             ],
           ),
         ],
