@@ -13,6 +13,7 @@ import '../widgets/search_bar_widget.dart';
 import '../widgets/groceries_filter_chips.dart';
 import '../widgets/grocery_item_card.dart';
 import '../controllers/groceries_controller.dart';
+import '../widgets/floating_search_bar.dart';
 
 class GroceriesBoardView extends GetView<GroceriesController> {
   const GroceriesBoardView({super.key});
@@ -28,32 +29,41 @@ class GroceriesBoardView extends GetView<GroceriesController> {
             // Custom Header
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Groceries',
-                    style: GoogleFonts.outfit(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Groceries',
+                        style: GoogleFonts.outfit(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Shopping Planner',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    'Shopping Planner',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+                  const Spacer(),
+                  Icon(Icons.auto_awesome, color: AppColors.primary, size: 24.sp),
                 ],
               ),
             ),
 
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Progress Card
@@ -221,26 +231,19 @@ class GroceriesBoardView extends GetView<GroceriesController> {
 
                                   SizedBox(height: 16.h),
 
-                                  // Search Bar
-                                  const GroceriesSearchBar(),
+                                  // Subtitle
+                                  Obx(() => Text(
+                                    '${controller.pendingItems.length} Items',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF7D7A75),
+                                    ),
+                                  )),
 
                                   SizedBox(height: 16.h),
 
-                                  // Filter Chips
-                                  const GroceriesFilterChips(selectedIndex: 0),
-
-                                  SizedBox(height: 24.h),
-
-                                  // Total Items Header
-                                  _buildGridHeader(
-                                    'Total Items',
-                                    '10 Shown',
-                                    showAddButton: true,
-                                  ),
-
-                                  SizedBox(height: 16.h),
-
-                                  // Pending Items Grid
+                                  // Items Grid
                                   Obx(
                                     () => GridView.count(
                                       crossAxisCount: 3,
@@ -251,44 +254,6 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                       crossAxisSpacing: 12.w,
                                       childAspectRatio: 0.80,
                                       children: controller.pendingItems
-                                          .map(
-                                            (item) => GroceryItemCard(
-                                              title: item.title,
-                                              iconAsset: item.iconAsset,
-                                              fallbackIcon: item.fallbackIcon,
-                                              sizeInfo: item.sizeInfo,
-                                              tagInfo: item.tagInfo,
-                                              addedBy: item.addedBy,
-                                              isCompleted: item.isCompleted,
-                                              completedAgo: item.completedAgo,
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                                  ),
-
-                                  SizedBox(height: 32.h),
-
-                                  // Completed Items Header
-                                  _buildGridHeader(
-                                    'Completed Items',
-                                    '3 Shown',
-                                    showAddButton: false,
-                                  ),
-
-                                  SizedBox(height: 16.h),
-
-                                  // Completed Items Grid
-                                  Obx(
-                                    () => GridView.count(
-                                      crossAxisCount: 3,
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      mainAxisSpacing: 12.h,
-                                      crossAxisSpacing: 12.w,
-                                      childAspectRatio: 0.80,
-                                      children: controller.completedItems
                                           .map(
                                             (item) => GroceryItemCard(
                                               title: item.title,
@@ -325,7 +290,19 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                     ), // close stack
                   ], // close column children
                 ), // close column
-              ), // close singlechildscrollview
+                  ), // close singlechildscrollview
+                  // Floating Search Bar
+                  Positioned(
+                    bottom: 0, // Padding handles inset
+                    left: 20.w,
+                    right: 20.w,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 20.h),
+                      child: const FloatingSearchBar(),
+                    ),
+                  ),
+                ],
+              ),
             ), // close expanded
           ], // close outer column children
         ), // close outer column
@@ -333,66 +310,4 @@ class GroceriesBoardView extends GetView<GroceriesController> {
     ); // close scaffold
   }
 
-  Widget _buildGridHeader(
-    String title,
-    String subtitle, {
-    required bool showAddButton,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.outfit(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Text(
-              subtitle,
-              style: GoogleFonts.outfit(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        if (showAddButton)
-          GestureDetector(
-            onTap: () {
-              Get.bottomSheet(
-                const AddGroceryItemBottomSheet(),
-                isScrollControlled: true,
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.primary, width: 1.w),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.add, color: AppColors.primary, size: 16.sp),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'Add Item',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 }

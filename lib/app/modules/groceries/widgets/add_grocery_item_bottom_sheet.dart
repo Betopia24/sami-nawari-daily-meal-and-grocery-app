@@ -4,10 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../widgets/primary_button.dart';
+import '../../../../core/utils/app_assets.dart';
 import '../controllers/groceries_controller.dart';
 
 class AddGroceryItemBottomSheet extends StatefulWidget {
-  const AddGroceryItemBottomSheet({super.key});
+  final String? initialItemName;
+  final IconData? initialItemIcon;
+  const AddGroceryItemBottomSheet({super.key, this.initialItemName, this.initialItemIcon});
 
   @override
   State<AddGroceryItemBottomSheet> createState() => _AddGroceryItemBottomSheetState();
@@ -32,6 +35,14 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
     'Frozen Food', 'Cleaning', 'Baby Care', 'Personal Care', 'Other'
   ];
   final List<String> _priorities = ['No priority', 'High', 'Medium', 'Low'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialItemName != null) {
+      _nameController.text = widget.initialItemName!;
+    }
+  }
 
   @override
   void dispose() {
@@ -79,7 +90,7 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
                 Column(
                   children: [
                     Text(
-                      'Add Grocery Item',
+                      widget.initialItemName != null ? 'Item Details' : 'Add Grocery Item',
                       style: GoogleFonts.outfit(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
@@ -101,15 +112,17 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
             ),
             SizedBox(height: 24.h),
 
-            // Item Name Input
-            _buildLabel('Item Name'),
-            SizedBox(height: 8.h),
-            _buildTextField(
-              controller: _nameController,
-              hint: 'Rice, Milk, Chiken,Oil...',
-              isFocused: true,
-            ),
-            SizedBox(height: 16.h),
+            if (widget.initialItemName == null) ...[
+              // Item Name Input
+              _buildLabel('Item Name'),
+              SizedBox(height: 8.h),
+              _buildTextField(
+                controller: _nameController,
+                hint: 'Rice, Milk, Chiken,Oil...',
+                isFocused: true,
+              ),
+              SizedBox(height: 16.h),
+            ],
 
             // Quantity and Unit Row
             Row(
@@ -197,7 +210,18 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
               showArrow: false,
               prefixIcon: Icons.add,
               onPressed: () {
-                // TODO: Perform add item logic
+                final newItem = GroceryItemModel(
+                  title: _nameController.text.isNotEmpty ? _nameController.text : 'New Item',
+                  iconAsset: AppAssets.veganEmojiIcon, 
+                  fallbackIcon: widget.initialItemIcon ?? Icons.shopping_bag_outlined,
+                  sizeInfo: '${_quantityController.text.isNotEmpty ? _quantityController.text : '1'} ${_selectedUnit.split(' ')[0]}',
+                  tagInfo: _selectedPriority != 'No priority' ? _selectedPriority : (_selectedCategory != 'Other' ? _selectedCategory : 'Normal'),
+                  addedBy: 'Me',
+                );
+                
+                final controller = Get.find<GroceriesController>();
+                controller.pendingItems.insert(0, newItem);
+                
                 Get.back();
               },
             ),
