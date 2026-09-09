@@ -24,6 +24,7 @@ class GroceriesBoardView extends GetView<GroceriesController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -64,9 +65,40 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                       );
                     },
                     child: Container(
-                      padding: EdgeInsets.all(8.w),
-                      color: Colors.transparent, // Ensures the touch area is padded
-                      child: Icon(Icons.auto_awesome, color: AppColors.primary, size: 24.sp),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 10.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(14.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            color: Colors.white,
+                            size: 20.sp,
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'Inspiration',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -80,13 +112,7 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                     child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Progress Card
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: const GroceriesProgressCard(),
-                    ),
 
-                    SizedBox(height: 12.h),
 
                     // View All Button
                     Padding(
@@ -269,24 +295,72 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                       childAspectRatio: 0.80,
                                       children: controller.pendingItems
                                           .map(
-                                            (item) => GroceryItemCard(
-                                              title: item.title,
-                                              iconAsset: item.iconAsset,
-                                              fallbackIcon: item.fallbackIcon,
-                                              sizeInfo: item.sizeInfo,
-                                              tagInfo: item.tagInfo,
-                                              addedBy: item.addedBy,
-                                              isCompleted: item.isCompleted,
-                                              completedAgo: item.completedAgo,
+                                            (item) => GestureDetector(
+                                              onTap: () => controller.toggleItemCompletion(item),
+                                              child: GroceryItemCard(
+                                                title: item.title,
+                                                iconAsset: item.iconAsset,
+                                                fallbackIcon: item.fallbackIcon,
+                                                sizeInfo: item.sizeInfo,
+                                                tagInfo: item.tagInfo,
+                                                addedBy: item.addedBy,
+                                                isCompleted: item.isCompleted,
+                                                completedAgo: item.completedAgo,
+                                              ),
                                             ),
                                           )
                                           .toList(),
                                     ),
                                   ),
 
+                                  Obx(() {
+                                    if (controller.completedItems.isEmpty) return const SizedBox.shrink();
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 24.h),
+                                        Text(
+                                          'Completed Items',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        SizedBox(height: 16.h),
+                                        GridView.count(
+                                          crossAxisCount: 3,
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          mainAxisSpacing: 12.h,
+                                          crossAxisSpacing: 12.w,
+                                          childAspectRatio: 0.80,
+                                          children: controller.completedItems
+                                              .map(
+                                                (item) => GestureDetector(
+                                                  onTap: () => controller.toggleItemCompletion(item),
+                                                  child: GroceryItemCard(
+                                                    title: item.title,
+                                                    iconAsset: item.iconAsset,
+                                                    fallbackIcon: item.fallbackIcon,
+                                                    sizeInfo: item.sizeInfo,
+                                                    tagInfo: item.tagInfo,
+                                                    addedBy: item.addedBy,
+                                                    isCompleted: item.isCompleted,
+                                                    completedAgo: item.completedAgo,
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+
                                   SizedBox(
-                                    height: 100.h,
-                                  ), // Bottom padding for navigation bar
+                                    height: 180.h,
+                                  ), // Bottom padding for navigation bar and search bar
                                 ],
                               ),
                             ),
@@ -307,12 +381,15 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                   ), // close singlechildscrollview
                   // Floating Search Bar
                   Positioned(
-                    bottom: 0, // Padding handles inset
+                    bottom: 0, 
                     left: 20.w,
                     right: 20.w,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 20.h),
-                      child: const FloatingSearchBar(),
+                    child: SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 16), // Just the gap, SafeArea handles the navbar height
+                        child: const FloatingSearchBar(),
+                      ),
                     ),
                   ),
                 ],

@@ -23,6 +23,28 @@ class GroceryItemModel {
     this.isCompleted = false,
     this.completedAgo,
   });
+
+  GroceryItemModel copyWith({
+    String? title,
+    String? iconAsset,
+    IconData? fallbackIcon,
+    String? sizeInfo,
+    String? tagInfo,
+    String? addedBy,
+    bool? isCompleted,
+    String? completedAgo,
+  }) {
+    return GroceryItemModel(
+      title: title ?? this.title,
+      iconAsset: iconAsset ?? this.iconAsset,
+      fallbackIcon: fallbackIcon ?? this.fallbackIcon,
+      sizeInfo: sizeInfo ?? this.sizeInfo,
+      tagInfo: tagInfo ?? this.tagInfo,
+      addedBy: addedBy ?? this.addedBy,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAgo: completedAgo ?? this.completedAgo,
+    );
+  }
 }
 
 class GroceriesController extends GetxController {
@@ -61,6 +83,16 @@ class GroceriesController extends GetxController {
     if (index >= 0 && index < groceryLists.length && index != 0) {
       final list = groceryLists.removeAt(index);
       groceryLists.insert(0, list);
+    }
+  }
+
+  void toggleItemCompletion(GroceryItemModel item) {
+    if (item.isCompleted) {
+      completedItems.remove(item);
+      pendingItems.add(item.copyWith(isCompleted: false, completedAgo: null));
+    } else {
+      pendingItems.remove(item);
+      completedItems.insert(0, item.copyWith(isCompleted: true, completedAgo: 'Just now'));
     }
   }
 

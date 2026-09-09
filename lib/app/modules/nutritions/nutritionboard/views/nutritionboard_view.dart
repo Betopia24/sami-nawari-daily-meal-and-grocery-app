@@ -33,7 +33,7 @@ class NutritionboardView extends GetView<NutritionboardController> {
                 _buildGoalGrid(),
                 SizedBox(height: 24.h),
                 _buildDisclaimerCard(),
-                SizedBox(height: 32.h),
+                SizedBox(height: 140.h), // Bottom padding for navbar
               ]),
             ),
           ),

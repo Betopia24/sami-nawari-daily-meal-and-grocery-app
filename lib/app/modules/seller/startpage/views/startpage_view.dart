@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -63,18 +63,22 @@ class StartpageView extends GetView<StartpageController> {
                         child: Column(
                           children: [
                             FeatureListTile(
+                              icon: Icons.groups_outlined,
                               svgIcon: AppAssets.connectIcon,
                               text: 'Reach more local customers',
                             ),
                             FeatureListTile(
+                              icon: Icons.monetization_on_outlined,
                               svgIcon: AppAssets.earnIcon,
                               text: 'Earn from your cooking',
                             ),
                             FeatureListTile(
+                              icon: Icons.access_time,
                               svgIcon: AppAssets.alarmClockIcon,
                               text: 'Set your own schedule',
                             ),
                             FeatureListTile(
+                              icon: Icons.alt_route,
                               svgIcon: AppAssets.graphTreeIcon,
                               text: 'No delivery partner needed',
                             ),

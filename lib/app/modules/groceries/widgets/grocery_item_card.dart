@@ -27,7 +27,7 @@ class GroceryItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = isCompleted ? AppColors.backgroundLightGreen : Colors.white;
+    Color bgColor = isCompleted ? AppColors.backgroundGrey : Colors.white;
     Color borderColor = isCompleted ? AppColors.borderLight : AppColors.borderLight; // or transparent if needed
     Color titleColor = isCompleted ? AppColors.textGreen : AppColors.textDark;
     

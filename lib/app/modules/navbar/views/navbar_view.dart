@@ -8,7 +8,7 @@ import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../userprofile/systempreference/views/systempreference_view.dart';
-import '../../cart/mycarts/views/mycarts_view.dart';
+import '../../nutritions/nutritionboard/views/nutritionboard_view.dart';
 import '../../groceries/views/groceries_board_view.dart';
 import '../../explore/exploreboard/views/exploreboard_view.dart';
 import '../controllers/navbar_controller.dart';
@@ -27,7 +27,7 @@ class NavbarView extends GetView<NavbarController> {
             const DashboardView(),
             const GroceriesBoardView(),
             const ExploreboardView(),
-            const MycartsView(),
+            const NutritionboardView(),
             const SystempreferenceView(),
           ],
         ),
@@ -48,7 +48,7 @@ class NavbarView extends GetView<NavbarController> {
                 _buildNavItem(0, AppAssets.homeIcon, 'Home'),
                 _buildNavItem(1, AppAssets.storeIcon, 'Store'),
                 _buildNavItem(2, AppAssets.compassIcon, 'Explore'),
-                _buildNavItem(3, AppAssets.cartIcon, 'Cart'),
+                _buildNavItem(3, AppAssets.nutritionIcon, 'Nutrition'),
                 _buildNavItem(4, AppAssets.singlePersonIcon, 'Profile'),
               ],
             ),
@@ -77,15 +77,22 @@ class NavbarView extends GetView<NavbarController> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              iconPath,
-              colorFilter: ColorFilter.mode(
-                isSelected ? AppColors.primary : Colors.white,
-                BlendMode.srcIn,
-              ),
-              width: 24,
-              height: 24,
-            ),
+            iconPath.endsWith('.svg')
+                ? SvgPicture.asset(
+                    iconPath,
+                    colorFilter: ColorFilter.mode(
+                      isSelected ? AppColors.primary : Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                    width: 24,
+                    height: 24,
+                  )
+                : Image.asset(
+                    iconPath,
+                    color: isSelected ? AppColors.primary : Colors.white,
+                    width: 24,
+                    height: 24,
+                  ),
             if (isSelected) ...[
               const SizedBox(width: 8),
               Text(

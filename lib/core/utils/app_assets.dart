@@ -77,6 +77,8 @@ class AppAssets {
   static const String earnIcon = 'assets/icons/earn_icon.svg';
   static const String earning2Icon = 'assets/icons/earning2_icon.png';
   static const String myFoodIcon = 'assets/icons/myfood_icon.png';
+  static const String myFoodIconSvg = 'assets/icons/myfood_icon.svg';
+  static const String nutritionIcon = 'assets/icons/nutrition_icon.svg';
   static const String paymentInformationIcon =
       'assets/icons/paymentiformation_icon.svg';
   static const String addFoodIcon = 'assets/icons/addfood_icon.png';

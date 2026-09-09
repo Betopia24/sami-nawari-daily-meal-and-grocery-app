@@ -1,3 +1,4 @@
+import 'package:daily_meal_and_grocery_app/app/widgets/custom_back_button.dart';
 import 'package:daily_meal_and_grocery_app/app/widgets/primary_button.dart';
 import 'package:daily_meal_and_grocery_app/core/utils/app_assets.dart';
 import 'package:daily_meal_and_grocery_app/core/utils/app_colors.dart';
@@ -21,75 +22,92 @@ class MycartsView extends GetView<MycartsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: Text(
-                'My Orders',
-                style: GoogleFonts.outfit(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  child: Row(
+                    children: [
+                      const CustomBackButton(),
+                      const SizedBox(width: 16),
+                      Text(
+                        'My Orders',
+                        style: GoogleFonts.outfit(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TabBar(
+                  controller: controller.tabController,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.textSecondary,
+                  labelStyle: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  indicatorColor: AppColors.primary,
+                  indicatorWeight: 2,
+                  tabs: const [
+                    Tab(text: 'Cart (3)'),
+                    Tab(text: 'Active'),
+                    Tab(text: 'History'),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: controller.tabController,
+                    children: [
+                      _buildCartTab(),
+                      _buildActiveTab(),
+                      _buildHistoryTab(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                child: Obx(
+                  () => controller.currentTabIndex.value == 0
+                      ? CheckoutBottomBar(
+                          totalItems: controller.totalItems.value,
+                          totalSellers: controller.totalSellers.value,
+                          totalPrice: controller.totalPrice.value,
+                          onCheckout: controller.checkout,
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ),
             ),
-            TabBar(
-              controller: controller.tabController,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textSecondary,
-              labelStyle: GoogleFonts.outfit(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-              unselectedLabelStyle: GoogleFonts.outfit(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 2,
-              tabs: const [
-                Tab(text: 'Cart (3)'),
-                Tab(text: 'Active'),
-                Tab(text: 'History'),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                controller: controller.tabController,
-                children: [
-                  _buildCartTab(),
-                  _buildActiveTab(),
-                  _buildHistoryTab(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Obx(
-            () => controller.currentTabIndex.value == 0
-                ? CheckoutBottomBar(
-                    totalItems: controller.totalItems.value,
-                    totalSellers: controller.totalSellers.value,
-                    totalPrice: controller.totalPrice.value,
-                    onCheckout: controller.checkout,
-                  )
-                : const SizedBox.shrink(),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildCartTab() {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
         Obx(
           () => CartRestaurantCard(
@@ -181,7 +199,7 @@ class MycartsView extends GetView<MycartsController> {
 
   Widget _buildActiveTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
       child: Column(
         children: [
           TrackOrderDetailsCard(
@@ -275,7 +293,7 @@ class MycartsView extends GetView<MycartsController> {
 
   Widget _buildHistoryTab() {
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
       children: [
         HistoryOrderCard(
           title: 'Pork & Chive Dumplings (12pc)',
