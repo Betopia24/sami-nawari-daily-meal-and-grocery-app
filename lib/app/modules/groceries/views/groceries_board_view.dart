@@ -14,6 +14,7 @@ import '../widgets/groceries_filter_chips.dart';
 import '../widgets/grocery_item_card.dart';
 import '../controllers/groceries_controller.dart';
 import '../widgets/floating_search_bar.dart';
+import '../widgets/meal_inspiration_bottom_sheet.dart';
 
 class GroceriesBoardView extends GetView<GroceriesController> {
   const GroceriesBoardView({super.key});
@@ -54,7 +55,20 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                     ],
                   ),
                   const Spacer(),
-                  Icon(Icons.auto_awesome, color: AppColors.primary, size: 24.sp),
+                  GestureDetector(
+                    onTap: () {
+                      Get.bottomSheet(
+                        const MealInspirationBottomSheet(),
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      color: Colors.transparent, // Ensures the touch area is padded
+                      child: Icon(Icons.auto_awesome, color: AppColors.primary, size: 24.sp),
+                    ),
+                  ),
                 ],
               ),
             ),
