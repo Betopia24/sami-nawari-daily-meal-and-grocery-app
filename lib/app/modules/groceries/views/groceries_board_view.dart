@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_assets.dart';
 
@@ -295,18 +296,30 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                       childAspectRatio: 0.80,
                                       children: controller.pendingItems
                                           .map(
-                                            (item) => GestureDetector(
-                                              onTap: () => controller.toggleItemCompletion(item),
-                                              child: GroceryItemCard(
-                                                title: item.title,
-                                                iconAsset: item.iconAsset,
-                                                fallbackIcon: item.fallbackIcon,
-                                                sizeInfo: item.sizeInfo,
-                                                tagInfo: item.tagInfo,
-                                                addedBy: item.addedBy,
-                                                isCompleted: item.isCompleted,
-                                                completedAgo: item.completedAgo,
-                                              ),
+                                            (item) => GroceryItemCard(
+                                              title: item.title,
+                                              iconAsset: item.iconAsset,
+                                              fallbackIcon: item.fallbackIcon,
+                                              sizeInfo: item.sizeInfo,
+                                              tagInfo: item.tagInfo,
+                                              addedBy: item.addedBy,
+                                              isCompleted: item.isCompleted,
+                                              completedAgo: item.completedAgo,
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                controller.toggleItemCompletion(item);
+                                              },
+                                              onLongPress: () {
+                                                HapticFeedback.heavyImpact();
+                                                Get.bottomSheet(
+                                                  AddGroceryItemBottomSheet(
+                                                    initialItemName: item.title,
+                                                    initialItemIcon: item.fallbackIcon,
+                                                    itemToEdit: item,
+                                                  ),
+                                                  isScrollControlled: true,
+                                                );
+                                              },
                                             ),
                                           )
                                           .toList(),

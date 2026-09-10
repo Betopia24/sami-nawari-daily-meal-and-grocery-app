@@ -12,6 +12,8 @@ class GroceryItemCard extends StatelessWidget {
   final String addedBy;
   final String? completedAgo;
   final IconData? fallbackIcon;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const GroceryItemCard({
     super.key,
@@ -23,6 +25,8 @@ class GroceryItemCard extends StatelessWidget {
     required this.addedBy,
     this.completedAgo,
     this.fallbackIcon,
+    this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -30,60 +34,87 @@ class GroceryItemCard extends StatelessWidget {
     Color bgColor = AppColors.backgroundGrey;
     Color borderColor = AppColors.borderLight;
     Color titleColor = AppColors.textGreen;
-    
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: borderColor, width: 1.w),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Icon
-          _buildIcon(),
-          SizedBox(height: 4.h),
-          
-          // Title
-          Text(
-            title,
-            style: GoogleFonts.outfit(
-              fontWeight: FontWeight.w500,
-              fontSize: 12.sp,
-              color: titleColor,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+
+    return Material(
+      color: bgColor,
+      borderRadius: BorderRadius.circular(16.r),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        splashColor: AppColors.primary.withValues(alpha: 0.1),
+        highlightColor: AppColors.primary.withValues(alpha: 0.05),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: borderColor, width: 1.w),
           ),
-          SizedBox(height: 2.h),
-          
-          // Tags
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildTag(sizeInfo, Colors.white, AppColors.primary, true),
-                SizedBox(width: 4.w),
-                _buildTag(tagInfo, Colors.white, AppColors.primary, true),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icon
+              _buildIcon(),
+              SizedBox(height: 4.h),
+
+              // Title
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 12.sp,
+                  color: titleColor,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 2.h),
+
+              // Tags
+              if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (sizeInfo.isNotEmpty)
+                        _buildTag(
+                          sizeInfo,
+                          Colors.white,
+                          AppColors.primary,
+                          true,
+                        ),
+                      if (sizeInfo.isNotEmpty && tagInfo.isNotEmpty)
+                        SizedBox(width: 4.w),
+                      if (tagInfo.isNotEmpty)
+                        _buildTag(
+                          tagInfo,
+                          Colors.white,
+                          AppColors.primary,
+                          true,
+                        ),
+                    ],
+                  ),
+                ),
+              if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
+                SizedBox(height: 2.h),
+
+              // Footer
+              Text(
+                isCompleted
+                    ? 'Completed by $addedBy\n${completedAgo ?? ''}'
+                    : 'Added by $addedBy',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 8.sp,
+                  color: AppColors.primary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          SizedBox(height: 2.h),
-          
-          // Footer
-          Text(
-            isCompleted ? 'Completed by $addedBy\n${completedAgo ?? ''}' : 'Added by $addedBy',
-            style: GoogleFonts.outfit(
-              fontWeight: FontWeight.w400,
-              fontSize: 8.sp,
-              color: AppColors.primary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -95,11 +126,21 @@ class GroceryItemCard extends StatelessWidget {
       alignment: Alignment.center,
       child: fallbackIcon != null
           ? Icon(fallbackIcon, size: 28.sp, color: AppColors.primary)
-          : Image.asset(iconAsset, width: 28.w, height: 28.w, color: AppColors.primary),
+          : Image.asset(
+              iconAsset,
+              width: 28.w,
+              height: 28.w,
+              color: AppColors.primary,
+            ),
     );
   }
 
-  Widget _buildTag(String text, Color textColor, Color bgColor, bool isCompleted) {
+  Widget _buildTag(
+    String text,
+    Color textColor,
+    Color bgColor,
+    bool isCompleted,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(

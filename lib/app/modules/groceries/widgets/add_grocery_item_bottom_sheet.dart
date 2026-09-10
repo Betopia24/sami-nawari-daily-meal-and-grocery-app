@@ -10,7 +10,8 @@ import '../controllers/groceries_controller.dart';
 class AddGroceryItemBottomSheet extends StatefulWidget {
   final String? initialItemName;
   final IconData? initialItemIcon;
-  const AddGroceryItemBottomSheet({super.key, this.initialItemName, this.initialItemIcon});
+  final GroceryItemModel? itemToEdit;
+  const AddGroceryItemBottomSheet({super.key, this.initialItemName, this.initialItemIcon, this.itemToEdit});
 
   @override
   State<AddGroceryItemBottomSheet> createState() => _AddGroceryItemBottomSheetState();
@@ -39,7 +40,29 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialItemName != null) {
+    if (widget.itemToEdit != null) {
+      _nameController.text = widget.itemToEdit!.title;
+      // parse quantity and unit
+      if (widget.itemToEdit!.sizeInfo.isNotEmpty) {
+        final parts = widget.itemToEdit!.sizeInfo.split(' ');
+        if (parts.isNotEmpty) {
+          _quantityController.text = parts[0];
+          if (parts.length > 1) {
+            final unitStr = parts.sublist(1).join(' ');
+            if (_units.any((u) => u.contains(unitStr) || unitStr.contains(u.split(' ')[0]))) {
+              _selectedUnit = _units.firstWhere((u) => u.contains(unitStr) || unitStr.contains(u.split(' ')[0]), orElse: () => _units.first);
+            }
+          }
+        }
+      }
+      if (widget.itemToEdit!.tagInfo.isNotEmpty) {
+        if (_priorities.contains(widget.itemToEdit!.tagInfo)) {
+          _selectedPriority = widget.itemToEdit!.tagInfo;
+        } else if (_categories.contains(widget.itemToEdit!.tagInfo)) {
+          _selectedCategory = widget.itemToEdit!.tagInfo;
+        }
+      }
+    } else if (widget.initialItemName != null) {
       _nameController.text = widget.initialItemName!;
     }
   }
@@ -206,21 +229,27 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
 
             // Add Item Button
             PrimaryButton(
-              text: 'Add Item',
+              text: widget.itemToEdit != null ? 'Save Item' : 'Add Item',
               showArrow: false,
-              prefixIcon: Icons.add,
+              prefixIcon: widget.itemToEdit != null ? Icons.save : Icons.add,
               onPressed: () {
                 final newItem = GroceryItemModel(
                   title: _nameController.text.isNotEmpty ? _nameController.text : 'New Item',
-                  iconAsset: AppAssets.veganEmojiIcon, 
-                  fallbackIcon: widget.initialItemIcon ?? Icons.shopping_bag_outlined,
+                  iconAsset: widget.itemToEdit?.iconAsset ?? AppAssets.veganEmojiIcon, 
+                  fallbackIcon: widget.initialItemIcon ?? widget.itemToEdit?.fallbackIcon ?? Icons.shopping_bag_outlined,
                   sizeInfo: '${_quantityController.text.isNotEmpty ? _quantityController.text : '1'} ${_selectedUnit.split(' ')[0]}',
                   tagInfo: _selectedPriority != 'No priority' ? _selectedPriority : (_selectedCategory != 'Other' ? _selectedCategory : 'Normal'),
-                  addedBy: 'Me',
+                  addedBy: widget.itemToEdit?.addedBy ?? 'Me',
+                  isCompleted: widget.itemToEdit?.isCompleted ?? false,
+                  completedAgo: widget.itemToEdit?.completedAgo,
                 );
                 
                 final controller = Get.find<GroceriesController>();
-                controller.pendingItems.insert(0, newItem);
+                if (widget.itemToEdit != null) {
+                  controller.updateItem(widget.itemToEdit!, newItem);
+                } else {
+                  controller.pendingItems.insert(0, newItem);
+                }
                 
                 Get.back();
               },

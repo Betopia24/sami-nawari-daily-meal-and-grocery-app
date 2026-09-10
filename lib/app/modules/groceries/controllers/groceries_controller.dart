@@ -96,6 +96,18 @@ class GroceriesController extends GetxController {
     }
   }
 
+  void updateItem(GroceryItemModel oldItem, GroceryItemModel newItem) {
+    final index = pendingItems.indexOf(oldItem);
+    if (index != -1) {
+      pendingItems[index] = newItem;
+    } else {
+      final completedIndex = completedItems.indexOf(oldItem);
+      if (completedIndex != -1) {
+        completedItems[completedIndex] = newItem;
+      }
+    }
+  }
+
   final pendingItems = <GroceryItemModel>[
     GroceryItemModel(
       title: 'Organic avocados',

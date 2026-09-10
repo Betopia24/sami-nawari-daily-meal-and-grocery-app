@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/utils/app_assets.dart';
+import '../controllers/groceries_controller.dart';
 import 'add_grocery_item_bottom_sheet.dart';
 
 class SearchGroceryItemBottomSheet extends StatefulWidget {
@@ -163,9 +165,24 @@ class _SearchGroceryItemBottomSheetState extends State<SearchGroceryItemBottomSh
     );
   }
 
+  void _addItemDirectly(String label, IconData icon) {
+    final controller = Get.find<GroceriesController>();
+    final newItem = GroceryItemModel(
+      title: label,
+      iconAsset: AppAssets.veganEmojiIcon, 
+      fallbackIcon: icon,
+      sizeInfo: '',
+      tagInfo: '',
+      addedBy: 'Me',
+    );
+    controller.pendingItems.insert(0, newItem);
+    Get.back();
+  }
+
   Widget _buildSuggestedChip(String label, IconData icon, bool outlined) {
     return GestureDetector(
-      onTap: () => _openItemDetails(label, icon),
+      onTap: () => _addItemDirectly(label, icon),
+      onLongPress: () => _openItemDetails(label, icon),
       child: Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       decoration: BoxDecoration(
@@ -216,6 +233,12 @@ class _SearchGroceryItemBottomSheetState extends State<SearchGroceryItemBottomSh
     final isSelected = _selectedResultIndex == index;
     return GestureDetector(
       onTap: () {
+        setState(() {
+          _selectedResultIndex = index;
+        });
+        _addItemDirectly(label, icon);
+      },
+      onLongPress: () {
         setState(() {
           _selectedResultIndex = index;
         });
