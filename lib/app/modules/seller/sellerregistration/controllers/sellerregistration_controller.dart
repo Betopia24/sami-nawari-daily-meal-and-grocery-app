@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../widgets/success_screen.dart';
 import '../../../userprofile/systempreference/controllers/systempreference_controller.dart';
 
+import 'package:image_picker/image_picker.dart';
+
 class SellerregistrationController extends GetxController {
   final formKey = GlobalKey<FormState>();
 
@@ -15,6 +17,26 @@ class SellerregistrationController extends GetxController {
   final locationController = TextEditingController();
 
   final RxList<String> selectedCuisines = <String>[].obs;
+  
+  final RxList<String> kitchenImages = <String>[].obs;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> pickKitchenImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        kitchenImages.add(image.path);
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
+
+  void removeKitchenImage(int index) {
+    if (index >= 0 && index < kitchenImages.length) {
+      kitchenImages.removeAt(index);
+    }
+  }
 
   final List<String> availableCuisines = [
     'Mediterranean',

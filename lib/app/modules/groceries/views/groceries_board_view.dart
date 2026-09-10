@@ -313,50 +313,7 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                     ),
                                   ),
 
-                                  Obx(() {
-                                    if (controller.completedItems.isEmpty) return const SizedBox.shrink();
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 24.h),
-                                        Text(
-                                          'Completed Items',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                        SizedBox(height: 16.h),
-                                        GridView.count(
-                                          crossAxisCount: 3,
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          mainAxisSpacing: 12.h,
-                                          crossAxisSpacing: 12.w,
-                                          childAspectRatio: 0.80,
-                                          children: controller.completedItems
-                                              .map(
-                                                (item) => GestureDetector(
-                                                  onTap: () => controller.toggleItemCompletion(item),
-                                                  child: GroceryItemCard(
-                                                    title: item.title,
-                                                    iconAsset: item.iconAsset,
-                                                    fallbackIcon: item.fallbackIcon,
-                                                    sizeInfo: item.sizeInfo,
-                                                    tagInfo: item.tagInfo,
-                                                    addedBy: item.addedBy,
-                                                    isCompleted: item.isCompleted,
-                                                    completedAgo: item.completedAgo,
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
-                                        ),
-                                      ],
-                                    );
-                                  }),
+                                  // Completed items section removed as requested
 
                                   SizedBox(
                                     height: 180.h,

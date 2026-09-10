@@ -76,6 +76,7 @@ abstract class Routes {
   static const mealplan = _Paths.mealplan;
   static const exploreboard = _Paths.exploreboard;
   static const viewmenu = _Paths.viewmenu;
+  static const chooseyourplan = _Paths.chooseyourplan;
 }
 
 abstract class _Paths {
@@ -157,4 +158,5 @@ abstract class _Paths {
   static const mealplan = '/mealplan';
   static const exploreboard = '/exploreboard';
   static const viewmenu = '/viewmenu';
+  static const chooseyourplan = '/chooseyourplan';
 }

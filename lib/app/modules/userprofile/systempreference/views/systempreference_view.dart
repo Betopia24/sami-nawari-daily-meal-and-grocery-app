@@ -1,4 +1,4 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,7 +10,9 @@ import '../../../../../core/utils/app_colors.dart';
 import '../../../../routes/app_routes.dart';
 import '../../widgets/profile_menu_tile.dart';
 import '../../widgets/profile_section_card.dart';
+import '../../widgets/subscription_plan_card.dart';
 import '../controllers/systempreference_controller.dart';
+import '../../../../routes/app_pages.dart';
 
 class SystempreferenceView extends GetView<SystempreferenceController> {
   const SystempreferenceView({super.key});
@@ -52,6 +54,16 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
                     child: Obx(() => Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (!controller.isSellerMode.value) ...[
+                          SubscriptionPlanCard(
+                            planName: 'Free / Basic',
+                            description: 'Upgrade for more features and a better experience',
+                            onViewPlans: () {
+                              Get.toNamed(Routes.chooseyourplan);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                         _buildBecomeSellerBanner(),
                         const SizedBox(height: 24),
                         _buildSectionTitle(controller.isSellerMode.value ? 'MANAGE' : 'MARKETPLACE'),
@@ -437,7 +449,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
             title: 'Notifications',
             trailing: CupertinoSwitch(
               value: controller.notificationsEnabled.value,
-              activeColor: AppColors.primary,
+              activeTrackColor: AppColors.primary,
               onChanged: controller.toggleNotifications,
             ),
           ),

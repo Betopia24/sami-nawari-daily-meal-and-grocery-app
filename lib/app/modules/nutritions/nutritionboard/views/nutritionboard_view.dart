@@ -114,9 +114,7 @@ class NutritionboardView extends GetView<NutritionboardController> {
     return Obx(() {
       if (controller.hasMealPlan.value) {
         // Show the active plan banner with mealplan graphic
-        return MealPlanBannerCard(
-          onViewPlan: controller.onViewTodaysPlan,
-        );
+        return MealPlanBannerCard(onViewPlan: controller.onViewTodaysPlan);
       }
 
       // Show the "Create Meal Plan" CTA
@@ -134,7 +132,10 @@ class NutritionboardView extends GetView<NutritionboardController> {
               SvgPicture.asset(
                 'assets/icons/aienhance_icon.svg',
                 width: 24.w,
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(

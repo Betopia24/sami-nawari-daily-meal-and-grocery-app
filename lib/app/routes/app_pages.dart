@@ -23,6 +23,8 @@ import '../modules/foodgrid/recommendedfoodgrid/bindings/recommendedfood_binding
 import '../modules/foodgrid/recommendedfoodgrid/views/recommendedfood_view.dart';
 import '../modules/foodgrid/homemadefoodgrid/bindings/homemadefoodgrid_binding.dart';
 import '../modules/foodgrid/homemadefoodgrid/views/homemadefoodgrid_view.dart';
+import '../modules/subscriptions/chooseyourplan/bindings/chooseyourplan_binding.dart';
+import '../modules/subscriptions/chooseyourplan/views/chooseyourplan_view.dart';
 import '../modules/foodgrid/fooddetails/bindings/fooddetails_binding.dart';
 import '../modules/foodgrid/fooddetails/views/fooddetails_view.dart';
 import '../modules/receipes/breakfastreceipes/bindings/breakfastreceipes_binding.dart';
@@ -512,6 +514,11 @@ class AppPages {
       name: Routes.viewmenu,
       page: () => const ViewmenuView(),
       binding: ViewmenuBinding(),
+    ),
+    GetPage(
+      name: Routes.chooseyourplan,
+      page: () => const ChooseyourplanView(),
+      binding: ChooseyourplanBinding(),
     ),
   ];
 }

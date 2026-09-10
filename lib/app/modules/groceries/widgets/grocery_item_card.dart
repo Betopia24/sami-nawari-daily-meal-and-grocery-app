@@ -27,9 +27,9 @@ class GroceryItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = isCompleted ? AppColors.backgroundGrey : Colors.white;
-    Color borderColor = isCompleted ? AppColors.borderLight : AppColors.borderLight; // or transparent if needed
-    Color titleColor = isCompleted ? AppColors.textGreen : AppColors.textDark;
+    Color bgColor = AppColors.backgroundGrey;
+    Color borderColor = AppColors.borderLight;
+    Color titleColor = AppColors.textGreen;
     
     return Container(
       padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
@@ -65,9 +65,9 @@ class GroceryItemCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildTag(sizeInfo, isCompleted ? Colors.white : AppColors.textSecondary, isCompleted ? AppColors.primary : AppColors.backgroundToggle, isCompleted),
+                _buildTag(sizeInfo, Colors.white, AppColors.primary, true),
                 SizedBox(width: 4.w),
-                _buildTag(tagInfo, isCompleted ? Colors.white : AppColors.iconOrange, isCompleted ? AppColors.primary : AppColors.backgroundNotification, isCompleted),
+                _buildTag(tagInfo, Colors.white, AppColors.primary, true),
               ],
             ),
           ),
@@ -79,7 +79,7 @@ class GroceryItemCard extends StatelessWidget {
             style: GoogleFonts.outfit(
               fontWeight: FontWeight.w400,
               fontSize: 8.sp,
-              color: isCompleted ? AppColors.primary : AppColors.iconGrey,
+              color: AppColors.primary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -94,8 +94,8 @@ class GroceryItemCard extends StatelessWidget {
       height: 40.w,
       alignment: Alignment.center,
       child: fallbackIcon != null
-          ? Icon(fallbackIcon, size: 28.sp, color: isCompleted ? AppColors.primary : Colors.black)
-          : Image.asset(iconAsset, width: 28.w, height: 28.w, color: isCompleted ? AppColors.primary : Colors.black),
+          ? Icon(fallbackIcon, size: 28.sp, color: AppColors.primary)
+          : Image.asset(iconAsset, width: 28.w, height: 28.w, color: AppColors.primary),
     );
   }
 

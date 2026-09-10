@@ -64,8 +64,8 @@ class NavbarView extends GetView<NavbarController> {
       onTap: () => controller.changePage(index),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutBack,
         padding: EdgeInsets.symmetric(
           horizontal: isSelected ? 16 : 8,
           vertical: 12,
@@ -77,33 +77,50 @@ class NavbarView extends GetView<NavbarController> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            iconPath.endsWith('.svg')
-                ? SvgPicture.asset(
-                    iconPath,
-                    colorFilter: ColorFilter.mode(
-                      isSelected ? AppColors.primary : Colors.white,
-                      BlendMode.srcIn,
+            AnimatedScale(
+              scale: isSelected ? 1.1 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutBack,
+              child: iconPath.endsWith('.svg')
+                  ? SvgPicture.asset(
+                      iconPath,
+                      colorFilter: ColorFilter.mode(
+                        isSelected ? AppColors.primary : Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                      width: 24,
+                      height: 24,
+                    )
+                  : Image.asset(
+                      iconPath,
+                      color: isSelected ? AppColors.primary : Colors.white,
+                      width: 24,
+                      height: 24,
                     ),
-                    width: 24,
-                    height: 24,
-                  )
-                : Image.asset(
-                    iconPath,
-                    color: isSelected ? AppColors.primary : Colors.white,
-                    width: 24,
-                    height: 24,
-                  ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.outfit(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-            ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOutBack,
+              alignment: Alignment.centerLeft,
+              child: isSelected
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 8),
+                        Text(
+                          label,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.outfit(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
