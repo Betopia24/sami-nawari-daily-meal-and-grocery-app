@@ -31,9 +31,9 @@ class GroceryItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = AppColors.backgroundGrey;
-    Color borderColor = AppColors.borderLight;
-    Color titleColor = AppColors.textGreen;
+    Color bgColor = isCompleted ? const Color(0xFFF8FAF8) : AppColors.backgroundGrey;
+    Color borderColor = isCompleted ? const Color(0xFFE2E8E2) : AppColors.borderLight;
+    Color titleColor = isCompleted ? const Color(0xFF7E8A7E) : AppColors.textGreen;
 
     return Material(
       color: bgColor,
@@ -44,93 +44,119 @@ class GroceryItemCard extends StatelessWidget {
         onLongPress: onLongPress,
         splashColor: AppColors.primary.withValues(alpha: 0.1),
         highlightColor: AppColors.primary.withValues(alpha: 0.05),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: borderColor, width: 1.w),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon
-              _buildIcon(),
-              SizedBox(height: 4.h),
-
-              // Title
-              Text(
-                title,
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12.sp,
-                  color: titleColor,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+        child: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: borderColor, width: 1.w),
               ),
-              SizedBox(height: 2.h),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Icon
+                  _buildIcon(),
+                  SizedBox(height: 4.h),
 
-              // Tags
-              if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (sizeInfo.isNotEmpty)
-                        _buildTag(
-                          sizeInfo,
-                          Colors.white,
-                          AppColors.primary,
-                          true,
-                        ),
-                      if (sizeInfo.isNotEmpty && tagInfo.isNotEmpty)
-                        SizedBox(width: 4.w),
-                      if (tagInfo.isNotEmpty)
-                        _buildTag(
-                          tagInfo,
-                          Colors.white,
-                          AppColors.primary,
-                          true,
-                        ),
-                    ],
+                  // Title
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12.sp,
+                      color: titleColor,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 2.h),
+
+                  // Tags
+                  if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (sizeInfo.isNotEmpty)
+                            _buildTag(
+                              sizeInfo,
+                              isCompleted ? const Color(0xFF6B756B) : Colors.white,
+                              isCompleted ? const Color(0xFFE2E7E2) : AppColors.primary,
+                              isCompleted,
+                            ),
+                          if (sizeInfo.isNotEmpty && tagInfo.isNotEmpty)
+                            SizedBox(width: 4.w),
+                          if (tagInfo.isNotEmpty)
+                            _buildTag(
+                              tagInfo,
+                              isCompleted ? const Color(0xFF6B756B) : Colors.white,
+                              isCompleted ? const Color(0xFFE2E7E2) : AppColors.primary,
+                              isCompleted,
+                            ),
+                        ],
+                      ),
+                    ),
+                  if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
+                    SizedBox(height: 2.h),
+
+                  // Footer
+                  Text(
+                    isCompleted
+                        ? 'Completed by $addedBy\n${completedAgo ?? ''}'
+                        : 'Added by $addedBy',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 8.sp,
+                      color: isCompleted ? const Color(0xFF8A948A) : AppColors.primary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            if (isCompleted)
+              Positioned(
+                top: 6.h,
+                right: 6.w,
+                child: Container(
+                  width: 16.w,
+                  height: 16.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.8),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    size: 11.sp,
+                    color: Colors.white,
                   ),
                 ),
-              if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
-                SizedBox(height: 2.h),
-
-              // Footer
-              Text(
-                isCompleted
-                    ? 'Completed by $addedBy\n${completedAgo ?? ''}'
-                    : 'Added by $addedBy',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 8.sp,
-                  color: AppColors.primary,
-                ),
-                textAlign: TextAlign.center,
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildIcon() {
+    final iconColor = isCompleted
+        ? AppColors.primary.withValues(alpha: 0.45)
+        : AppColors.primary;
+
     return Container(
       width: 40.w,
       height: 40.w,
       alignment: Alignment.center,
       child: fallbackIcon != null
-          ? Icon(fallbackIcon, size: 28.sp, color: AppColors.primary)
+          ? Icon(fallbackIcon, size: 28.sp, color: iconColor)
           : Image.asset(
               iconAsset,
               width: 28.w,
               height: 28.w,
-              color: AppColors.primary,
+              color: iconColor,
             ),
     );
   }

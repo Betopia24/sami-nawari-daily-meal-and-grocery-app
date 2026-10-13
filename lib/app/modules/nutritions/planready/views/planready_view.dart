@@ -85,7 +85,7 @@ class PlanreadyView extends GetView<PlanreadyController> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Your personalized 1 month meal plan is ready.\nLet\'s start your healthy journey!',
+                'Your personalized 1 week meal plan is ready.\nLet\'s start your healthy journey!',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   fontSize: 14.sp,
@@ -108,7 +108,7 @@ class PlanreadyView extends GetView<PlanreadyController> {
                   children: [
                     _buildInfoRow('Goal', controller.goal.value),
                     const Divider(height: 1, color: Color(0xFFF3F3F3)),
-                    _buildInfoRow('Duration', '1 month'),
+                    _buildInfoRow('Duration', '1 week'),
                     const Divider(height: 1, color: Color(0xFFF3F3F3)),
                     _buildInfoRow('Start Date', _getFormattedDate()),
                     const Divider(height: 1, color: Color(0xFFF3F3F3)),
