@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../widgets/custom_back_button.dart';

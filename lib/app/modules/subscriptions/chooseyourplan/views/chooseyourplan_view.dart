@@ -102,7 +102,7 @@ class ChooseyourplanView extends GetView<ChooseyourplanController> {
           features: [
             'Ads & Promotions',
             'AI Assistance',
-            'No Referral Perks',
+            'Refer 3 people, get 3 months Pro for free',
             'No Social Impact contribution',
           ],
           buttonText: 'Current Plan',
@@ -116,7 +116,6 @@ class ChooseyourplanView extends GetView<ChooseyourplanController> {
           features: [
             'Minimum Ads',
             'Limited AI consultation',
-            'Share with 3 people, get 6-month Pro perk',
             '20% donated to Stop Hunger Globally',
           ],
           buttonText: 'Choose Pro',
