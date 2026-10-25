@@ -1,4 +1,3 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,14 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../routes/app_routes.dart';
+import '../../navbar/controllers/navbar_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/daily_plan_banner.dart';
+import '../widgets/dashboard_shimmer.dart';
 import '../widgets/greeting_header.dart';
 import '../widgets/homemade_food_card.dart';
 import '../widgets/location_bar.dart';
 import '../widgets/meal_category_card.dart';
-import '../../../widgets/nutrition_goal_card.dart';
-import '../../../data/models/nutrition_instruction_model.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/shared_grocery_card.dart';
@@ -27,192 +26,296 @@ class DashboardView extends GetView<DashboardController> {
       backgroundColor: const Color(0xFFFAFAFA),
       body: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            // Fixed Header Section
-            GreetingHeader(
-              greeting: 'Good Morning',
-              name: 'Rafi',
-              onNotificationTap: () => Get.toNamed(Routes.notification),
-            ),
-            LocationBar(location: 'San Francisco, CA', onTap: () {}),
-            // Scrollable Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  bottom: 100,
-                ), // Space for floating navbar
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const DashboardSearchBar(),
+        child: Obx(() {
+          // Display shimmering skeleton while data is loading
+          if (controller.isLoading.value) {
+            return const DashboardShimmer();
+          }
 
-                    _buildSectionHeader(
-                      title: 'What are you cooking today?',
-                      subtitle: 'Pick a meal to see matching recipes',
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: MealCategoryCard(
-                              title: 'Breakfast',
-                              imagePath: AppAssets.homeBreakfastCardImage,
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFFFFF8EE),
-                                  AppColors.backgroundNotification,
-                                ],
-                              ),
-                              onTap: () =>
-                                  Get.toNamed(Routes.breakfastreceipes),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: MealCategoryCard(
-                              title: 'Lunch',
-                              imagePath: AppAssets.homeLunchCardImage,
-                              color: const Color.fromRGBO(58, 143, 92, 0.1),
-                              onTap: () => Get.toNamed(Routes.lunchreceipes),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: MealCategoryCard(
-                              title: 'Dinner',
-                              imagePath: AppAssets.homeDinnerCardImage,
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [Color(0xFFF5F0FF), Color(0xFFEDE8FF)],
-                              ),
-                              onTap: () => Get.toNamed(Routes.dinnerreceipes),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: MealCategoryCard(
-                              title: 'Snacks',
-                              imagePath: AppAssets.homeSnacksCardImage,
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [Color(0xFFFFF0F0), Color(0xFFFFE8E8)],
-                              ),
-                              onTap: () => Get.toNamed(Routes.snacksreceipes),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    _buildSectionHeader(
-                      title: 'Today\'s Meal Plan',
-                      subtitle: 'Your personalized meals for today',
-                    ),
-                    DailyPlanBanner(onViewPlanTap: () => Get.toNamed(Routes.mealplan)),
-                    const SizedBox(height: 16),
-
-                    _buildSectionHeader(
-                      title: 'Recommended For You',
-                      subtitle:
-                          'Based on your preferences, saves and favorites',
-                      actionLabel: 'See all',
-                      onActionTap: () => Get.toNamed(Routes.recommendedfood),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 250,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        children: [
-                          RecipeCard(
-                            title: 'Steamed Veg Dumplings',
-                            imagePath: AppAssets.homeRecipeCardImage1,
-                            tag: 'Previously viewed',
-                            time: '50m',
-                            calories: '310 kcal',
-                            rating: '4.6',
-                            onTap: () {},
-                          ),
-                          RecipeCard(
-                            title: 'Lemon Lentil Soup',
-                            imagePath: AppAssets
-                                .doesNotExist, // Invalid path to show fallback
-                            tag: 'Previously viewed',
-                            time: '25m',
-                            calories: '290 kcal',
-                            rating: '4.5',
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    _buildSectionHeader(
-                      title: 'Shared Grocery',
-                      actionLabel: 'Open List',
-                    ),
-                    SharedGroceryCard(onTap: () {}),
-                    const SizedBox(height: 16),
-
-                    _buildSectionHeader(
-                      title: 'Homemade Food Near You',
-                      subtitle:
-                          'Neighbour kitchens - pickup or seller delivery',
-                      actionLabel: 'See all',
-                      onActionTap: () => Get.toNamed(Routes.homemadefoodgrid),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 330,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        children: [
-                          HomemadeFoodCard(
-                            title: 'Chicken Biryani Tiffin',
-                            subtitle: 'Amina\'s Home Kitchen',
-                            imagePath: AppAssets.homeRecipeCardImage3,
-                            distance: '0.8 km',
-                            rating: '4.9 (214)',
-                            price: '\$6.50',
-                            onAddTap: () {},
-                            onViewDetailsTap: () =>
-                                Get.toNamed(Routes.fooddetails),
-                          ),
-                          HomemadeFoodCard(
-                            title: 'Steamed Veg Dumplings',
-                            subtitle: 'Mei\'s Dumpling Table',
-                            imagePath: AppAssets
-                                .doesNotExist, // Invalid path to show fallback
-                            distance: '1.4 km',
-                            rating: '4.7 (132)',
-                            price: '\$4.00',
-                            onAddTap: () {},
-                            onViewDetailsTap: () =>
-                                Get.toNamed(Routes.fooddetails),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 40), // Extra bottom padding
-                  ],
+          return RefreshIndicator(
+            onRefresh: controller.refreshDashboard,
+            color: AppColors.primary,
+            child: Column(
+              children: [
+                // Fixed Header Section with live user greeting & location
+                Obx(
+                  () => GreetingHeader(
+                    greeting: controller.greetingMessage.value,
+                    name: controller.userName.value,
+                    onNotificationTap: () => Get.toNamed(Routes.notification),
+                  ),
                 ),
-              ),
+                Obx(
+                  () => LocationBar(
+                    location: controller.userLocation.value,
+                    onTap: () {},
+                  ),
+                ),
+
+                // Scrollable Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 100), // Space for floating navbar
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const DashboardSearchBar(),
+
+                        _buildSectionHeader(
+                          title: 'What are you cooking today?',
+                          subtitle: 'Pick a meal to see matching recipes',
+                        ),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: MealCategoryCard(
+                                  title: 'Breakfast',
+                                  imagePath: AppAssets.homeBreakfastCardImage,
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFFFFF8EE),
+                                      AppColors.backgroundNotification,
+                                    ],
+                                  ),
+                                  onTap: () => Get.toNamed(Routes.breakfastreceipes),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: MealCategoryCard(
+                                  title: 'Lunch',
+                                  imagePath: AppAssets.homeLunchCardImage,
+                                  color: const Color.fromRGBO(58, 143, 92, 0.1),
+                                  onTap: () => Get.toNamed(Routes.lunchreceipes),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: MealCategoryCard(
+                                  title: 'Dinner',
+                                  imagePath: AppAssets.homeDinnerCardImage,
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [Color(0xFFF5F0FF), Color(0xFFEDE8FF)],
+                                  ),
+                                  onTap: () => Get.toNamed(Routes.dinnerreceipes),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: MealCategoryCard(
+                                  title: 'Snacks',
+                                  imagePath: AppAssets.homeSnacksCardImage,
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [Color(0xFFFFF0F0), Color(0xFFFFE8E8)],
+                                  ),
+                                  onTap: () => Get.toNamed(Routes.snacksreceipes),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        _buildSectionHeader(
+                          title: "Today's Meal Plan",
+                          subtitle: 'Your personalized meals for today',
+                        ),
+                        DailyPlanBanner(onViewPlanTap: () => Get.toNamed(Routes.mealplan)),
+                        const SizedBox(height: 16),
+
+                        _buildSectionHeader(
+                          title: 'Recommended For You',
+                          subtitle: 'Based on your preferences, saves and favorites',
+                          actionLabel: 'See all',
+                          onActionTap: () => Get.toNamed(Routes.recommendedfood),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildRecommendedList(),
+                        const SizedBox(height: 24),
+
+                        _buildSectionHeader(
+                          title: 'Shared Grocery',
+                          actionLabel: 'Open List',
+                          onActionTap: () {
+                            if (Get.isRegistered<NavbarController>()) {
+                              Get.find<NavbarController>().changePage(1);
+                            } else {
+                              Get.offAllNamed(Routes.navbar, arguments: {'tab': 1});
+                            }
+                          },
+                        ),
+                        SharedGroceryCard(
+                          onTap: () {
+                            if (Get.isRegistered<NavbarController>()) {
+                              Get.find<NavbarController>().changePage(1);
+                            } else {
+                              Get.offAllNamed(Routes.navbar, arguments: {'tab': 1});
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        _buildSectionHeader(
+                          title: 'Homemade Food Near You',
+                          subtitle: 'Neighbour kitchens - pickup or seller delivery',
+                          actionLabel: 'See all',
+                          onActionTap: () => Get.toNamed(Routes.homemadefoodgrid),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildHomemadeList(),
+                        const SizedBox(height: 40), // Extra bottom padding
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        }),
       ),
     );
+  }
+
+  Widget _buildRecommendedList() {
+    return Obx(() {
+      final foods = controller.recommendedFoods;
+      if (foods.isEmpty) {
+        // Graceful fallback cards
+        return SizedBox(
+          height: 250,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            children: [
+              RecipeCard(
+                title: 'Steamed Veg Dumplings',
+                imagePath: AppAssets.homeRecipeCardImage1,
+                tag: 'Chef special',
+                time: '50m',
+                calories: '310 kcal',
+                rating: '4.6',
+                onTap: () => Get.toNamed(Routes.recommendedfood),
+              ),
+              RecipeCard(
+                title: 'Lemon Lentil Soup',
+                imagePath: AppAssets.homeRecipeCardImage3,
+                tag: 'Popular',
+                time: '25m',
+                calories: '290 kcal',
+                rating: '4.5',
+                onTap: () => Get.toNamed(Routes.recommendedfood),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return SizedBox(
+        height: 250,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          itemCount: foods.length,
+          itemBuilder: (context, index) {
+            final food = foods[index];
+            return RecipeCard(
+              title: food.name,
+              imagePath: food.firstImage.isNotEmpty
+                  ? food.firstImage
+                  : AppAssets.homeRecipeCardImage1,
+              tag: food.category.isNotEmpty ? food.category : 'Chef special',
+              time: food.preparationTime.isNotEmpty ? food.preparationTime : '20m',
+              calories: food.calories,
+              rating: food.rating,
+              onTap: () => Get.toNamed(Routes.fooddetails, arguments: food.id),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildHomemadeList() {
+    return Obx(() {
+      final foods = controller.homemadeFoods;
+      if (foods.isEmpty) {
+        // Graceful fallback cards
+        return SizedBox(
+          height: 330,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            children: [
+              HomemadeFoodCard(
+                title: 'Chicken Biryani Tiffin',
+                subtitle: "Amina's Home Kitchen",
+                imagePath: AppAssets.homeRecipeCardImage3,
+                distance: '0.8 km',
+                rating: '4.9 (214)',
+                price: '\$6.50',
+                onAddTap: () {},
+                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails),
+              ),
+              HomemadeFoodCard(
+                title: 'Steamed Veg Dumplings',
+                subtitle: "Mei's Dumpling Table",
+                imagePath: AppAssets.homeRecipeCardImage1,
+                distance: '1.4 km',
+                rating: '4.7 (132)',
+                price: '\$4.00',
+                onAddTap: () {},
+                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return SizedBox(
+        height: 330,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          itemCount: foods.length,
+          itemBuilder: (context, index) {
+            final food = foods[index];
+            return HomemadeFoodCard(
+              title: food.name,
+              subtitle: food.displaySeller,
+              imagePath: food.firstImage.isNotEmpty
+                  ? food.firstImage
+                  : AppAssets.homeRecipeCardImage3,
+              distance: food.sellerAddress.isNotEmpty
+                  ? food.sellerAddress.split(',').first
+                  : '1.0 km',
+              rating: '${food.rating} (120)',
+              price: '\$${food.price.toStringAsFixed(2)}',
+              onAddTap: () {
+                Get.snackbar(
+                  'Added to Cart',
+                  '${food.name} added to cart',
+                  snackPosition: SnackPosition.TOP,
+                  backgroundColor: AppColors.primary,
+                  colorText: Colors.white,
+                  duration: const Duration(seconds: 2),
+                );
+              },
+              onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: food.id),
+            );
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildSectionHeader({

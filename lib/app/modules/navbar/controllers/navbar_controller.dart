@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../dashboard/controllers/dashboard_controller.dart';
 
 class NavbarController extends GetxController {
   final _currentIndex = 0.obs;
@@ -14,6 +15,11 @@ class NavbarController extends GetxController {
   }
 
   void changePage(int index) {
+    if (_currentIndex.value == index && index == 0) {
+      if (Get.isRegistered<DashboardController>()) {
+        Get.find<DashboardController>().refreshDashboard();
+      }
+    }
     _currentIndex.value = index;
   }
 }

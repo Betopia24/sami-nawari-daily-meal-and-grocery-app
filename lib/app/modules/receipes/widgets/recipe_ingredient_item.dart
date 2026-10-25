@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/app_colors.dart';
 
 class RecipeIngredientItem extends StatelessWidget {
@@ -33,11 +34,7 @@ class RecipeIngredientItem extends StatelessWidget {
               color: const Color(0xFFF7F5F2),
               borderRadius: BorderRadius.circular(12),
             ),
-            padding: const EdgeInsets.all(8),
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.contain,
-            ), // Assumes transparent png/icon
+            child: _buildIcon(imagePath),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -59,6 +56,43 @@ class RecipeIngredientItem extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIcon(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          path,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _defaultPlaceholder(),
+        ),
+      );
+    }
+    if (path.isNotEmpty) {
+      return Image.asset(
+        path,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => _defaultPlaceholder(),
+      );
+    }
+    return _defaultPlaceholder();
+  }
+
+  Widget _defaultPlaceholder() {
+    return Center(
+      child: Image.asset(
+        AppAssets.logoCropped,
+        width: 24,
+        height: 24,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          Icons.restaurant_menu,
+          size: 20,
+          color: AppColors.primary,
+        ),
       ),
     );
   }

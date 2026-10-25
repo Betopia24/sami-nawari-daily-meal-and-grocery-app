@@ -47,15 +47,7 @@ class HomemadeFoodCard extends StatelessWidget {
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
-            child: Image.asset(
-              imagePath,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const CustomRecipeCover(height: 120);
-              },
-            ),
+            child: _buildImage(imagePath),
           ),
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -171,6 +163,29 @@ class HomemadeFoodCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const CustomRecipeCover(height: 120);
+        },
+      );
+    }
+    return Image.asset(
+      path,
+      height: 120,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return const CustomRecipeCover(height: 120);
+      },
     );
   }
 }

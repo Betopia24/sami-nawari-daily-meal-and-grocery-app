@@ -164,10 +164,15 @@ class OtpView extends GetView<OtpController> {
                           const Spacer(),
                           const SizedBox(height: 32),
                           // Verify Button
-                          PrimaryButton(
-                            text: AppStrings.verifyEmail,
-                            onPressed: controller.verifyOtp,
-                            showArrow: false,
+                          Obx(
+                            () => PrimaryButton(
+                              text: controller.isLoading.value
+                                  ? 'Verifying...'
+                                  : AppStrings.verifyEmail,
+                              onPressed: controller.verifyOtp,
+                              isEnabled: !controller.isLoading.value,
+                              showArrow: false,
+                            ),
                           ),
                           const SizedBox(height: 24),
                           // Footer text

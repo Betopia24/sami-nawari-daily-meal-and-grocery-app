@@ -13,6 +13,7 @@ import '../../widgets/recipe_method_step_card.dart';
 import '../../widgets/pro_tips_card.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../widgets/floating_seam_sliver_header.dart';
+import '../../../../widgets/custom_recipe_cover.dart';
 
 class ReceipedetailsView extends GetView<ReceipedetailsController> {
   const ReceipedetailsView({super.key});
@@ -31,76 +32,86 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
                 toolbarHeight: 121,
                 floatingCardOverhang: 37,
                 titleBottomOffset: 16,
-                imagePath: AppAssets.homeRecipeCardImage1,
-                titleWidget: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _buildHeaderTag('High Protein'),
-                        const SizedBox(width: 8),
-                        _buildHeaderTag('Healthy'),
-                        const SizedBox(width: 8),
-                        _buildHeaderTag('Quick'),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Avocado Toast with Poached Egg',
-                      style: GoogleFonts.outfit(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.surface,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Text(
-                          'American',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: AppColors.surface.withValues(alpha: 0.9),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          '•',
-                          style: TextStyle(color: AppColors.surface),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.star,
-                          color: AppColors.secondary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '4.8',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.surface,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '(2,340)',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: AppColors.surface.withValues(alpha: 0.9),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                  ],
+                imageWidget: Obx(
+                  () => _buildHeaderImage(controller.recipeImage.value),
                 ),
-                floatingCard: const NutritionSummaryCard(
-                  prepTime: '5m',
-                  cookTime: '10m',
-                  calories: '380',
+                titleWidget: Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: controller.tags.map((tag) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: _buildHeaderTag(tag),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        controller.recipeName.value,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.outfit(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.surface,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Text(
+                            controller.category.value,
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: AppColors.surface.withValues(alpha: 0.9),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '•',
+                            style: TextStyle(color: AppColors.surface),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.star,
+                            color: AppColors.secondary,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            controller.rating.value.toStringAsFixed(1),
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.surface,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            controller.reviewCount.value,
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: AppColors.surface.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                  ),
+                ),
+                floatingCard: Obx(
+                  () => NutritionSummaryCard(
+                    prepTime: controller.prepTime.value,
+                    cookTime: controller.cookTime.value,
+                    calories: controller.calories.value,
+                  ),
                 ),
               ),
 
@@ -133,6 +144,16 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
                       const SizedBox(height: 24),
                       // Tab Content
                       Obx(() {
+                        if (controller.isLoading.value) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 40),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          );
+                        }
                         if (controller.activeTab.value == 0) {
                           return _buildIngredientsTab();
                         } else {
@@ -173,21 +194,32 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
                     ),
                   ),
                 ),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      AppAssets.bookmarkIcon,
-                      width: 20,
-                      height: 20,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.textPrimary,
-                        BlendMode.srcIn,
+                Obx(
+                  () => GestureDetector(
+                    onTap: controller.toggleBookmark,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Center(
+                        child: controller.isBookmarked.value
+                            ? const Icon(
+                                Icons.bookmark,
+                                size: 22,
+                                color: AppColors.primary,
+                              )
+                            : SvgPicture.asset(
+                                AppAssets.bookmarkIcon,
+                                width: 20,
+                                height: 20,
+                                colorFilter: const ColorFilter.mode(
+                                  AppColors.textPrimary,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -197,6 +229,23 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const CustomRecipeCover(height: 380),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : AppAssets.homeBreakfastCardImage,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          const CustomRecipeCover(height: 380),
     );
   }
 
@@ -271,6 +320,20 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
   }
 
   Widget _buildIngredientsTab() {
+    if (controller.ingredients.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: Text(
+            'No ingredients listed for this recipe.',
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -278,9 +341,9 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: RecipeIngredientItem(
-              imagePath: ing['icon']!,
-              name: ing['name']!,
-              amount: ing['amount']!,
+              imagePath: ing['icon'] ?? '',
+              name: ing['name'] ?? '',
+              amount: ing['amount'] ?? '',
             ),
           );
         }).toList(),
@@ -289,6 +352,10 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
   }
 
   Widget _buildMethodTab() {
+    final totalSteps = controller.methodSteps.length;
+    final completedCount = controller.completedSteps.length;
+    final progress = totalSteps == 0 ? 0.0 : completedCount / totalSteps;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -306,53 +373,44 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
                   letterSpacing: 1.2,
                 ),
               ),
-              Obx(
-                () => Text(
-                  '${controller.completedSteps.length}/${controller.methodSteps.length} done',
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
+              Text(
+                '$completedCount/$totalSteps done',
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           // Progress Bar
-          Obx(() {
-            final progress = controller.methodSteps.isEmpty
-                ? 0.0
-                : controller.completedSteps.length /
-                      controller.methodSteps.length;
-            return LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey.shade200,
-              color: AppColors.primary,
-              minHeight: 4,
-              borderRadius: BorderRadius.circular(2),
-            );
-          }),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Colors.grey.shade200,
+            color: AppColors.primary,
+            minHeight: 4,
+            borderRadius: BorderRadius.circular(2),
+          ),
           const SizedBox(height: 24),
           // Steps
-          ...List.generate(controller.methodSteps.length, (index) {
+          ...List.generate(totalSteps, (index) {
             final step = controller.methodSteps[index];
-            return Obx(() {
-              final isCompleted = controller.completedSteps.contains(index);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: RecipeMethodStepCard(
-                  stepNumber: index + 1,
-                  title: step['title']!,
-                  description: step['description']!,
-                  isCompleted: isCompleted,
-                  onTap: () => controller.toggleStep(index),
-                ),
-              );
-            });
+            final isCompleted = controller.completedSteps.contains(index);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: RecipeMethodStepCard(
+                stepNumber: index + 1,
+                title: step['title'] ?? '',
+                description: step['description'] ?? '',
+                isCompleted: isCompleted,
+                onTap: () => controller.toggleStep(index),
+              ),
+            );
           }),
           const SizedBox(height: 8),
-          ProTipsCard(tips: controller.proTips),
+          if (controller.proTips.isNotEmpty)
+            ProTipsCard(tips: controller.proTips),
         ],
       ),
     );
@@ -366,7 +424,7 @@ class ReceipedetailsView extends GetView<ReceipedetailsController> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
             child: PrimaryButton(
-              onPressed: () {},
+              onPressed: controller.addIngredientsToGrocery,
               text: 'Add Ingredients to Grocery List',
               svgPrefix: AppAssets.storeIcon,
               showArrow: false,

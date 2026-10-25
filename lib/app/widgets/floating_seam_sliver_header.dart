@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/app_colors.dart';
+import 'custom_recipe_cover.dart';
 
 class FloatingSeamSliverHeader extends StatelessWidget {
   final double expandedHeight;
   final double toolbarHeight;
   final double floatingCardOverhang;
-  final String imagePath;
+  final String? imagePath;
+  final Widget? imageWidget;
   final Widget titleWidget;
   final Widget floatingCard;
   final double titleBottomOffset;
@@ -16,7 +19,8 @@ class FloatingSeamSliverHeader extends StatelessWidget {
     required this.expandedHeight,
     required this.toolbarHeight,
     required this.floatingCardOverhang,
-    required this.imagePath,
+    this.imagePath,
+    this.imageWidget,
     required this.titleWidget,
     required this.floatingCard,
     this.titleBottomOffset = 45.0,
@@ -64,7 +68,7 @@ class FloatingSeamSliverHeader extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(imagePath, fit: BoxFit.cover),
+                    imageWidget ?? _buildImage(imagePath ?? ''),
                     // Dark gradient at the bottom for text readability
                     Positioned(
                       bottom: 0,
@@ -110,6 +114,23 @@ class FloatingSeamSliverHeader extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            CustomRecipeCover(height: expandedHeight),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : AppAssets.homeRecipeCardImage1,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          CustomRecipeCover(height: expandedHeight),
     );
   }
 }

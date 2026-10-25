@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../../core/utils/app_assets.dart';
 import '../../../../../../core/utils/app_colors.dart';
@@ -99,10 +98,15 @@ class ResetpasswordView extends GetView<ResetpasswordController> {
                             const Spacer(),
                             const SizedBox(height: 32),
                             // Reset Password Button
-                            PrimaryButton(
-                              text: AppStrings.resetPasswordButton,
-                              onPressed: controller.resetPassword,
-                              showArrow: false,
+                            Obx(
+                              () => PrimaryButton(
+                                text: controller.isLoading.value
+                                    ? 'Updating Password...'
+                                    : AppStrings.resetPasswordButton,
+                                onPressed: controller.resetPassword,
+                                isEnabled: !controller.isLoading.value,
+                                showArrow: false,
+                              ),
                             ),
                             const SizedBox(height: 32),
                           ],

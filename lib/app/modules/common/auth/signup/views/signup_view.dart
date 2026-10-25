@@ -13,7 +13,7 @@ import '../../widgets/social_auth_button.dart';
 import '../controllers/signup_controller.dart';
 
 class SignupView extends GetView<SignupController> {
-  const SignupView({Key? key}) : super(key: key);
+  const SignupView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -124,10 +124,15 @@ class SignupView extends GetView<SignupController> {
                         ),
                         const SizedBox(height: 32),
                         // Sign Up Button
-                        PrimaryButton(
-                          text: AppStrings.signupButton,
-                          onPressed: controller.signup,
-                          showArrow: false,
+                        Obx(
+                          () => PrimaryButton(
+                            text: controller.isLoading.value
+                                ? 'Creating Account...'
+                                : AppStrings.signupButton,
+                            onPressed: controller.signup,
+                            isEnabled: !controller.isLoading.value,
+                            showArrow: false,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         // Divider

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../../core/utils/app_assets.dart';
 import '../../../../../../core/utils/app_colors.dart';
@@ -76,10 +75,15 @@ class ForgotpasswordView extends GetView<ForgotpasswordController> {
                             const Spacer(),
                             const SizedBox(height: 32),
                             // Send Reset Link Button
-                            PrimaryButton(
-                              text: AppStrings.sendResetLink,
-                              onPressed: controller.sendResetLink,
-                              showArrow: false,
+                            Obx(
+                              () => PrimaryButton(
+                                text: controller.isLoading.value
+                                    ? 'Sending Code...'
+                                    : AppStrings.sendResetLink,
+                                onPressed: controller.sendResetLink,
+                                isEnabled: !controller.isLoading.value,
+                                showArrow: false,
+                              ),
                             ),
                             const SizedBox(height: 24),
                             // Back to Sign In

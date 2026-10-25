@@ -12,7 +12,7 @@ import '../../widgets/profile_menu_tile.dart';
 import '../../widgets/profile_section_card.dart';
 import '../../widgets/subscription_plan_card.dart';
 import '../controllers/systempreference_controller.dart';
-import '../../../../routes/app_pages.dart';
+import '../../../../data/network/local_storage.dart';
 
 class SystempreferenceView extends GetView<SystempreferenceController> {
   const SystempreferenceView({super.key});
@@ -349,7 +349,8 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
 
   Widget _buildSignOutButton() {
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        await LocalStorage.clearAuthData();
         Get.offAllNamed(Routes.signin);
       },
       borderRadius: BorderRadius.circular(16),

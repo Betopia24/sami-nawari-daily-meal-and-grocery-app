@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../widgets/custom_recipe_cover.dart';
 
 class RecipeListCard extends StatelessWidget {
   final String imagePath;
@@ -41,12 +42,7 @@ class RecipeListCard extends StatelessWidget {
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(16),
               ),
-              child: Image.asset(
-                imagePath,
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
-              ),
+              child: _buildImage(imagePath),
             ),
             const SizedBox(width: 16),
             // Right Content
@@ -147,6 +143,29 @@ class RecipeListCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 120,
+        height: 120,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const CustomRecipeCover(height: 120);
+        },
+      );
+    }
+    return Image.asset(
+      path,
+      width: 120,
+      height: 120,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return const CustomRecipeCover(height: 120);
+      },
     );
   }
 }

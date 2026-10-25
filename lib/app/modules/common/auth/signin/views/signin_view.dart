@@ -14,7 +14,7 @@ import '../../widgets/social_auth_button.dart';
 import '../controllers/signin_controller.dart';
 
 class SigninView extends GetView<SigninController> {
-  const SigninView({Key? key}) : super(key: key);
+  const SigninView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -141,10 +141,15 @@ class SigninView extends GetView<SigninController> {
                         ),
                         const SizedBox(height: 32),
                         // Sign In Button
-                        PrimaryButton(
-                          text: AppStrings.signIn,
-                          onPressed: controller.signin,
-                          showArrow: false,
+                        Obx(
+                          () => PrimaryButton(
+                            text: controller.isLoading.value
+                                ? 'Signing In...'
+                                : AppStrings.signIn,
+                            onPressed: controller.signin,
+                            isEnabled: !controller.isLoading.value,
+                            showArrow: false,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         // Divider

@@ -1,6 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:daily_meal_and_grocery_app/app/data/network/local_storage.dart';
+import 'package:daily_meal_and_grocery_app/app/data/network/network.dart';
+import 'package:daily_meal_and_grocery_app/app/data/network/url.dart';
 import '../../../../../routes/app_routes.dart';
 
 class SignupController extends GetxController {
@@ -14,6 +17,7 @@ class SignupController extends GetxController {
 
   final isPasswordHidden = true.obs;
   final isConfirmPasswordHidden = true.obs;
+  final isLoading = false.obs;
 
   @override
   void onClose() {
@@ -37,6 +41,9 @@ class SignupController extends GetxController {
     if (value == null || value.trim().isEmpty) {
       return 'Full name is required';
     }
+    if (value.trim().length < 2) {
+      return 'Please enter a valid name';
+    }
     return null;
   }
 
@@ -44,7 +51,7 @@ class SignupController extends GetxController {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
     }
-    if (!GetUtils.isEmail(value)) {
+    if (!GetUtils.isEmail(value.trim())) {
       return 'Please enter a valid email address';
     }
     return null;
@@ -52,25 +59,19 @@ class SignupController extends GetxController {
 
   String? validatePhone(String? value) {
     if (value != null && value.trim().isNotEmpty) {
-      if (!GetUtils.isPhoneNumber(value)) {
+      if (!GetUtils.isPhoneNumber(value.trim())) {
         return 'Please enter a valid phone number';
       }
     }
-    return null; // Phone is optional
+    return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Password is required';
     }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (!value.contains(RegExp(r'[A-Z]'))) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!value.contains(RegExp(r'[0-9]'))) {
-      return 'Password must contain at least one number';
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
     }
     return null;
   }
@@ -85,19 +86,96 @@ class SignupController extends GetxController {
     return null;
   }
 
-  void signup() {
-    if (formKey.currentState!.validate()) {
-      // Implement sign up logic here
-      Get.offAllNamed(Routes.locationaccess);
+  Future<void> signup() async {
+    if (!(formKey.currentState?.validate() ?? false)) return;
+
+    final name = fullNameController.text.trim();
+    final email = emailController.text.trim();
+    final phone = phoneController.text.trim();
+    final password = passwordController.text;
+
+    isLoading.value = true;
+
+    final Map<String, dynamic> requestBody = {
+      'name': name,
+      'email': email,
+      'password': password,
+    };
+    if (phone.isNotEmpty) {
+      requestBody['phone'] = phone;
+    }
+
+    try {
+      final response = await NetworkCaller.postRequest(
+        Urls.register,
+        body: requestBody,
+        requiresToken: false,
+      );
+
+      isLoading.value = false;
+
+      if (response.isSuccess) {
+        final data = response.responseData;
+        final userData = data is Map ? data['data'] : null;
+        final registeredId = userData?['id']?.toString();
+
+        if (registeredId != null && registeredId.isNotEmpty) {
+          await LocalStorage.saveId(registeredId);
+        }
+        if (userData is Map<String, dynamic>) {
+          await LocalStorage.saveUser(userData);
+        }
+
+        Get.snackbar(
+          'Success',
+          data?['message']?.toString() ??
+              'User registered successfully! Please verify your email.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        );
+
+        // Navigate to OTP screen for email verification
+        Get.toNamed(
+          Routes.otp,
+          arguments: {
+            'email': email,
+            'isFromRegister': true,
+          },
+        );
+      } else {
+        Get.snackbar(
+          'Registration Failed',
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to register. Please try again.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+        );
+      }
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred: $e',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFEF4444),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
     }
   }
 
   void continueWithGoogle() {
-    Get.offAllNamed(Routes.locationaccess);
+    // Implement Google sign up
   }
 
   void continueWithApple() {
-    Get.offAllNamed(Routes.locationaccess);
+    // Implement Apple sign up
   }
 
   void goToSignIn() {
