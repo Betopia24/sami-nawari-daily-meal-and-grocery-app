@@ -204,7 +204,7 @@ class DashboardView extends GetView<DashboardController> {
                 time: '50m',
                 calories: '310 kcal',
                 rating: '4.6',
-                onTap: () => Get.toNamed(Routes.recommendedfood),
+                onTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a8d6ca9e87759724844e5ec'),
               ),
               RecipeCard(
                 title: 'Lemon Lentil Soup',
@@ -213,7 +213,7 @@ class DashboardView extends GetView<DashboardController> {
                 time: '25m',
                 calories: '290 kcal',
                 rating: '4.5',
-                onTap: () => Get.toNamed(Routes.recommendedfood),
+                onTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a897de42f4aa7b54cd9298b'),
               ),
             ],
           ),
@@ -237,7 +237,7 @@ class DashboardView extends GetView<DashboardController> {
               time: food.preparationTime.isNotEmpty ? food.preparationTime : '20m',
               calories: food.calories,
               rating: food.rating,
-              onTap: () => Get.toNamed(Routes.fooddetails, arguments: food.id),
+              onTap: () => Get.toNamed(Routes.fooddetails, arguments: food),
             );
           },
         ),
@@ -264,7 +264,7 @@ class DashboardView extends GetView<DashboardController> {
                 rating: '4.9 (214)',
                 price: '\$6.50',
                 onAddTap: () {},
-                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails),
+                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a8d6ca9e87759724844e5ec'),
               ),
               HomemadeFoodCard(
                 title: 'Steamed Veg Dumplings',
@@ -274,7 +274,7 @@ class DashboardView extends GetView<DashboardController> {
                 rating: '4.7 (132)',
                 price: '\$4.00',
                 onAddTap: () {},
-                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails),
+                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a897de42f4aa7b54cd9298b'),
               ),
             ],
           ),
@@ -310,7 +310,7 @@ class DashboardView extends GetView<DashboardController> {
                   duration: const Duration(seconds: 2),
                 );
               },
-              onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: food.id),
+              onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: food),
             );
           },
         ),

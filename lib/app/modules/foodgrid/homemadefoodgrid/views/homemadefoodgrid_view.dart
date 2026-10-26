@@ -72,7 +72,10 @@ class HomemadefoodgridView extends GetView<HomemadefoodgridController> {
           width: null, // Let grid manage width
           margin: EdgeInsets.zero, // Remove right margin in grid
           onAddTap: () {},
-          onViewDetailsTap: () => Get.toNamed(Routes.fooddetails),
+          onViewDetailsTap: () => Get.toNamed(
+            Routes.fooddetails,
+            arguments: '6a8d6ca9e87759724844e5ec',
+          ),
         );
       },
     );

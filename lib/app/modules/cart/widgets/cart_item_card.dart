@@ -11,6 +11,7 @@ class CartItemCard extends StatelessWidget {
   final String title;
   final double pricePerItem;
   final int quantity;
+  final bool isBookmarked;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onBookmark;
@@ -22,6 +23,7 @@ class CartItemCard extends StatelessWidget {
     required this.title,
     required this.pricePerItem,
     required this.quantity,
+    this.isBookmarked = false,
     required this.onIncrement,
     required this.onDecrement,
     required this.onBookmark,
@@ -46,12 +48,7 @@ class CartItemCard extends StatelessWidget {
           // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              imagePath,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+            child: _buildImage(imagePath),
           ),
           const SizedBox(width: 16),
           // Details
@@ -112,7 +109,11 @@ class CartItemCard extends StatelessWidget {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.bookmark_border, size: 18, color: Colors.black),
+                  child: Icon(
+                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    size: 18,
+                    color: isBookmarked ? AppColors.primary : Colors.black,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -136,6 +137,35 @@ class CartItemCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image.asset(
+          AppAssets.homeRecipeCardImage1,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : AppAssets.homeRecipeCardImage1,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Image.asset(
+        AppAssets.homeRecipeCardImage1,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
       ),
     );
   }

@@ -9,6 +9,7 @@ class PopularDishCard extends StatelessWidget {
   final String title;
   final String price;
   final bool isPopular;
+  final VoidCallback? onTap;
 
   const PopularDishCard({
     super.key,
@@ -16,36 +17,31 @@ class PopularDishCard extends StatelessWidget {
     required this.title,
     required this.price,
     this.isPopular = true,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 200,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+              child: _buildImage(),
             ),
-            child: Image.asset(
-              imagePath,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const CustomRecipeCover(height: 120);
-              },
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -99,6 +95,30 @@ class PopularDishCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
+  );
+}
+
+  Widget _buildImage() {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const CustomRecipeCover(height: 120);
+        },
+      );
+    }
+    return Image.asset(
+      imagePath,
+      height: 120,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return const CustomRecipeCover(height: 120);
+      },
     );
   }
 }

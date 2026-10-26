@@ -1,3 +1,4 @@
+import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
 import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -78,7 +79,10 @@ class RecommendedfoodView extends GetView<RecommendedfoodController> {
           rating: recipe['rating']!,
           width: null,
           margin: EdgeInsets.zero,
-          onTap: () {},
+          onTap: () => Get.toNamed(
+            Routes.fooddetails,
+            arguments: '6a8d6ca9e87759724844e5ec',
+          ),
         );
       },
     );

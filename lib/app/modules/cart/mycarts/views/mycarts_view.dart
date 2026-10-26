@@ -46,25 +46,27 @@ class MycartsView extends GetView<MycartsController> {
                     ],
                   ),
                 ),
-                TabBar(
-                  controller: controller.tabController,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                Obx(
+                  () => TabBar(
+                    controller: controller.tabController,
+                    labelColor: AppColors.primary,
+                    unselectedLabelColor: AppColors.textSecondary,
+                    labelStyle: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    indicatorColor: AppColors.primary,
+                    indicatorWeight: 2,
+                    tabs: [
+                      Tab(text: 'Cart (${controller.totalItems.value})'),
+                      const Tab(text: 'Active'),
+                      const Tab(text: 'History'),
+                    ],
                   ),
-                  unselectedLabelStyle: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  indicatorColor: AppColors.primary,
-                  indicatorWeight: 2,
-                  tabs: const [
-                    Tab(text: 'Cart (3)'),
-                    Tab(text: 'Active'),
-                    Tab(text: 'History'),
-                  ],
                 ),
                 Expanded(
                   child: TabBarView(
@@ -86,9 +88,10 @@ class MycartsView extends GetView<MycartsController> {
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Obx(
-                  () => controller.currentTabIndex.value == 0
+                  () => controller.currentTabIndex.value == 0 &&
+                          controller.cartGroups.isNotEmpty
                       ? CheckoutBottomBar(
                           totalItems: controller.totalItems.value,
                           totalSellers: controller.totalSellers.value,
@@ -106,239 +109,307 @@ class MycartsView extends GetView<MycartsController> {
   }
 
   Widget _buildCartTab() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-      children: [
-        Obx(
-          () => CartRestaurantCard(
-            restaurantImage: AppAssets.homeRecipeCardImage1,
-            restaurantName: "Maria's Kitchen",
-            authorName: "Maria Santos",
-            totalPrice:
-                controller.itemQuantities[0].value * controller.itemPrices[0],
-            timeText: '25 min',
-            hasPickup: true,
-            deliveryFee: 2.50,
-            items: [
-              CartItemCard(
-                imagePath: AppAssets.homeRecipeCardImage1,
-                title: "Classic Mezze Platter",
-                pricePerItem: controller.itemPrices[0],
-                quantity: controller.itemQuantities[0].value,
-                onIncrement: () => controller.incrementItem(0),
-                onDecrement: () => controller.decrementItem(0),
-                onBookmark: () => controller.bookmarkItem(0),
-                onDelete: () => controller.deleteItem(0),
-              ),
-            ],
-          ),
-        ),
-        Obx(
-          () => CartRestaurantCard(
-            restaurantImage: AppAssets.homeRecipeCardImage2,
-            restaurantName: "Luca's Pasta Club",
-            authorName: "Luca Buanchi",
-            totalPrice:
-                (controller.itemQuantities[1].value *
-                    controller.itemPrices[1]) +
-                (controller.itemQuantities[2].value * controller.itemPrices[2]),
-            timeText: '20 min',
-            hasPickup: true,
-            deliveryFee: 2.50,
-            items: [
-              CartItemCard(
-                imagePath: AppAssets.homeRecipeCardImage2,
-                title: "Cacio e Pepe",
-                pricePerItem: controller.itemPrices[1],
-                quantity: controller.itemQuantities[1].value,
-                onIncrement: () => controller.incrementItem(1),
-                onDecrement: () => controller.decrementItem(1),
-                onBookmark: () => controller.bookmarkItem(1),
-                onDelete: () => controller.deleteItem(1),
-              ),
-              CartItemCard(
-                imagePath: AppAssets.homeRecipeCardImage2,
-                title: "Tiramisu",
-                pricePerItem: controller.itemPrices[2],
-                quantity: controller.itemQuantities[2].value,
-                onIncrement: () => controller.incrementItem(2),
-                onDecrement: () => controller.decrementItem(2),
-                onBookmark: () => controller.bookmarkItem(2),
-                onDelete: () => controller.deleteItem(2),
-              ),
-            ],
-          ),
-        ),
-        Obx(
-          () => CartRestaurantCard(
-            restaurantImage: AppAssets.homeRecipeCardImage3,
-            restaurantName: "Priya's Spice House",
-            authorName: "Priya Sharma",
-            totalPrice:
-                controller.itemQuantities[3].value * controller.itemPrices[3],
-            timeText: '40 min',
-            hasPickup: true,
-            deliveryFee: 2.50,
-            items: [
-              CartItemCard(
-                imagePath: AppAssets.homeRecipeCardImage3,
-                title: "Chiken Biriyani",
-                pricePerItem: controller.itemPrices[3],
-                quantity: controller.itemQuantities[3].value,
-                onIncrement: () => controller.incrementItem(3),
-                onDecrement: () => controller.decrementItem(3),
-                onBookmark: () => controller.bookmarkItem(3),
-                onDelete: () => controller.deleteItem(3),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+    return Obx(() {
+      if (controller.isLoadingCart.value && controller.cartGroups.isEmpty) {
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
+      }
 
-  Widget _buildActiveTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-      child: Column(
-        children: [
-          TrackOrderDetailsCard(
-            restaurantName: 'Maria\'s Kitchen',
-            restaurantImage: AppAssets.homeRecipeCardImage1,
-            orderName: 'Classic Mezze Platter',
-            timeAgo: '15 min ago',
-            status: 'Preparing',
-            eta: '~10 min',
-            itemsAndPrice: '1 item  •  \$20.50',
-            paymentMethod: 'Cash on Delivery',
-            address: '123 Main St, San Francisco',
-            onContactSeller: controller.onContactSeller,
-          ),
-          const SizedBox(height: 16),
-          OrderStatusTimelineCard(
-            steps: [
-              OrderStatusStep(
-                title: 'Order Placed',
-                time: '02:41 PM',
-                isCompleted: true,
-              ),
-              OrderStatusStep(
-                title: 'Accepted',
-                time: '02:42 PM',
-                isCompleted: true,
-              ),
-              OrderStatusStep(
-                title: 'Preparing',
-                time: '02:45 PM',
-                isCompleted: true,
-              ),
-              OrderStatusStep(
-                title: 'Out for Delivery',
-                time: '03:15 PM',
-                isCompleted: false,
-              ),
-              OrderStatusStep(
-                title: 'Delivered',
-                time: '03:25 PM',
-                isCompleted: false,
-              ),
-              OrderStatusStep(title: 'Completed', time: '', isCompleted: false),
-            ],
-            bottomActions: Row(
+      if (controller.cartGroups.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: PrimaryButton(
-                    text: 'Refresh Status',
-                    showArrow: false,
-                    onPressed: controller.onRefreshStatus,
+                Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 64,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Your cart is empty',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: controller.onCancelOrder,
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFFFFE4E6)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Text(
-                      'Cancel Order',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFEF4444),
-                      ),
-                    ),
+                const SizedBox(height: 8),
+                Text(
+                  'Explore our delicious homemade meals and add your favorites to cart!',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
                   ),
+                ),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  text: 'Browse Foods',
+                  width: 180,
+                  onPressed: () => Get.back(),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Obx(
-            () => LeaveReviewCard(
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.fetchCart,
+        color: AppColors.primary,
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+          itemCount: controller.cartGroups.length,
+          itemBuilder: (context, index) {
+            final group = controller.cartGroups[index];
+            return CartRestaurantCard(
+              restaurantImage: group.restaurantImage,
+              restaurantName: group.sellerName,
+              authorName: group.authorName,
+              totalPrice: group.totalPrice,
+              timeText: group.prepTime,
+              hasPickup: group.hasPickup,
+              deliveryFee: group.deliveryFee,
+              items: group.items.map((item) {
+                return CartItemCard(
+                  imagePath: item.image,
+                  title: item.name,
+                  pricePerItem: item.price,
+                  quantity: item.quantity,
+                  isBookmarked: item.isBookmarked,
+                  onIncrement: () => controller.incrementItem(item.foodId),
+                  onDecrement: () => controller.decrementItem(item.foodId),
+                  onBookmark: () => controller.bookmarkItem(item.foodId),
+                  onDelete: () => controller.deleteItem(item.foodId),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildActiveTab() {
+    return Obx(() {
+      if (controller.isLoadingOrders.value &&
+          controller.activeOrders.isEmpty) {
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
+      }
+
+      final activeList = controller.activeOrders;
+      final hasActive = activeList.isNotEmpty;
+      final firstOrder = hasActive ? activeList.first : null;
+
+      final restaurantName = firstOrder?['seller']?['name']?.toString() ??
+          firstOrder?['sellerName']?.toString() ??
+          "Maria's Kitchen";
+      final orderTitle = (firstOrder?['items'] is List &&
+              (firstOrder!['items'] as List).isNotEmpty)
+          ? firstOrder['items'][0]['foodName']?.toString() ??
+              'Classic Mezze Platter'
+          : 'Classic Mezze Platter';
+      final status = firstOrder?['status']?.toString() ?? 'Preparing';
+      final totalPrice = firstOrder?['totalPrice'] != null
+          ? '\$${(firstOrder!['totalPrice'] as num).toStringAsFixed(2)}'
+          : '\$20.50';
+      final address = firstOrder?['deliveryAddress'] is Map
+          ? '${firstOrder!['deliveryAddress']['streetAddress'] ?? ''}, ${firstOrder['deliveryAddress']['city'] ?? ''}'
+          : '123 Main St, San Francisco';
+
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+        child: Column(
+          children: [
+            TrackOrderDetailsCard(
+              restaurantName: restaurantName,
+              restaurantImage: AppAssets.homeRecipeCardImage1,
+              orderName: orderTitle,
+              timeAgo: '15 min ago',
+              status: status,
+              eta: '~10 min',
+              itemsAndPrice: '1 item  •  $totalPrice',
+              paymentMethod: 'Cash on Delivery',
+              address: address,
+              onContactSeller: controller.onContactSeller,
+            ),
+            const SizedBox(height: 16),
+            OrderStatusTimelineCard(
+              steps: [
+                OrderStatusStep(
+                  title: 'Order Placed',
+                  time: '02:41 PM',
+                  isCompleted: true,
+                ),
+                OrderStatusStep(
+                  title: 'Accepted',
+                  time: '02:42 PM',
+                  isCompleted: true,
+                ),
+                OrderStatusStep(
+                  title: 'Preparing',
+                  time: '02:45 PM',
+                  isCompleted: true,
+                ),
+                OrderStatusStep(
+                  title: 'Out for Delivery',
+                  time: '03:15 PM',
+                  isCompleted: false,
+                ),
+                OrderStatusStep(
+                  title: 'Delivered',
+                  time: '03:25 PM',
+                  isCompleted: false,
+                ),
+                OrderStatusStep(
+                  title: 'Completed',
+                  time: '',
+                  isCompleted: false,
+                ),
+              ],
+              bottomActions: Row(
+                children: [
+                  Expanded(
+                    child: PrimaryButton(
+                      text: 'Refresh Status',
+                      showArrow: false,
+                      onPressed: controller.onRefreshStatus,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => controller.onCancelOrder(
+                        firstOrder?['id']?.toString(),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFFFE4E6)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        'Cancel Order',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFEF4444),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            LeaveReviewCard(
               selectedRating: controller.selectedRating.value,
               onRatingChanged: controller.setRating,
-              onSubmit: controller.onSubmitReview,
+              onSubmit: () => controller.onSubmitReview(
+                firstOrder?['id']?.toString(),
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildHistoryTab() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-      children: [
-        HistoryOrderCard(
-          title: 'Pork & Chive Dumplings (12pc)',
-          restaurantName: 'Chen\'s Dim Sum',
-          imagePath: AppAssets.homeRecipeCardImage1, // Placeholder
-          status: 'Picked Up',
-          timeAgo: '3 days ago',
-          price: 22.00,
-          quantity: 2,
-          isReviewed: true,
-          reviewScore: 5,
-          onReceipt: () {},
-          onReview: () {},
-          onReorder: () {},
-        ),
-        const SizedBox(height: 16),
-        HistoryOrderCard(
-          title: 'Chiken Biriyani',
-          restaurantName: 'Priya\'s Spice House',
-          imagePath: AppAssets.homeRecipeCardImage3,
-          status: 'Delivered',
-          timeAgo: '1 weeks ago',
-          price: 32.00,
-          quantity: 1,
-          isReviewed: false,
-          onReceipt: () {},
-          onReview: () {},
-          onReorder: () {},
-        ),
-        const SizedBox(height: 16),
-        HistoryOrderCard(
-          title: 'Classic Mezze Platter',
-          restaurantName: 'Maria\'s Kitchen',
-          imagePath: AppAssets.homeRecipeCardImage2,
-          status: 'Delivered',
-          timeAgo: '2 weeks ago',
-          price: 20.50,
-          quantity: 1,
-          isReviewed: true,
-          reviewScore: 5,
-          onReceipt: () {},
-          onReview: () {},
-          onReorder: () {},
-        ),
-      ],
-    );
+    return Obx(() {
+      final historyList = controller.historyOrders;
+
+      if (historyList.isNotEmpty) {
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+          itemCount: historyList.length,
+          itemBuilder: (context, index) {
+            final order = historyList[index];
+            final title = (order['items'] is List &&
+                    (order['items'] as List).isNotEmpty)
+                ? order['items'][0]['foodName']?.toString() ?? 'Food Item'
+                : 'Delicious Meal';
+            final seller = order['sellerName']?.toString() ?? "Kitchen";
+            final price = (order['totalPrice'] as num?)?.toDouble() ?? 20.0;
+            final status = order['status']?.toString() ?? 'Delivered';
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: HistoryOrderCard(
+                title: title,
+                restaurantName: seller,
+                imagePath: AppAssets.homeRecipeCardImage1,
+                status: status,
+                timeAgo: 'Recently',
+                price: price,
+                quantity: 1,
+                isReviewed: false,
+                onReceipt: () {},
+                onReview: () {},
+                onReorder: () {},
+              ),
+            );
+          },
+        );
+      }
+
+      // Default curated history cards
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+        children: [
+          HistoryOrderCard(
+            title: 'Pork & Chive Dumplings (12pc)',
+            restaurantName: "Chen's Dim Sum",
+            imagePath: AppAssets.homeRecipeCardImage1,
+            status: 'Picked Up',
+            timeAgo: '3 days ago',
+            price: 22.00,
+            quantity: 2,
+            isReviewed: true,
+            reviewScore: 5,
+            onReceipt: () {},
+            onReview: () {},
+            onReorder: () {},
+          ),
+          const SizedBox(height: 16),
+          HistoryOrderCard(
+            title: 'Chiken Biriyani',
+            restaurantName: "Priya's Spice House",
+            imagePath: AppAssets.homeRecipeCardImage3,
+            status: 'Delivered',
+            timeAgo: '1 weeks ago',
+            price: 32.00,
+            quantity: 1,
+            isReviewed: false,
+            onReceipt: () {},
+            onReview: () {},
+            onReorder: () {},
+          ),
+          const SizedBox(height: 16),
+          HistoryOrderCard(
+            title: 'Classic Mezze Platter',
+            restaurantName: "Maria's Kitchen",
+            imagePath: AppAssets.homeRecipeCardImage2,
+            status: 'Delivered',
+            timeAgo: '2 weeks ago',
+            price: 20.50,
+            quantity: 1,
+            isReviewed: true,
+            reviewScore: 5,
+            onReceipt: () {},
+            onReview: () {},
+            onReorder: () {},
+          ),
+        ],
+      );
+    });
   }
 }

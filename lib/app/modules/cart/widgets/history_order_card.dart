@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/utils/app_colors.dart';
-
 class HistoryOrderCard extends StatelessWidget {
   final String title;
   final String restaurantName;
@@ -51,12 +49,7 @@ class HistoryOrderCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    imagePath,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _buildImage(imagePath),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -218,6 +211,35 @@ class HistoryOrderCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 64,
+        height: 64,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image.asset(
+          'assets/images/home_recipe_card_image_1.png',
+          width: 64,
+          height: 64,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : 'assets/images/home_recipe_card_image_1.png',
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Image.asset(
+        'assets/images/home_recipe_card_image_1.png',
+        width: 64,
+        height: 64,
+        fit: BoxFit.cover,
       ),
     );
   }

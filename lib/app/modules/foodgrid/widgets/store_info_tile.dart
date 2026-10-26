@@ -36,20 +36,7 @@ class StoreInfoTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                imagePath,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 48,
-                    height: 48,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.storefront, color: Colors.grey),
-                  );
-                },
-              ),
+              child: _buildImage(),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -113,6 +100,39 @@ class StoreInfoTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImage() {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        width: 48,
+        height: 48,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: 48,
+            height: 48,
+            color: Colors.grey.shade200,
+            child: const Icon(Icons.storefront, color: Colors.grey),
+          );
+        },
+      );
+    }
+    return Image.asset(
+      imagePath.isNotEmpty ? imagePath : 'assets/images/home_recipe_card_image_3.png',
+      width: 48,
+      height: 48,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: 48,
+          height: 48,
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.storefront, color: Colors.grey),
+        );
+      },
     );
   }
 }
