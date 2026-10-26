@@ -51,7 +51,9 @@ class CheckoutBottomBar extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '\$${totalPrice.toStringAsFixed(0)}',
+                totalPrice % 1 == 0
+                    ? '\$${totalPrice.toInt()}'
+                    : '\$${totalPrice.toStringAsFixed(2)}',
                 style: GoogleFonts.outfit(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,

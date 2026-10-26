@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/app_colors.dart';
-import '../../../../core/utils/app_assets.dart';
 
 class OrderSummaryCard extends StatelessWidget {
   final String restaurantImage;
@@ -54,7 +52,7 @@ class OrderSummaryCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (statusTag != null) statusTag!,
+              ?statusTag,
             ],
           ),
           const SizedBox(height: 16),

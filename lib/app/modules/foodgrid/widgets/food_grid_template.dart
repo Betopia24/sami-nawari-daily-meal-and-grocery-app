@@ -8,6 +8,9 @@ class FoodGridTemplate extends StatelessWidget {
   final String subtitle;
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
+  final bool isLoading;
+  final Future<void> Function()? onRefresh;
+  final String emptyMessage;
 
   const FoodGridTemplate({
     super.key,
@@ -15,6 +18,9 @@ class FoodGridTemplate extends StatelessWidget {
     required this.subtitle,
     required this.itemCount,
     required this.itemBuilder,
+    this.isLoading = false,
+    this.onRefresh,
+    this.emptyMessage = 'No items found',
   });
 
   @override
@@ -78,28 +84,83 @@ class FoodGridTemplate extends StatelessWidget {
             ),
             // Divider
             Divider(color: Colors.grey.shade200, height: 1),
-            // Grid
+            // Grid / Content
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double itemWidth =
-                        (constraints.maxWidth - 16) /
-                        2; // 2 columns with 16 spacing
-                    return Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: List.generate(itemCount, (index) {
-                        return SizedBox(
-                          width: itemWidth,
-                          child: itemBuilder(context, index),
-                        );
-                      }),
-                    );
-                  },
-                ),
-              ),
+              child: isLoading && itemCount == 0
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : (itemCount == 0
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.restaurant_menu,
+                                  size: 48,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  emptyMessage,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : (onRefresh != null
+                          ? RefreshIndicator(
+                              onRefresh: onRefresh!,
+                              color: AppColors.primary,
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.all(24),
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final double itemWidth =
+                                        (constraints.maxWidth - 16) / 2;
+                                    return Wrap(
+                                      spacing: 16,
+                                      runSpacing: 16,
+                                      children: List.generate(itemCount, (index) {
+                                        return SizedBox(
+                                          width: itemWidth,
+                                          child: itemBuilder(context, index),
+                                        );
+                                      }),
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                          : SingleChildScrollView(
+                              padding: const EdgeInsets.all(24),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final double itemWidth =
+                                      (constraints.maxWidth - 16) / 2;
+                                  return Wrap(
+                                    spacing: 16,
+                                    runSpacing: 16,
+                                    children: List.generate(itemCount, (index) {
+                                      return SizedBox(
+                                        width: itemWidth,
+                                        child: itemBuilder(context, index),
+                                      );
+                                    }),
+                                  );
+                                },
+                              ),
+                            ))),
             ),
           ],
         ),

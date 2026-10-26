@@ -35,6 +35,8 @@ class Urls {
   static const String foods = '/foods';
   static const String sellerFoods = '/foods/seller';
   static const String foodRecipes = '/foods/recipe';
+  static const String aiRecommendFoods = '/ai/recommendations/foods';
+  static const String aiRecommendRecipes = '/ai/recommendations/recipes';
 
   // ---------------------------------------------------------------------------
   // EXPLORE & SELLERS

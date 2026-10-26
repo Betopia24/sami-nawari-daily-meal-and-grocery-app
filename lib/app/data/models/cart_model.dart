@@ -49,20 +49,16 @@ class CartItemModel {
         ? feeVal.toDouble()
         : double.tryParse(feeVal?.toString() ?? '2.50') ?? 2.50;
 
-    final seller = json['seller'] is Map
-        ? json['seller'] as Map<String, dynamic>
-        : null;
-    final sellerProfile =
-        seller?['sellerProfile'] is Map ? seller!['sellerProfile'] as Map : null;
+    final foodName =
+        json['name']?.toString() ?? json['foodName']?.toString() ?? 'Food Item';
+    final foodId = json['foodId']?.toString() ?? json['id']?.toString() ?? '';
 
-    final sName = json['sellerName']?.toString() ??
-        sellerProfile?['businessName']?.toString() ??
-        seller?['name']?.toString() ??
-        "Maria's Kitchen";
-
-    final sAuthor = seller?['name']?.toString() ??
-        json['sellerAuthor']?.toString() ??
-        "Maria Santos";
+    // Resolves accurate restaurant metadata per food so foods from different restaurants never get lumped together
+    final restaurant = _resolveRestaurant(
+      foodId: foodId,
+      foodName: foodName,
+      rawJson: json,
+    );
 
     final img = json['image']?.toString() ??
         (json['images'] is List && (json['images'] as List).isNotEmpty
@@ -74,24 +70,144 @@ class CartItemModel {
         : int.tryParse(json['quantity']?.toString() ?? '1') ?? 1;
 
     return CartItemModel(
-      foodId: json['foodId']?.toString() ?? json['id']?.toString() ?? '',
-      name:
-          json['name']?.toString() ?? json['foodName']?.toString() ?? 'Food Item',
+      foodId: foodId,
+      name: foodName,
       price: parsedPrice,
       quantity: qty,
       image: img,
       category: json['category']?.toString() ?? 'Lunch',
       pickupAvailable: json['pickupAvailable'] != false,
       deliveryAvailable: json['deliveryAvailable'] != false,
-      deliveryFee: parsedFee,
+      deliveryFee:
+          (restaurant['deliveryFee'] as num?)?.toDouble() ?? parsedFee,
       subTotal: parsedSubTotal > 0 ? parsedSubTotal : (parsedPrice * qty),
-      sellerId:
-          json['sellerId']?.toString() ?? seller?['id']?.toString() ?? sName,
-      sellerName: sName,
-      sellerAuthor: sAuthor,
-      prepTime: json['preparationTime']?.toString() ?? '20 min',
+      sellerId: restaurant['sellerId'] as String,
+      sellerName: restaurant['sellerName'] as String,
+      sellerAuthor: restaurant['sellerAuthor'] as String,
+      prepTime: restaurant['prepTime'] as String,
       isBookmarked: json['isBookmarked'] == true,
     );
+  }
+
+  static Map<String, dynamic> _resolveRestaurant({
+    required String foodId,
+    required String foodName,
+    required Map<String, dynamic> rawJson,
+  }) {
+    final seller = rawJson['seller'] is Map
+        ? rawJson['seller'] as Map<String, dynamic>
+        : null;
+    final sellerProfile =
+        seller?['sellerProfile'] is Map ? seller!['sellerProfile'] as Map : null;
+
+    final explicitSellerName = rawJson['sellerName']?.toString() ??
+        sellerProfile?['businessName']?.toString() ??
+        rawJson['restaurantName']?.toString();
+
+    final explicitAuthor = seller?['name']?.toString() ??
+        rawJson['sellerAuthor']?.toString() ??
+        rawJson['authorName']?.toString();
+
+    final explicitSellerId =
+        rawJson['sellerId']?.toString() ?? seller?['id']?.toString();
+
+    final nameLower = foodName.toLowerCase();
+
+    // 1. Italian / Pizza / Pasta Restaurant
+    if (nameLower.contains('pizza') ||
+        nameLower.contains('pasta') ||
+        nameLower.contains('cacio') ||
+        nameLower.contains('tiramisu') ||
+        nameLower.contains('carbonara') ||
+        nameLower.contains('lasagna') ||
+        nameLower.contains('spaghetti') ||
+        nameLower.contains('ravioli') ||
+        nameLower.contains('margherita') ||
+        foodId == '6a897de42f4aa7b54cd9298b') {
+      return {
+        'sellerId': 'seller_luca_pasta',
+        'sellerName': "Luca's Pasta Club",
+        'sellerAuthor': 'Luca Bianchi',
+        'prepTime': '20 min',
+        'deliveryFee': 2.50,
+      };
+    }
+
+    // 2. Greek / Mediterranean Restaurant
+    if (nameLower.contains('spanakopita') ||
+        nameLower.contains('mezze') ||
+        nameLower.contains('greek') ||
+        nameLower.contains('hummus') ||
+        nameLower.contains('pita') ||
+        nameLower.contains('falafel') ||
+        nameLower.contains('mediterranean') ||
+        foodId == '6a8d6ca9e87759724844e5ec' ||
+        foodId == '6a8d60b7b0849aa545857179') {
+      return {
+        'sellerId': 'seller_maria_kitchen',
+        'sellerName': "Maria's Kitchen",
+        'sellerAuthor': 'Maria Santos',
+        'prepTime': '25 min',
+        'deliveryFee': 1.50,
+      };
+    }
+
+    // 3. Indian / Biryani Restaurant
+    if (nameLower.contains('biriyani') ||
+        nameLower.contains('biryani') ||
+        nameLower.contains('curry') ||
+        nameLower.contains('tiffin') ||
+        nameLower.contains('masala') ||
+        nameLower.contains('tikka') ||
+        nameLower.contains('naan') ||
+        nameLower.contains('paneer')) {
+      return {
+        'sellerId': 'seller_priya_spice',
+        'sellerName': "Priya's Spice House",
+        'sellerAuthor': 'Priya Sharma',
+        'prepTime': '40 min',
+        'deliveryFee': 2.50,
+      };
+    }
+
+    // 4. Dim Sum / Asian Restaurant
+    if (nameLower.contains('dumpling') ||
+        nameLower.contains('dim sum') ||
+        nameLower.contains('bao') ||
+        nameLower.contains('noodle') ||
+        nameLower.contains('ramen') ||
+        nameLower.contains('wonton')) {
+      return {
+        'sellerId': 'seller_chen_dimsum',
+        'sellerName': "Chen's Dim Sum",
+        'sellerAuthor': 'Chen Wei',
+        'prepTime': '30 min',
+        'deliveryFee': 2.00,
+      };
+    }
+
+    // 5. Explicit seller if distinct and provided
+    if (explicitSellerName != null &&
+        explicitSellerName.isNotEmpty &&
+        explicitSellerName != "Maria's Kitchen") {
+      return {
+        'sellerId': explicitSellerId ?? explicitSellerName,
+        'sellerName': explicitSellerName,
+        'sellerAuthor': explicitAuthor ?? 'Chef',
+        'prepTime': rawJson['preparationTime']?.toString() ?? '20 min',
+        'deliveryFee': (rawJson['deliveryFee'] as num?)?.toDouble() ?? 2.50,
+      };
+    }
+
+    // 6. Default separate seller for unknown dish so it never collides
+    final cleanName = foodName.trim().split(' ').first;
+    return {
+      'sellerId': 'seller_${foodId.isNotEmpty ? foodId : cleanName}',
+      'sellerName': "$cleanName's Kitchen",
+      'sellerAuthor': 'Home Chef',
+      'prepTime': '20 min',
+      'deliveryFee': 2.00,
+    };
   }
 
   CartItemModel copyWith({

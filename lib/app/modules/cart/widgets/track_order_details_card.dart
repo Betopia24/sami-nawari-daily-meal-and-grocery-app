@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/app_assets.dart';
-import '../../../../core/utils/app_colors.dart';
 
 class TrackOrderDetailsCard extends StatelessWidget {
   final String restaurantName;

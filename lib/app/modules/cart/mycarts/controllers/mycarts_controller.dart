@@ -156,7 +156,7 @@ class MycartsController extends GetxController
   void _rebuildCartGroups() {
     final Map<String, List<CartItemModel>> grouped = {};
     for (final item in cartItems) {
-      final key = item.sellerName.isNotEmpty ? item.sellerName : item.sellerId;
+      final key = item.sellerId.isNotEmpty ? item.sellerId : item.sellerName;
       grouped.putIfAbsent(key, () => []).add(item);
     }
 
@@ -164,10 +164,23 @@ class MycartsController extends GetxController
     grouped.forEach((key, items) {
       final first = items.first;
       String restaurantImg = AppAssets.homeRecipeCardImage1;
-      if (key.toLowerCase().contains('luca')) {
+      final lowerKey = key.toLowerCase();
+      final lowerName = first.sellerName.toLowerCase();
+
+      if (lowerKey.contains('luca') ||
+          lowerName.contains('luca') ||
+          lowerName.contains('pasta') ||
+          lowerName.contains('pizza')) {
         restaurantImg = AppAssets.homeRecipeCardImage2;
-      } else if (key.toLowerCase().contains('priya')) {
+      } else if (lowerKey.contains('priya') ||
+          lowerName.contains('priya') ||
+          lowerName.contains('spice') ||
+          lowerName.contains('biryani')) {
         restaurantImg = AppAssets.homeRecipeCardImage3;
+      } else if (lowerKey.contains('chen') ||
+          lowerName.contains('chen') ||
+          lowerName.contains('dim sum')) {
+        restaurantImg = AppAssets.homeRecipeCardImage1;
       } else if (first.image.isNotEmpty) {
         restaurantImg = first.image;
       }
