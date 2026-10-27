@@ -14,6 +14,8 @@ class SavedRecipeCard extends StatelessWidget {
   final VoidCallback? onBookmarkTap;
   final VoidCallback? onTap;
 
+  final bool isBookmarked;
+
   const SavedRecipeCard({
     super.key,
     required this.imagePath,
@@ -21,6 +23,7 @@ class SavedRecipeCard extends StatelessWidget {
     required this.category,
     required this.time,
     required this.rating,
+    this.isBookmarked = true,
     this.onBookmarkTap,
     this.onTap,
   });
@@ -43,18 +46,53 @@ class SavedRecipeCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                imagePath,
-                width: 72,
-                height: 72,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 72,
-                  height: 72,
-                  color: AppColors.backgroundGrey,
-                  child: const Icon(Icons.image, color: AppColors.iconGrey),
-                ),
-              ),
+              child: imagePath.startsWith('http')
+                  ? Image.network(
+                      imagePath,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 72,
+                        height: 72,
+                        color: AppColors.backgroundGrey,
+                        child: const Icon(Icons.broken_image,
+                            color: AppColors.iconGrey),
+                      ),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: 72,
+                          height: 72,
+                          color: AppColors.backgroundGrey,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : Image.asset(
+                      imagePath.isNotEmpty
+                          ? imagePath
+                          : AppAssets.homeRecipeCardImage1,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 72,
+                        height: 72,
+                        color: AppColors.backgroundGrey,
+                        child:
+                            const Icon(Icons.image, color: AppColors.iconGrey),
+                      ),
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(

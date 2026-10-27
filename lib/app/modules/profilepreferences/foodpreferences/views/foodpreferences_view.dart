@@ -9,7 +9,7 @@ import '../../widgets/preference_title_section.dart';
 import '../controllers/foodpreferences_controller.dart';
 
 class FoodpreferencesView extends GetView<FoodpreferencesController> {
-  const FoodpreferencesView({Key? key}) : super(key: key);
+  const FoodpreferencesView({super.key});
 
   @override
   Widget build(BuildContext context) {

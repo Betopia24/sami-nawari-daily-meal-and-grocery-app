@@ -103,7 +103,7 @@ class _ImagePickerGridState extends State<ImagePickerGrid> {
                   ),
                 ],
               );
-            }).toList(),
+            }),
             
             // Add Button
             GestureDetector(

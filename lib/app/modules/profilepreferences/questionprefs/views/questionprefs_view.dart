@@ -11,7 +11,7 @@ import '../../widgets/step_progress_indicator.dart';
 import '../controllers/questionprefs_controller.dart';
 
 class QuestionprefsView extends GetView<QuestionprefsController> {
-  const QuestionprefsView({Key? key}) : super(key: key);
+  const QuestionprefsView({super.key});
 
   @override
   Widget build(BuildContext context) {

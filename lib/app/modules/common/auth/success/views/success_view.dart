@@ -8,7 +8,7 @@ import '../../../../../../core/utils/app_colors.dart';
 import '../controllers/success_controller.dart';
 
 class SuccessView extends GetView<SuccessController> {
-  const SuccessView({Key? key}) : super(key: key);
+  const SuccessView({super.key});
 
   @override
   Widget build(BuildContext context) {

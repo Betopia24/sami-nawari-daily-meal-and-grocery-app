@@ -57,6 +57,7 @@ abstract class Routes {
   static const SELLERREGISTRATION = _Paths.SELLERREGISTRATION;
   static const orderlist = _Paths.orderlist;
   static const orderdetails = _Paths.orderdetails;
+  static const myfood = _Paths.myfood;
   static const addnewfood = _Paths.addnewfood;
   static const addfooddetails = _Paths.addfooddetails;
   static const previewfood = _Paths.previewfood;
@@ -116,6 +117,7 @@ abstract class _Paths {
   static const SELLERREGISTRATION = '/sellerregistration';
   static const orderlist = '/orderlist';
   static const orderdetails = '/orderdetails';
+  static const myfood = '/myfood';
   static const addnewfood = '/addnewfood';
   static const addfooddetails = '/addfooddetails';
   static const previewfood = '/previewfood';

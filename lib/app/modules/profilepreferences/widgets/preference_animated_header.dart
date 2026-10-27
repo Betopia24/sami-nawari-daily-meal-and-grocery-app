@@ -9,10 +9,10 @@ class PreferenceAnimatedHeader extends StatefulWidget {
   final HeaderAnimationType animationType;
 
   const PreferenceAnimatedHeader({
-    Key? key,
+    super.key,
     required this.bgSvgPath,
     this.animationType = HeaderAnimationType.mapPin,
-  }) : super(key: key);
+  });
 
   @override
   State<PreferenceAnimatedHeader> createState() =>

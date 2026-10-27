@@ -68,8 +68,4 @@ class ExploreboardController extends GetxController {
     },
   ];
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
 }

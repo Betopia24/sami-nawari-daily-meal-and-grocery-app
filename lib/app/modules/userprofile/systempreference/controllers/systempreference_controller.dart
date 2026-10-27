@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
 import '../../../../data/models/user_model.dart';
+import '../../../../data/models/seller_profile_model.dart';
 import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
@@ -10,7 +11,9 @@ import '../../../seller/widgets/admin_approval_dialog.dart';
 
 class SystempreferenceController extends GetxController {
   final user = Rxn<UserModel>();
+  final sellerProfile = Rxn<SellerProfileData>();
   final isLoading = false.obs;
+  final isLoadingSellerProfile = false.obs;
 
   final notificationsEnabled = true.obs;
   final isSellerMode = false.obs;
@@ -39,6 +42,9 @@ class SystempreferenceController extends GetxController {
           hasPendingSellerRequest.value = false;
           await LocalStorage.setPendingSellerApproval(parsedUser.id, false);
           isSellerMode.value = (parsedUser.role?.toUpperCase() == 'SELLER');
+          if (isSellerMode.value) {
+            fetchSellerProfile();
+          }
         } else {
           isSellerMode.value = false;
           hasPendingSellerRequest.value =
@@ -70,6 +76,9 @@ class SystempreferenceController extends GetxController {
             hasPendingSellerRequest.value = false;
             await LocalStorage.setPendingSellerApproval(fetchedUser.id, false);
             isSellerMode.value = (fetchedUser.role?.toUpperCase() == 'SELLER');
+            if (isSellerMode.value) {
+              fetchSellerProfile();
+            }
           } else {
             isSellerMode.value = false;
             // Query seller profile to check whether a request actually exists and is pending
@@ -78,14 +87,19 @@ class SystempreferenceController extends GetxController {
               if (sellerRes.isSuccess &&
                   sellerRes.responseData != null &&
                   sellerRes.responseData['data'] != null) {
-                final sData = sellerRes.responseData['data'];
-                final status = sData['status']?.toString().toUpperCase();
-                final approved = status == 'APPROVED' || sData['isApproved'] == true;
+                final profileResponse =
+                    SellerProfileResponseModel.fromJson(sellerRes.responseData);
+                sellerProfile.value = profileResponse.data;
+                final status = profileResponse.data?.status?.toUpperCase();
+                final approved = status == 'APPROVED' || profileResponse.data?.isApproved == true;
                 if (approved) {
                   isRegisteredSeller.value = true;
                   hasPendingSellerRequest.value = false;
                   await LocalStorage.setPendingSellerApproval(fetchedUser.id, false);
                   isSellerMode.value = (fetchedUser.role?.toUpperCase() == 'SELLER');
+                  if (isSellerMode.value) {
+                    fetchSellerProfile();
+                  }
                 } else {
                   hasPendingSellerRequest.value = true;
                   await LocalStorage.setPendingSellerApproval(fetchedUser.id, true);
@@ -106,6 +120,39 @@ class SystempreferenceController extends GetxController {
       debugPrint('Error fetching user profile in SystempreferenceController: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Fetch seller profile via GET Urls.sellerProfileMe ('/seller/profile/me')
+  /// Called whenever the user is in the "seller" role
+  Future<void> fetchSellerProfile() async {
+    isLoadingSellerProfile.value = true;
+    try {
+      final response = await NetworkCaller.getRequest(Urls.sellerProfileMe);
+      if (response.isSuccess && response.responseData != null) {
+        final profileResponse =
+            SellerProfileResponseModel.fromJson(response.responseData);
+        if (profileResponse.data != null) {
+          sellerProfile.value = profileResponse.data;
+          final status = profileResponse.data?.status?.toUpperCase();
+          if (status == 'APPROVED') {
+            isRegisteredSeller.value = true;
+            hasPendingSellerRequest.value = false;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching seller profile in SystempreferenceController: $e');
+    } finally {
+      isLoadingSellerProfile.value = false;
+    }
+  }
+
+  /// Refreshes both user profile and seller profile (if in seller mode)
+  Future<void> onRefresh() async {
+    await fetchUserProfile();
+    if (isSellerMode.value) {
+      await fetchSellerProfile();
     }
   }
 
@@ -175,6 +222,9 @@ class SystempreferenceController extends GetxController {
         }
 
         final modeName = isSellerMode.value ? 'Seller' : 'Buyer';
+        if (isSellerMode.value) {
+          fetchSellerProfile();
+        }
         Get.snackbar(
           'Mode Changed',
           response.successMessage ?? 'Switched to $modeName mode successfully',

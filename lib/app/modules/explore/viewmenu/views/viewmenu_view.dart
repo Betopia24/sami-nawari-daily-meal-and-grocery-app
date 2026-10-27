@@ -88,7 +88,7 @@ class ViewmenuView extends GetView<ViewmenuController> {
                       style: GoogleFonts.outfit(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                       ),
                     ),
                   ],
@@ -147,11 +147,11 @@ class ViewmenuView extends GetView<ViewmenuController> {
               child: Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                     ),
                   ],
@@ -172,11 +172,11 @@ class ViewmenuView extends GetView<ViewmenuController> {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                   ),
                 ],
@@ -219,7 +219,7 @@ class ViewmenuView extends GetView<ViewmenuController> {
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.only(right: 24.w),
                       itemCount: controller.popularDishes.length,
-                      separatorBuilder: (_, __) => SizedBox(width: 12.w),
+                      separatorBuilder: (_, _) => SizedBox(width: 12.w),
                       itemBuilder: (context, index) {
                         final dish = controller.popularDishes[index];
                         return PopularDishHorizontalCard(

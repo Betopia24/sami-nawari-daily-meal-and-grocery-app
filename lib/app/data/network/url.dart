@@ -75,6 +75,7 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String notifications = '/notifications';
   static const String readAllNotifications = '/notifications/read-all';
+  static const String singleReadNotification = '/notifications/notification_id/read';
 
   // ---------------------------------------------------------------------------
   // SELLER MODULE
@@ -82,4 +83,25 @@ class Urls {
   static const String sellerRequest = '/seller/request';
   static const String sellerProfileMe = '/seller/profile/me';
   static const String changeRole = '/users/switch-role';
+  static const String sellerOrderList = '/orders/seller';
+  static const String sellerFoodsList = '/foods/seller';
+  static const String updateFood = '/foods/seller/food_id';
+  static const String deleteFood = '/foods/seller/:foodId';
+  static const String orderStatusUpdate = '/orders/seller/order_id/status';
+
+  /// Helper to get the update food endpoint with food ID
+  static String getUpdateFoodUrl(String foodId) =>
+      updateFood.replaceAll('food_id', foodId);
+
+  /// Helper to get the delete food endpoint with food ID
+  static String getDeleteFoodUrl(String foodId) =>
+      deleteFood.replaceAll(':foodId', foodId);
+
+  /// Helper to get the order status update endpoint with order ID
+  static String getOrderStatusUpdateUrl(String orderId) =>
+      orderStatusUpdate.replaceAll('order_id', orderId);
+
+  /// Helper to get the single notification read endpoint with notification ID
+  static String getSingleReadNotificationUrl(String notificationId) =>
+      singleReadNotification.replaceAll('notification_id', notificationId);
 }

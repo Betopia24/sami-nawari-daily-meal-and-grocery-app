@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../../core/utils/app_colors.dart';
+import '../../../../data/models/seller_order_model.dart';
 
 class OrderListItemCard extends StatelessWidget {
   final String orderId;
@@ -14,9 +15,11 @@ class OrderListItemCard extends StatelessWidget {
   final String? deliveryCharge;
   final String deliveryType;
   final String paymentMethod;
+  final VoidCallback? onTap;
+  final SellerOrder? order;
 
   const OrderListItemCard({
-    Key? key,
+    super.key,
     required this.orderId,
     required this.status,
     required this.customerName,
@@ -26,19 +29,49 @@ class OrderListItemCard extends StatelessWidget {
     this.deliveryCharge,
     required this.deliveryType,
     required this.paymentMethod,
-  }) : super(key: key);
+    this.onTap,
+    this.order,
+  });
+
+  factory OrderListItemCard.fromOrder({
+    Key? key,
+    required SellerOrder order,
+    VoidCallback? onTap,
+  }) {
+    final subTotal =
+        order.sellerSubTotal > 0 ? order.sellerSubTotal : order.subTotal;
+    return OrderListItemCard(
+      key: key,
+      orderId: order.displayOrderNumber,
+      status: order.displayStatus,
+      customerName: order.recipientName,
+      dateTime: order.formattedDateTime,
+      itemsSummary: order.itemsSummary,
+      itemsPrice: '\$${subTotal.toStringAsFixed(2)}',
+      deliveryCharge:
+          order.deliveryFee > 0 ? '+\$${order.deliveryFee.toStringAsFixed(2)}' : null,
+      deliveryType: order.deliveryType,
+      paymentMethod: order.formattedPaymentMethod,
+      order: order,
+      onTap: onTap,
+    );
+  }
 
   Color _getStatusBgColor() {
     switch (status) {
       case 'New':
+      case 'Confirmed':
       case 'Delivered':
-        return AppColors.secondary.withOpacity(0.15);
+        return AppColors.secondary.withValues(alpha: 0.15);
       case 'Preparing':
-        return const Color(0xFF3B82F6).withOpacity(0.15);
+      case 'Accepted':
+        return const Color(0xFF3B82F6).withValues(alpha: 0.15);
       case 'Out for Delivery':
-        return const Color(0xFF8B5CF6).withOpacity(0.15);
+        return const Color(0xFF8B5CF6).withValues(alpha: 0.15);
       case 'Completed':
-        return AppColors.primary.withOpacity(0.15);
+        return AppColors.primary.withValues(alpha: 0.15);
+      case 'Cancelled':
+        return Colors.red.withValues(alpha: 0.15);
       default:
         return AppColors.backgroundGrey;
     }
@@ -47,14 +80,18 @@ class OrderListItemCard extends StatelessWidget {
   Color _getStatusTextColor() {
     switch (status) {
       case 'New':
+      case 'Confirmed':
       case 'Delivered':
         return AppColors.secondary;
       case 'Preparing':
+      case 'Accepted':
         return const Color(0xFF3B82F6);
       case 'Out for Delivery':
         return const Color(0xFF8B5CF6);
       case 'Completed':
         return AppColors.primary;
+      case 'Cancelled':
+        return Colors.red;
       default:
         return AppColors.textSecondary;
     }
@@ -63,9 +100,16 @@ class OrderListItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Get.toNamed(Routes.orderdetails, arguments: {'status': status});
-      },
+      onTap: onTap ??
+          () {
+            Get.toNamed(
+              Routes.orderdetails,
+              arguments: {
+                'status': status,
+                if (order != null) 'order': order,
+              },
+            );
+          },
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -79,12 +123,15 @@ class OrderListItemCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  orderId,
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Text(
+                    orderId,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 Container(
@@ -111,12 +158,15 @@ class OrderListItemCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  customerName,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Text(
+                    customerName,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 Text(
@@ -133,14 +183,19 @@ class OrderListItemCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  itemsSummary,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                Expanded(
+                  child: Text(
+                    itemsSummary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   itemsPrice,
                   style: GoogleFonts.outfit(
@@ -190,3 +245,4 @@ class OrderListItemCard extends StatelessWidget {
     );
   }
 }
+

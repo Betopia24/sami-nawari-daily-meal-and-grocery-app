@@ -8,11 +8,11 @@ class PreferenceOptionCard extends StatelessWidget {
   final String subtitle;
 
   const PreferenceOptionCard({
-    Key? key,
+    super.key,
     required this.iconPath,
     required this.title,
     required this.subtitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

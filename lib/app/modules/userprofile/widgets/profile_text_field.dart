@@ -10,6 +10,8 @@ class ProfileTextField extends StatelessWidget {
   final Widget? trailing;
   final Widget? customInput;
   final TextEditingController? controller;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const ProfileTextField({
     super.key,
@@ -20,6 +22,8 @@ class ProfileTextField extends StatelessWidget {
     this.trailing,
     this.customInput,
     this.controller,
+    this.readOnly = false,
+    this.onTap,
   });
 
   @override
@@ -49,6 +53,8 @@ class ProfileTextField extends StatelessWidget {
                       TextFormField(
                         controller: controller,
                         initialValue: controller == null ? initialValue : null,
+                        readOnly: readOnly,
+                        onTap: onTap,
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           color: Colors.grey.shade600,
@@ -74,7 +80,16 @@ class ProfileTextField extends StatelessWidget {
                   ],
                 ),
               ),
-              if (trailing != null) ...[const SizedBox(width: 16), trailing!],
+              if (trailing != null) ...[
+                const SizedBox(width: 16),
+                onTap != null
+                    ? GestureDetector(
+                        onTap: onTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: trailing!,
+                      )
+                    : trailing!,
+              ],
             ],
           ),
         ),

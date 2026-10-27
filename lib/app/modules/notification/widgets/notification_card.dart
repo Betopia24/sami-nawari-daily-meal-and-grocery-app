@@ -9,6 +9,7 @@ class NotificationCard extends StatelessWidget {
   final String type;
   final String emoji;
   final bool isUnread;
+  final VoidCallback? onTap;
 
   const NotificationCard({
     super.key,
@@ -18,11 +19,15 @@ class NotificationCard extends StatelessWidget {
     required this.type,
     required this.emoji,
     this.isUnread = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -123,7 +128,8 @@ class NotificationCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 

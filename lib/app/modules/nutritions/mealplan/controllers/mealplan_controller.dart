@@ -5,10 +5,6 @@ import '../../../../data/models/nutrition_instruction_model.dart';
 
 class MealplanController extends GetxController {
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   void onContinue() {
     Get.toNamed(

@@ -65,7 +65,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         width: 40.w,
                         height: 40.w,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.25),
+                          color: Colors.white.withValues(alpha: 0.25),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -86,7 +86,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         vertical: 7.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: Text(

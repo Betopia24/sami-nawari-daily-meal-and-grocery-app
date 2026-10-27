@@ -11,7 +11,7 @@ import '../../widgets/preference_title_section.dart';
 import '../../widgets/preference_option_card.dart';
 
 class LocationaccessView extends GetView<LocationaccessController> {
-  const LocationaccessView({Key? key}) : super(key: key);
+  const LocationaccessView({super.key});
 
   @override
   Widget build(BuildContext context) {

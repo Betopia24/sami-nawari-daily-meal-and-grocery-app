@@ -70,7 +70,10 @@ class EditbuyerprofileView extends GetView<EditbuyerprofileController> {
               children: [
                 ProfileTextField(
                   label: 'Birthday',
+                  hintText: 'YYYY-MM-DD',
                   controller: controller.birthdayController,
+                  readOnly: true,
+                  onTap: () => controller.pickBirthday(context),
                   trailing: SvgPicture.asset(
                     AppAssets.calendarIcon,
                     width: 20,
@@ -101,9 +104,12 @@ class EditbuyerprofileView extends GetView<EditbuyerprofileController> {
           ],
         ),
       ),
-      bottomNavigationBar: ProfileBottomButton(
-        text: 'Save Changes',
-        onPressed: controller.saveChanges,
+      bottomNavigationBar: Obx(
+        () => ProfileBottomButton(
+          text: 'Save Changes',
+          isLoading: controller.isLoading.value,
+          onPressed: controller.saveChanges,
+        ),
       ),
     );
   }

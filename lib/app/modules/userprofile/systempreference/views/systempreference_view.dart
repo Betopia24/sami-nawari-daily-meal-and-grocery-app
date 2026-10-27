@@ -49,7 +49,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
               child: Container(
                 color: AppColors.backgroundSecondary,
                 child: RefreshIndicator(
-                  onRefresh: controller.fetchUserProfile,
+                  onRefresh: controller.onRefresh,
                   color: AppColors.primary,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -105,14 +105,24 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
 
   Widget _buildHeader() {
     final user = controller.user.value;
-    final hasImage = user?.hasProfilePicture ?? false;
-    final displayName = controller.isSellerMode.value
-        ? (user?.name != null ? "${user!.name}'s Kitchen" : "Rafi's Kitchen")
-        : (user?.displayName ?? 'Rafiul Islam');
-    final displaySubtitle = controller.isSellerMode.value
-        ? (user?.name != null ? 'by ${user!.name}' : 'by Rafiul Islam')
-        : (user?.displayEmail.isNotEmpty == true ? user!.displayEmail : 'rafi@email.com');
-    final displayRole = controller.isSellerMode.value ? 'Seller' : 'Buyer';
+    final sellerProfile = controller.sellerProfile.value;
+    final isSeller = controller.isSellerMode.value;
+
+    final avatarUrl = isSeller
+        ? (sellerProfile?.avatarUrl ?? user?.profilePicture)
+        : user?.profilePicture;
+    final hasImage = avatarUrl != null && avatarUrl.isNotEmpty;
+
+    final displayName = isSeller
+        ? (sellerProfile?.displayBusinessName ??
+            (user?.name != null ? "${user!.name}'s Kitchen" : "My Kitchen"))
+        : (user?.displayName ?? 'User');
+    final displaySubtitle = isSeller
+        ? (sellerProfile != null && sellerProfile.displayOwnerName.isNotEmpty
+            ? 'by ${sellerProfile.displayOwnerName}'
+            : (user?.name != null ? 'by ${user!.name}' : ''))
+        : (user?.displayEmail.isNotEmpty == true ? user!.displayEmail : '');
+    final displayRole = isSeller ? 'Seller' : 'Buyer';
 
     return Row(
       children: [
@@ -132,7 +142,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
               child: ClipOval(
                 child: hasImage
                     ? Image.network(
-                        user!.profilePicture!,
+                        avatarUrl,
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,
@@ -173,14 +183,16 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                displaySubtitle,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
+              if (displaySubtitle.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  displaySubtitle,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 4),
               Text(
                 displayRole,
@@ -237,16 +249,20 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
     );
   }
 
-
   Widget _buildStatsRow() {
     if (controller.isSellerMode.value) {
+      final sellerProfile = controller.sellerProfile.value;
+      final ordersCount = sellerProfile?.totalOrders.toString() ?? '0';
+      final pendingCount = sellerProfile?.pendingOrders.toString() ?? '0';
+      final completedCount = sellerProfile?.completedOrders.toString() ?? '0';
+
       return Row(
         children: [
-          _buildStatItem('5', 'Orders'),
+          _buildStatItem(ordersCount, 'Orders'),
           _buildVerticalDivider(),
-          _buildStatItem('2', 'Pending'),
+          _buildStatItem(pendingCount, 'Pending'),
           _buildVerticalDivider(),
-          _buildStatItem('12', 'Completed'),
+          _buildStatItem(completedCount, 'Completed'),
         ],
       );
     }
@@ -501,7 +517,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
         ProfileMenuTile(
           iconPath: AppAssets.myFoodIcon,
           title: 'My Food',
-          onTap: () {},
+          onTap: () => Get.toNamed(Routes.myfood),
         ),
         ProfileMenuTile(
           iconPath: AppAssets.orderHistoryIcon,

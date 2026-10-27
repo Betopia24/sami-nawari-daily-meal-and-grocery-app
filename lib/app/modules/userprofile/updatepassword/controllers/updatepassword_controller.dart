@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:daily_meal_and_grocery_app/core/utils/app_colors.dart';
+import '../../../../../core/utils/app_colors.dart';
+import '../../../../data/network/network.dart';
+import '../../../../data/network/url.dart';
 
 class UpdatepasswordController extends GetxController {
   final formKey = GlobalKey<FormState>();
-  
+
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+
+  final RxBool isLoading = false.obs;
 
   @override
   void onClose() {
@@ -17,18 +21,19 @@ class UpdatepasswordController extends GetxController {
     super.onClose();
   }
 
+  String? validateCurrentPassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Current password is required';
+    }
+    return null;
+  }
+
   String? validateNewPassword(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Password is required';
     }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (!value.contains(RegExp(r'[A-Z]'))) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!value.contains(RegExp(r'[0-9]'))) {
-      return 'Password must contain at least one number';
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
     }
     return null;
   }
@@ -43,19 +48,70 @@ class UpdatepasswordController extends GetxController {
     return null;
   }
 
-  void saveChanges() {
-    if (formKey.currentState?.validate() ?? false) {
-      // Logic to update password would go here
-      Get.back();
+  Future<void> updatePassword() async {
+    if (isLoading.value) return;
+    if (!(formKey.currentState?.validate() ?? false)) return;
+
+    isLoading.value = true;
+    try {
+      final body = {
+        'oldPassword': currentPasswordController.text.trim(),
+        'newPassword': newPasswordController.text.trim(),
+      };
+
+      final response = await NetworkCaller.patchRequest(
+        Urls.updatePassword,
+        body: body,
+      );
+
+      if (response.isSuccess) {
+        currentPasswordController.clear();
+        newPasswordController.clear();
+        confirmPasswordController.clear();
+
+        Get.back();
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          'Success',
+          response.message.isNotEmpty
+              ? response.message
+              : 'Password updated successfully',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.primary,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      } else {
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          'Error',
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to update password',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error updating password: $e');
+      Get.closeCurrentSnackbar();
       Get.snackbar(
-        'Success',
-        'Password updated successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.primary,
-        colorText: const Color(0xFFFFFFFF),
+        'Error',
+        'Something went wrong. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
+    } finally {
+      isLoading.value = false;
     }
   }
+
+  void saveChanges() => updatePassword();
 }

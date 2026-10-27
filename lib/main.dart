@@ -24,8 +24,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Gmail : cinova2653@moblha.com
-  // Password : 123456789
+  // Gmail : civet36100@moblha.com
+  // Password : 147852369
 
   @override
   Widget build(BuildContext context) {

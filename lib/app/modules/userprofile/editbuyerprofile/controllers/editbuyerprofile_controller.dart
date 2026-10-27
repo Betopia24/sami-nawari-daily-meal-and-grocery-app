@@ -5,6 +5,7 @@ import '../../../../data/models/user_model.dart';
 import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
+import '../../../../../core/utils/app_colors.dart';
 import '../../systempreference/controllers/systempreference_controller.dart';
 
 class EditbuyerprofileController extends GetxController {
@@ -98,6 +99,71 @@ class EditbuyerprofileController extends GetxController {
     selectedGender.value = gender;
   }
 
+  Future<void> pickBirthday(BuildContext context) async {
+    DateTime initialDate = DateTime(2000, 1, 1);
+    if (birthdayController.text.isNotEmpty) {
+      try {
+        initialDate = DateTime.parse(birthdayController.text.trim());
+      } catch (_) {
+        final parts = birthdayController.text.trim().split(RegExp(r'[-/.]'));
+        if (parts.length == 3) {
+          if (parts[0].length == 4) {
+            final y = int.tryParse(parts[0]);
+            final m = int.tryParse(parts[1]);
+            final d = int.tryParse(parts[2]);
+            if (y != null && m != null && d != null) {
+              initialDate = DateTime(y, m, d);
+            }
+          } else if (parts[2].length == 4) {
+            final d = int.tryParse(parts[0]);
+            final m = int.tryParse(parts[1]);
+            final y = int.tryParse(parts[2]);
+            if (y != null && m != null && d != null) {
+              initialDate = DateTime(y, m, d);
+            }
+          }
+        }
+      }
+    }
+
+    if (initialDate.isAfter(DateTime.now())) {
+      initialDate = DateTime.now();
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.year,
+      helpText: 'Select Birthday',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final year = picked.year.toString();
+      final month = picked.month.toString().padLeft(2, '0');
+      final day = picked.day.toString().padLeft(2, '0');
+      birthdayController.text = '$year-$month-$day';
+    }
+  }
+
   Future<void> pickImage() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -110,6 +176,7 @@ class EditbuyerprofileController extends GetxController {
   }
 
   Future<void> saveChanges() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     try {
       final Map<String, dynamic> body = {

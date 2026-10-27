@@ -10,7 +10,7 @@ import '../../widgets/preference_title_section.dart';
 import '../../widgets/preference_option_card.dart';
 
 class NotificationaccessView extends GetView<NotificationaccessController> {
-  const NotificationaccessView({Key? key}) : super(key: key);
+  const NotificationaccessView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class NotificationaccessView extends GetView<NotificationaccessController> {
                               subtitle: option['subtitle']!,
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),

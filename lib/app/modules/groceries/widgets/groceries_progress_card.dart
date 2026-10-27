@@ -53,7 +53,7 @@ class GroceriesProgressCard extends StatelessWidget {
             height: 8.h,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(4.r),
             ),
             alignment: Alignment.centerLeft,
@@ -71,7 +71,7 @@ class GroceriesProgressCard extends StatelessWidget {
           Text(
             '3 lists • 15 items pending',
             style: GoogleFonts.outfit(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.w400,
               fontSize: 12.sp,
             ),
@@ -86,7 +86,7 @@ class GroceriesProgressCard extends StatelessWidget {
       width: 90.w,
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
@@ -109,7 +109,7 @@ class GroceriesProgressCard extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.outfit(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.w400,
               fontSize: 12.sp,
             ),

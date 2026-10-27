@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:daily_meal_and_grocery_app/core/utils/app_colors.dart';
 
 class AnimatedNotificationHeader extends StatefulWidget {
-  const AnimatedNotificationHeader({Key? key}) : super(key: key);
+  const AnimatedNotificationHeader({super.key});
 
   @override
   State<AnimatedNotificationHeader> createState() =>
@@ -94,7 +94,7 @@ class _AnimatedNotificationHeaderState extends State<AnimatedNotificationHeader>
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.glowYellow.withOpacity(0.15),
+                color: AppColors.glowYellow.withValues(alpha: 0.15),
               ),
             ),
 
@@ -175,7 +175,7 @@ class _AnimatedNotificationHeaderState extends State<AnimatedNotificationHeader>
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.iconOrange.withOpacity(0.3),
+                          color: AppColors.iconOrange.withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 8),
                         ),
@@ -246,7 +246,7 @@ class _NotificationMiniCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
