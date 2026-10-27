@@ -5,6 +5,9 @@ import '../controllers/fooddetails_controller.dart';
 class FooddetailsBinding extends Bindings {
   @override
   void dependencies() {
+    if (Get.isRegistered<FooddetailsController>()) {
+      Get.delete<FooddetailsController>(force: true);
+    }
     Get.lazyPut<FooddetailsController>(() => FooddetailsController());
   }
 }

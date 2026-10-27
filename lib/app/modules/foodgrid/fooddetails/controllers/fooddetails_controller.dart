@@ -13,27 +13,25 @@ class FooddetailsController extends GetxController
   late TabController tabController;
 
   // Loading state
-  final RxBool isLoading = false.obs;
+  final RxBool isLoading = true.obs;
   final RxBool isBookmarkLoading = false.obs;
 
   // Food details
   final RxString foodId = ''.obs;
-  final RxString foodName = 'Chicken Biriyani Tiffin'.obs;
-  final RxString sellerName = "Maria's Kitchen".obs;
+  final RxString foodName = ''.obs;
+  final RxString sellerName = ''.obs;
   final RxString sellerProfilePicture = ''.obs;
-  final RxString sellerAddress = 'San Francisco, CA'.obs;
-  final RxString foodImage = AppAssets.homeRecipeCardImage3.obs;
+  final RxString sellerAddress = ''.obs;
+  final RxString foodImage = ''.obs;
   final RxList<String> images = <String>[].obs;
-  final RxDouble price = 18.00.obs;
-  final RxString rating = '4.7'.obs;
-  final RxString reviewCount = '84 reviews'.obs;
-  final RxString prepTime = '20 min'.obs;
-  final RxString category = 'Lunch'.obs;
+  final RxDouble price = 0.0.obs;
+  final RxString rating = '0.0'.obs;
+  final RxString reviewCount = '0 reviews'.obs;
+  final RxString prepTime = ''.obs;
+  final RxString category = ''.obs;
   final RxBool pickupAvailable = true.obs;
   final RxBool deliveryAvailable = true.obs;
-  final RxString description =
-      'Hummus, baba ghanoush, tabbouleh, olives, and fresh pita for 2. A taste of the Mediterranean coast.'
-          .obs;
+  final RxString description = ''.obs;
 
   // Ingredients: list of maps { 'name': 'Spinach', 'quantity': '100g' }
   final RxList<Map<String, String>> ingredients = <Map<String, String>>[].obs;
@@ -60,7 +58,30 @@ class FooddetailsController extends GetxController
     super.onClose();
   }
 
+  void resetData() {
+    foodId.value = '';
+    foodName.value = '';
+    sellerName.value = '';
+    sellerProfilePicture.value = '';
+    sellerAddress.value = '';
+    foodImage.value = '';
+    images.clear();
+    price.value = 0.0;
+    rating.value = '0.0';
+    reviewCount.value = '0 reviews';
+    prepTime.value = '';
+    category.value = '';
+    pickupAvailable.value = true;
+    deliveryAvailable.value = true;
+    description.value = '';
+    ingredients.clear();
+    quantity.value = 1;
+    isBookmarked.value = false;
+  }
+
   void _initFromArguments() {
+    resetData();
+    isLoading.value = true;
     final args = Get.arguments;
     if (args is FoodItemModel) {
       _applyFoodModel(args);
@@ -73,7 +94,7 @@ class FooddetailsController extends GetxController
       if (args['price'] != null) {
         price.value = (args['price'] is num)
             ? (args['price'] as num).toDouble()
-            : double.tryParse(args['price'].toString()) ?? 18.0;
+            : double.tryParse(args['price'].toString()) ?? 0.0;
       }
       if (id.isNotEmpty) {
         foodId.value = id;
@@ -474,7 +495,17 @@ class FooddetailsController extends GetxController
     Get.toNamed(Routes.mycarts);
   }
 
-  String get formattedUnitPrice => '\$${price.value.toStringAsFixed(2)}';
+  Future<void> refreshFoodDetails() async {
+    if (foodId.value.isNotEmpty) {
+      await fetchFoodDetails(foodId.value);
+      await _fetchPopularDishes();
+    }
+  }
+
+  String get formattedUnitPrice =>
+      price.value > 0 ? '\$${price.value.toStringAsFixed(2)}' : '\$0.00';
   String get totalPrice =>
-      '\$${(price.value * quantity.value).toStringAsFixed(2)}';
+      price.value > 0
+          ? '\$${(price.value * quantity.value).toStringAsFixed(2)}'
+          : '\$0.00';
 }

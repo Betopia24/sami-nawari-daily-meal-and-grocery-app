@@ -12,18 +12,18 @@ class MycartsController extends GetxController
   late TabController tabController;
 
   // Cart state
-  final RxBool isLoadingCart = false.obs;
+  final RxBool isLoadingCart = true.obs;
   final RxList<CartItemModel> cartItems = <CartItemModel>[].obs;
   final RxList<CartGroupModel> cartGroups = <CartGroupModel>[].obs;
 
-  final totalItems = 4.obs;
-  final totalSellers = 3.obs;
-  final totalPrice = 77.0.obs;
+  final totalItems = 0.obs;
+  final totalSellers = 0.obs;
+  final totalPrice = 0.0.obs;
 
   final currentTabIndex = 0.obs;
 
   // Active orders state
-  final RxBool isLoadingOrders = false.obs;
+  final RxBool isLoadingOrders = true.obs;
   final RxList<Map<String, dynamic>> activeOrders =
       <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> historyOrders =
@@ -48,7 +48,6 @@ class MycartsController extends GetxController
       currentTabIndex.value = tabController.index;
     });
 
-    _loadDefaultCart();
     fetchCart();
     fetchOrders();
   }
@@ -90,6 +89,9 @@ class MycartsController extends GetxController
       }
     } catch (e) {
       debugPrint('Error fetching cart: $e');
+      if (cartItems.isEmpty) {
+        _loadDefaultCart();
+      }
     } finally {
       isLoadingCart.value = false;
     }
