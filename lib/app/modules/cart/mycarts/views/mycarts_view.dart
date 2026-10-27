@@ -13,6 +13,7 @@ import '../../widgets/leave_review_card.dart';
 import '../../widgets/order_status_timeline_card.dart';
 import '../../widgets/track_order_details_card.dart';
 import '../../widgets/history_order_card.dart';
+import '../../widgets/mycarts_shimmer.dart';
 import '../controllers/mycarts_controller.dart';
 
 class MycartsView extends GetView<MycartsController> {
@@ -62,7 +63,11 @@ class MycartsView extends GetView<MycartsController> {
                     indicatorColor: AppColors.primary,
                     indicatorWeight: 2,
                     tabs: [
-                      Tab(text: 'Cart (${controller.totalItems.value})'),
+                      Tab(
+                        text: controller.isLoadingCart.value
+                            ? 'Cart'
+                            : 'Cart (${controller.totalItems.value})',
+                      ),
                       const Tab(text: 'Active'),
                       const Tab(text: 'History'),
                     ],
@@ -90,15 +95,23 @@ class MycartsView extends GetView<MycartsController> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Obx(
-                  () => controller.currentTabIndex.value == 0 &&
-                          controller.cartGroups.isNotEmpty
-                      ? CheckoutBottomBar(
-                          totalItems: controller.totalItems.value,
-                          totalSellers: controller.totalSellers.value,
-                          totalPrice: controller.totalPrice.value,
-                          onCheckout: controller.checkout,
-                        )
-                      : const SizedBox.shrink(),
+                  () {
+                    if (controller.currentTabIndex.value != 0) {
+                      return const SizedBox.shrink();
+                    }
+                    if (controller.isLoadingCart.value) {
+                      return const CheckoutBottomBarShimmer();
+                    }
+                    if (controller.cartGroups.isNotEmpty) {
+                      return CheckoutBottomBar(
+                        totalItems: controller.totalItems.value,
+                        totalSellers: controller.totalSellers.value,
+                        totalPrice: controller.totalPrice.value,
+                        onCheckout: controller.checkout,
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
               ),
             ),
@@ -110,10 +123,8 @@ class MycartsView extends GetView<MycartsController> {
 
   Widget _buildCartTab() {
     return Obx(() {
-      if (controller.isLoadingCart.value && controller.cartGroups.isEmpty) {
-        return const Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        );
+      if (controller.isLoadingCart.value) {
+        return const MyCartsShimmer();
       }
 
       if (controller.cartGroups.isEmpty) {
@@ -198,9 +209,7 @@ class MycartsView extends GetView<MycartsController> {
     return Obx(() {
       if (controller.isLoadingOrders.value &&
           controller.activeOrders.isEmpty) {
-        return const Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        );
+        return const ActiveOrdersShimmer();
       }
 
       final activeList = controller.activeOrders;

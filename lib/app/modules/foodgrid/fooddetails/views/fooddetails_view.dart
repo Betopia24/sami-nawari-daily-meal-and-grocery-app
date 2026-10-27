@@ -11,8 +11,10 @@ import '../../widgets/ingredient_item.dart';
 import '../../widgets/popular_dish_card.dart';
 import '../../widgets/store_info_tile.dart';
 import '../../widgets/sticky_cart_bottom_bar.dart';
+import '../../widgets/fooddetails_shimmer.dart';
 import '../../../../widgets/floating_seam_sliver_header.dart';
 import '../../../../widgets/custom_recipe_cover.dart';
+import '../../../../widgets/custom_shimmer.dart';
 
 class FooddetailsView extends GetView<FooddetailsController> {
   const FooddetailsView({super.key});
@@ -22,18 +24,27 @@ class FooddetailsView extends GetView<FooddetailsController> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF9F8),
       bottomNavigationBar: Obx(
-        () => StickyCartBottomBar(
-          quantity: controller.quantity.value,
-          price: controller.totalPrice,
-          onDecrement: controller.decrementQuantity,
-          onIncrement: controller.incrementQuantity,
-          onAddToCart: controller.addToCart,
-          onViewCart: controller.viewCart,
-        ),
+        () => controller.isLoading.value
+            ? const FooddetailsBottomBarShimmer()
+            : StickyCartBottomBar(
+                quantity: controller.quantity.value,
+                price: controller.totalPrice,
+                onDecrement: controller.decrementQuantity,
+                onIncrement: controller.incrementQuantity,
+                onAddToCart: controller.addToCart,
+                onViewCart: controller.viewCart,
+              ),
       ),
       body: Stack(
         children: [
-          CustomScrollView(
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const FooddetailsShimmer();
+            }
+            return RefreshIndicator(
+              onRefresh: controller.refreshFoodDetails,
+              color: AppColors.primary,
+              child: CustomScrollView(
             slivers: [
               FloatingSeamSliverHeader(
                 expandedHeight: 360,
@@ -395,6 +406,8 @@ class FooddetailsView extends GetView<FooddetailsController> {
               ),
             ],
           ),
+            );
+          }),
           // Floating Pinned Buttons
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
@@ -421,33 +434,45 @@ class FooddetailsView extends GetView<FooddetailsController> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
-            child: GestureDetector(
-              onTap: controller.toggleBookmark,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Obx(
-                    () => SvgPicture.asset(
-                      controller.isBookmarked.value
-                          ? AppAssets.bookmarkFilledIcon
-                          : AppAssets.bookmarkIcon,
-                      width: 18,
-                      height: 18,
-                      colorFilter: ColorFilter.mode(
-                        controller.isBookmarked.value
-                            ? AppColors.primary
-                            : AppColors.textPrimary,
-                        BlendMode.srcIn,
+            child: Obx(
+              () => controller.isLoading.value
+                  ? Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: CustomShimmer.circular(size: 18),
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: controller.toggleBookmark,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            controller.isBookmarked.value
+                                ? AppAssets.bookmarkFilledIcon
+                                : AppAssets.bookmarkIcon,
+                            width: 18,
+                            height: 18,
+                            colorFilter: ColorFilter.mode(
+                              controller.isBookmarked.value
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
         ],
