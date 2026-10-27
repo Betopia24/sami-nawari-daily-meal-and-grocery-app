@@ -1,6 +1,4 @@
 import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
-import 'package:daily_meal_and_grocery_app/app/widgets/custom_text_field.dart';
-import 'package:daily_meal_and_grocery_app/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -10,8 +8,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../widgets/restaurant_card.dart';
+import '../../widgets/explore_sellers_shimmer.dart';
 import '../controllers/exploreboard_controller.dart';
-import '../widgets/mock_map_view.dart';
+import '../widgets/explore_map_view.dart';
 
 class ExploreboardView extends GetView<ExploreboardController> {
   const ExploreboardView({super.key});
@@ -100,7 +99,10 @@ class ExploreboardView extends GetView<ExploreboardController> {
               ),
               SizedBox(height: 12.h),
               Expanded(
-                child: CustomScrollView(
+                child: RefreshIndicator(
+                  onRefresh: controller.fetchNearbySellers,
+                  color: AppColors.primary,
+                  child: CustomScrollView(
                   slivers: [
                     SliverToBoxAdapter(
                       child: Column(
@@ -111,7 +113,8 @@ class ExploreboardView extends GetView<ExploreboardController> {
                             children: [
                               Expanded(
                                 child: TextField(
-                                  controller: TextEditingController(),
+                                  controller: controller.searchController,
+                                  onChanged: controller.onSearchChanged,
                                   decoration: InputDecoration(
                                     hintText: 'Search restaurants, cuisines...',
                                     hintStyle: GoogleFonts.outfit(
@@ -192,20 +195,54 @@ class ExploreboardView extends GetView<ExploreboardController> {
                           ),
                           SizedBox(height: 24.h),
 
-                          // Mock Map
-                          const MockMapView(),
+                          // Google Map with interactive markers and Current Location button
+                          const ExploreMapView(),
                           SizedBox(height: 24.h),
                         ],
                       ),
                     ),
 
-                    // List of Restaurant Cards
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final restaurant = controller.restaurants[index];
-                        return RestaurantCard(restaurant: restaurant);
-                      }, childCount: controller.restaurants.length),
-                    ),
+                    // List of Restaurant Cards (Live API data)
+                    Obx(() {
+                      if (controller.isLoadingSellers.value) {
+                        return const ExploreSellersShimmer();
+                      }
+
+                      if (controller.restaurants.isEmpty) {
+                        return SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 40.h),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.storefront_outlined,
+                                    size: 48.sp,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  Text(
+                                    'No kitchens found nearby',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final restaurant = controller.restaurants[index];
+                          return RestaurantCard(restaurant: restaurant);
+                        }, childCount: controller.restaurants.length),
+                      );
+                    }),
 
                     SliverToBoxAdapter(
                       child: SizedBox(height: 100.h),
@@ -213,6 +250,7 @@ class ExploreboardView extends GetView<ExploreboardController> {
                   ],
                 ),
               ),
+            ),
             ],
           ),
         ),

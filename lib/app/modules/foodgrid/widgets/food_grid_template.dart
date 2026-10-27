@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/utils/app_colors.dart';
+import 'food_grid_shimmer.dart';
 
 class FoodGridTemplate extends StatelessWidget {
   final String title;
@@ -11,6 +12,7 @@ class FoodGridTemplate extends StatelessWidget {
   final bool isLoading;
   final Future<void> Function()? onRefresh;
   final String emptyMessage;
+  final Widget? shimmerWidget;
 
   const FoodGridTemplate({
     super.key,
@@ -21,6 +23,7 @@ class FoodGridTemplate extends StatelessWidget {
     this.isLoading = false,
     this.onRefresh,
     this.emptyMessage = 'No items found',
+    this.shimmerWidget,
   });
 
   @override
@@ -86,12 +89,8 @@ class FoodGridTemplate extends StatelessWidget {
             Divider(color: Colors.grey.shade200, height: 1),
             // Grid / Content
             Expanded(
-              child: isLoading && itemCount == 0
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    )
+              child: isLoading
+                  ? (shimmerWidget ?? const FoodGridShimmer())
                   : (itemCount == 0
                       ? Center(
                           child: Padding(

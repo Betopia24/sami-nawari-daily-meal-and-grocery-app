@@ -41,12 +41,7 @@ class ReviewRestaurantCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ClipOval(
-                child: Image.asset(
-                  restaurantImage,
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.cover,
-                ),
+                child: _buildAvatar(restaurantImage),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -116,6 +111,35 @@ class ReviewRestaurantCard extends StatelessWidget {
           // Items
           ...items,
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 48,
+        height: 48,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image.asset(
+          AppAssets.homeRecipeCardImage1,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : AppAssets.homeRecipeCardImage1,
+      width: 48,
+      height: 48,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Image.asset(
+        AppAssets.homeRecipeCardImage1,
+        width: 48,
+        height: 48,
+        fit: BoxFit.cover,
       ),
     );
   }

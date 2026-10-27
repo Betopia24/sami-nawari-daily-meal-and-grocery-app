@@ -45,12 +45,7 @@ class PopularDishHorizontalCard extends StatelessWidget {
             // Image
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-              child: Image.asset(
-                image,
-                height: 100.h,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: _buildImage(image),
             ),
             Padding(
               padding: EdgeInsets.all(10.w),
@@ -95,6 +90,35 @@ class PopularDishHorizontalCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        height: 100.h,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Image.asset(
+          'assets/images/homelunchcardimage.png',
+          height: 100.h,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : 'assets/images/homelunchcardimage.png',
+      height: 100.h,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Image.asset(
+        'assets/images/homelunchcardimage.png',
+        height: 100.h,
+        width: double.infinity,
+        fit: BoxFit.cover,
       ),
     );
   }

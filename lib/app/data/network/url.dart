@@ -43,6 +43,9 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String exploreSellers = '/explore/sellers';
   static const String exploreFoods = '/explore/foods';
+  static String sellerMenu(String sellerId) => '/explore/sellers/$sellerId/menu';
+  static String sellerAbout(String sellerId) => '/explore/sellers/$sellerId/about';
+  static String sellerReviews(String sellerId) => '/explore/sellers/$sellerId/reviews';
 
   // ---------------------------------------------------------------------------
   // CART

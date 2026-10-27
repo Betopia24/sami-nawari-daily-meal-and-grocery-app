@@ -45,12 +45,7 @@ class MenuDishCard extends StatelessWidget {
             // Thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(12.r),
-              child: Image.asset(
-                image,
-                height: 72.h,
-                width: 72.w,
-                fit: BoxFit.cover,
-              ),
+              child: _buildImage(image),
             ),
             SizedBox(width: 12.w),
             // Details
@@ -153,6 +148,35 @@ class MenuDishCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        height: 72.h,
+        width: 72.w,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Image.asset(
+          'assets/images/homelunchcardimage.png',
+          height: 72.h,
+          width: 72.w,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : 'assets/images/homelunchcardimage.png',
+      height: 72.h,
+      width: 72.w,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Image.asset(
+        'assets/images/homelunchcardimage.png',
+        height: 72.h,
+        width: 72.w,
+        fit: BoxFit.cover,
       ),
     );
   }
