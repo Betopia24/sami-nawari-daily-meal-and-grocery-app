@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/utils/app_assets.dart';
-import '../../../../widgets/profile_avatar.dart';
 import '../../../../widgets/toggle_setting_card.dart';
 import '../../../../widgets/custom_time_dropdown.dart';
 import '../../../userprofile/widgets/profile_app_bar.dart';

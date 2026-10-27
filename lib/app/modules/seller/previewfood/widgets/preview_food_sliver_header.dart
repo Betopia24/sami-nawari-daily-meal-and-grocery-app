@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -8,6 +9,7 @@ class PreviewFoodSliverHeader extends StatelessWidget {
   final double collapsedHeight;
   final double floatingCardOverhang;
   final String imagePath;
+  final File? imageFile;
   final String foodName;
   final String restaurantName;
   final Widget floatingCard;
@@ -18,6 +20,7 @@ class PreviewFoodSliverHeader extends StatelessWidget {
     required this.collapsedHeight,
     required this.floatingCardOverhang,
     required this.imagePath,
+    this.imageFile,
     required this.foodName,
     required this.restaurantName,
     required this.floatingCard,
@@ -29,7 +32,9 @@ class PreviewFoodSliverHeader extends StatelessWidget {
       expandedHeight: expandedHeight,
       toolbarHeight: collapsedHeight,
       pinned: true,
-      backgroundColor: const Color(0xFFFAF9F8), // Match Scaffold background to hide content scrolling under
+      backgroundColor: const Color(
+        0xFFFAF9F8,
+      ), // Match Scaffold background to hide content scrolling under
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
       elevation: 0,
@@ -45,7 +50,7 @@ class PreviewFoodSliverHeader extends StatelessWidget {
           // Fade out text inside image as we scroll up
           final double textOpacity =
               (expansionFraction - 0.3).clamp(0.0, 0.7) / 0.7;
-              
+
           // Ensure image doesn't overflow when shrinking
           final double imageTop = top - expandedHeight;
 
@@ -59,15 +64,15 @@ class PreviewFoodSliverHeader extends StatelessWidget {
                 left: 24,
                 right: 24,
                 child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.asset(imagePath, fit: BoxFit.cover),
+                        imageFile != null
+                            ? Image.file(imageFile!, fit: BoxFit.cover)
+                            : Image.asset(imagePath, fit: BoxFit.cover),
                         // Dark gradient for text readability
                         Positioned(
                           bottom: 0,
@@ -82,7 +87,9 @@ class PreviewFoodSliverHeader extends StatelessWidget {
                                   begin: Alignment.bottomCenter,
                                   end: Alignment.topCenter,
                                   colors: [
-                                    AppColors.textPrimary.withValues(alpha: 0.8),
+                                    AppColors.textPrimary.withValues(
+                                      alpha: 0.8,
+                                    ),
                                     Colors.transparent,
                                   ],
                                 ),

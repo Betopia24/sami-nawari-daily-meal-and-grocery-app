@@ -48,46 +48,51 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
             Expanded(
               child: Container(
                 color: AppColors.backgroundSecondary,
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Obx(() => Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (!controller.isSellerMode.value) ...[
-                          SubscriptionPlanCard(
-                            planName: 'Free / Basic',
-                            description: 'Upgrade for more features and a better experience',
-                            onViewPlans: () {
-                              Get.toNamed(Routes.chooseyourplan);
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        _buildBecomeSellerBanner(),
-                        const SizedBox(height: 24),
-                        _buildSectionTitle(controller.isSellerMode.value ? 'MANAGE' : 'MARKETPLACE'),
-                        const SizedBox(height: 12),
-                        controller.isSellerMode.value ? _buildSellerManageSection() : _buildBuyerMarketplaceSection(),
-                        const SizedBox(height: 24),
-                        _buildSectionTitle('ACCOUNT'),
-                        const SizedBox(height: 12),
-                        _buildAccountSection(),
-                        if (controller.isSellerMode.value) ...[
+                child: RefreshIndicator(
+                  onRefresh: controller.fetchUserProfile,
+                  color: AppColors.primary,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Obx(() => Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (!controller.isSellerMode.value) ...[
+                            SubscriptionPlanCard(
+                              planName: 'Free / Basic',
+                              description: 'Upgrade for more features and a better experience',
+                              onViewPlans: () {
+                                Get.toNamed(Routes.chooseyourplan);
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          _buildBecomeSellerBanner(),
                           const SizedBox(height: 24),
-                          _buildSectionTitle('PAYMENT METHOD'),
+                          _buildSectionTitle(controller.isSellerMode.value ? 'MANAGE' : 'MARKETPLACE'),
                           const SizedBox(height: 12),
-                          _buildSellerPaymentSection(),
+                          controller.isSellerMode.value ? _buildSellerManageSection() : _buildBuyerMarketplaceSection(),
+                          const SizedBox(height: 24),
+                          _buildSectionTitle('ACCOUNT'),
+                          const SizedBox(height: 12),
+                          _buildAccountSection(),
+                          if (controller.isSellerMode.value) ...[
+                            const SizedBox(height: 24),
+                            _buildSectionTitle('PAYMENT METHOD'),
+                            const SizedBox(height: 12),
+                            _buildSellerPaymentSection(),
+                          ],
+                          const SizedBox(height: 24),
+                          _buildSectionTitle('PRIVACY & SECURITY'),
+                          const SizedBox(height: 12),
+                          _buildPrivacySecuritySection(),
+                          const SizedBox(height: 32),
+                          _buildSignOutButton(),
+                          const SizedBox(height: 140), // Space for bottom navbar
                         ],
-                        const SizedBox(height: 24),
-                        _buildSectionTitle('PRIVACY & SECURITY'),
-                        const SizedBox(height: 12),
-                        _buildPrivacySecuritySection(),
-                        const SizedBox(height: 32),
-                        _buildSignOutButton(),
-                        const SizedBox(height: 140), // Space for bottom navbar
-                      ],
-                    )),
+                      )),
+                    ),
                   ),
                 ),
               ),
@@ -99,21 +104,42 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
   }
 
   Widget _buildHeader() {
+    final user = controller.user.value;
+    final hasImage = user?.hasProfilePicture ?? false;
+    final displayName = controller.isSellerMode.value
+        ? (user?.name != null ? "${user!.name}'s Kitchen" : "Rafi's Kitchen")
+        : (user?.displayName ?? 'Rafiul Islam');
+    final displaySubtitle = controller.isSellerMode.value
+        ? (user?.name != null ? 'by ${user!.name}' : 'by Rafiul Islam')
+        : (user?.displayEmail.isNotEmpty == true ? user!.displayEmail : 'rafi@email.com');
+    final displayRole = controller.isSellerMode.value ? 'Seller' : 'Buyer';
+
     return Row(
       children: [
         Stack(
           children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-              child: SvgPicture.asset(
-                AppAssets.singlePersonIcon,
-                width: 40,
-                height: 40,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.primary,
-                  BlendMode.srcIn,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  width: 2,
                 ),
+              ),
+              child: ClipOval(
+                child: hasImage
+                    ? Image.network(
+                        user!.profilePicture!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildDefaultAvatar(),
+                      )
+                    : _buildDefaultAvatar(),
               ),
             ),
             Positioned(
@@ -140,7 +166,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                controller.isSellerMode.value ? 'Rafi\'s Kitchen' : 'Rafiul Islam',
+                displayName,
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -149,7 +175,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
               ),
               const SizedBox(height: 4),
               Text(
-                controller.isSellerMode.value ? 'by Rafiul Islam' : 'rafi@email.com',
+                displaySubtitle,
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -157,7 +183,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
               ),
               const SizedBox(height: 4),
               Text(
-                controller.isSellerMode.value ? 'Seller' : 'Buyer',
+                displayRole,
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -197,6 +223,21 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
     );
   }
 
+  Widget _buildDefaultAvatar() {
+    return Center(
+      child: SvgPicture.asset(
+        AppAssets.singlePersonIcon,
+        width: 40,
+        height: 40,
+        colorFilter: const ColorFilter.mode(
+          AppColors.primary,
+          BlendMode.srcIn,
+        ),
+      ),
+    );
+  }
+
+
   Widget _buildStatsRow() {
     if (controller.isSellerMode.value) {
       return Row(
@@ -209,13 +250,18 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
         ],
       );
     }
+    final currentUser = controller.user.value;
+    final recipesCount = currentUser?.recipesSaved.toString() ?? '0';
+    final mealsCount = currentUser?.mealsCooked.toString() ?? '0';
+    final groceryCount = currentUser?.groceryLists.toString() ?? '0';
+
     return Row(
       children: [
-        _buildStatItem('3', 'Recipes Saved'),
+        _buildStatItem(recipesCount, 'Recipes Saved'),
         _buildVerticalDivider(),
-        _buildStatItem('47', 'Meals Cooked'),
+        _buildStatItem(mealsCount, 'Meals Cooked'),
         _buildVerticalDivider(),
-        _buildStatItem('12', 'Grocery Lists'),
+        _buildStatItem(groceryCount, 'Grocery Lists'),
       ],
     );
   }
@@ -255,62 +301,93 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
   }
 
   Widget _buildBecomeSellerBanner() {
+    final isApproved = controller.isRegisteredSeller.value;
+    final isPending = controller.hasPendingSellerRequest.value;
+    final isSwitching = controller.isSwitchingRole.value;
+
     return InkWell(
-      onTap: () {
-        if (controller.isRegisteredSeller.value) {
-          // If already registered, toggle modes
-          controller.toggleSellerMode();
-        } else {
-          // If not registered, navigate to the start page
-          Get.toNamed(Routes.SELLER_STARTPAGE);
-        }
-      },
+      onTap: isSwitching
+          ? null
+          : () {
+              if (isApproved) {
+                // If already approved, toggle modes
+                controller.toggleSellerMode();
+              } else if (isPending) {
+                // If waiting for admin approval, show pending dialog
+                controller.showPendingApprovalDialog();
+              } else {
+                // If not registered, navigate to the start page
+                Get.toNamed(Routes.SELLER_STARTPAGE);
+              }
+            },
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: isPending && !isApproved
+              ? const Color(0xFFD97706) // Warm amber for pending review
+              : AppColors.primary,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: [
-            controller.isRegisteredSeller.value 
-              ? const Icon(Icons.sync, color: Colors.white, size: 28)
-              : SvgPicture.asset(
-                  AppAssets.sellerStoreIcon,
-                  width: 32,
-                  height: 32,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
+            isApproved
+                ? const Icon(Icons.sync, color: Colors.white, size: 28)
+                : (isPending
+                    ? const Icon(Icons.hourglass_top_rounded, color: Colors.white, size: 28)
+                    : SvgPicture.asset(
+                        AppAssets.sellerStoreIcon,
+                        width: 32,
+                        height: 32,
+                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      )),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    controller.isRegisteredSeller.value 
-                        ? (controller.isSellerMode.value ? 'Switch to Buyer' : 'Switch to Seller') 
-                        : 'Become a Seller',
+                    isApproved
+                        ? (controller.isSellerMode.value ? 'Switch to Buyer' : 'Switch to Seller')
+                        : (isPending ? 'Seller Request Pending' : 'Become a Seller'),
                     style: GoogleFonts.outfit(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
                   ),
-                  if (!controller.isRegisteredSeller.value) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      'Share your homemade food',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isSwitching
+                        ? (controller.isSellerMode.value
+                            ? 'Switching to Buyer mode...'
+                            : 'Switching to Seller mode...')
+                        : (isApproved
+                            ? (controller.isSellerMode.value
+                                ? 'Switch back to customer mode'
+                                : 'Switch to manage your kitchen')
+                            : (isPending
+                                ? 'Waiting for admin approval'
+                                : 'Share your homemade food')),
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.white),
+            if (isSwitching)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.2,
+                ),
+              )
+            else
+              const Icon(Icons.chevron_right, color: Colors.white),
           ],
         ),
       ),

@@ -1,10 +1,7 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../widgets/food_preference_card.dart';

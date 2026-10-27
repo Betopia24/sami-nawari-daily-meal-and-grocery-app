@@ -107,31 +107,8 @@ abstract class _Paths {
   static const savedreceipe = '/savedreceipe';
   static const favouriteseller = '/favouriteseller';
   static const notification = '/notification';
-
-  static const locationaccess = '/locationaccess';
-  static const foodpreferences = '/foodpreferences';
-  static const questionprefs = '/questionprefs';
-  static const notificationaccess = '/notificationaccess';
-
-  static const appsharing = '/appsharing';
-  static const languageandregion = '/languageandregion';
-  static const updatepassword = '/updatepassword';
-  static const familyinvite = '/familyinvite';
-  static const dietarypref = '/dietarypref';
-  static const privacypolicy = '/privacypolicy';
-  static const helpandsupport = '/helpandsupport';
-  static const rateapp = '/rateapp';
-  static const termandcondition = '/termandcondition';
-  static const alergiesandintolerence = '/alergiesandintolerence';
-  static const editbuyerprofile = '/editbuyerprofile';
   static const editSellerProfile = '/editsellerprofile';
-  static const mycarts = '/mycarts';
-  static const revieworder = '/revieworder';
-  static const deliveryselection = '/deliveryselection';
-  static const deliveryaddress = '/deliveryaddress';
-  static const placeorder = '/placeorder';
   static const orderplaced = '/orderplaced';
-  static const trackorder = '/trackorder';
   static const sharedmembers = '/sharedmembers';
   static const MEMBERINVITE = '/memberinvite';
   static const PERMISSIONSET = '/permissionset';

@@ -2,7 +2,6 @@ import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../../../../routes/app_pages.dart';
 import '../../../../../core/utils/app_colors.dart';
 
 class OrderListItemCard extends StatelessWidget {

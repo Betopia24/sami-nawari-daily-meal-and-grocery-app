@@ -25,7 +25,8 @@ class Urls {
   static const String updateProfile = '/users/update-profile';
   static const String updatePassword = '/users/update-password';
   static const String updateLanguageRegion = '/users/update-language-region';
-  static const String updateDietaryPreferences = '/users/update-dietary-preferences';
+  static const String updateDietaryPreferences =
+      '/users/update-dietary-preferences';
   static const String updateAllergies = '/users/update-allergies';
   static const String switchRole = '/users/switch-role';
 
@@ -80,4 +81,5 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String sellerRequest = '/seller/request';
   static const String sellerProfileMe = '/seller/profile/me';
+  static const String changeRole = '/users/switch-role';
 }

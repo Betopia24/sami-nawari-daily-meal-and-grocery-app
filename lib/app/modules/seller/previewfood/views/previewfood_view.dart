@@ -34,283 +34,276 @@ class PreviewfoodView extends GetView<PreviewfoodController> {
               top: BorderSide(color: Colors.grey.shade200),
             ),
           ),
-          child: PrimaryButton(
-            text: 'Submit for Review',
-            onPressed: () {
-              controller.submit();
-            },
-          ),
-        ),
-        appBar: AppBar(
-        backgroundColor: const Color(0xFFFAF9F8),
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        centerTitle: false,
-        titleSpacing: 16,
-        leadingWidth: 72, // 16 padding + 40 width + 16 padding
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 24.0),
-          child: const CustomBackButton(
-            backgroundColor: Colors.white,
-          ),
-        ),
-        title: Text(
-          'Preview Food',
-          style: GoogleFonts.outfit(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            PreviewFoodSliverHeader(
-              expandedHeight: 340,
-              collapsedHeight: 180,
-              floatingCardOverhang: 55,
-              imagePath: AppAssets.homeRecipeCardImage3,
-              foodName: 'Paneer Butter Masala',
-              restaurantName: "Rafi's Kitchen",
-              floatingCard: const PreviewFoodHeaderCard(
-                price: '\$11.99',
-                rating: '4.7',
-                reviewCount: '(84 reviews)',
-                time: '45 min',
-                mealType: 'Lunch',
-              ),
-            ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _TabBarDelegate(
-                Column(
-                  children: [
-                    const SizedBox(height: 24),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: TabBar(
-                          controller: controller.tabController,
-                          indicator: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          indicatorPadding: const EdgeInsets.all(4),
-                          dividerColor: Colors.transparent,
-                          labelColor: Colors.white,
-                          unselectedLabelColor: AppColors.textSecondary,
-                          labelStyle: GoogleFonts.outfit(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          unselectedLabelStyle: GoogleFonts.outfit(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          tabs: const [
-                            Tab(text: 'Details'),
-                            Tab(text: 'Ingredients'),
-                            Tab(text: 'Method'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
-          ];
-        },
-        body: TabBarView(
-                controller: controller.tabController,
-                children: [
-                  // Details Tab
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        Text(
-                          'DESCRIPTION',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'A classic Indian dish made with paneer (Indian cottage cheese) cooked in a rich and creamy tomato-based sauce, flavored with butter and aromatic spices. Perfectly pairs with garlic naan or basmati rice.',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                      ],
+          child: controller.isSubmitting.value
+              ? const SizedBox(
+                  height: 51,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
                     ),
                   ),
-                  // Ingredients Tab
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'INGREDIENTS',
-                              style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF4F2EE),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '8 items',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                          ),
+                )
+              : PrimaryButton(
+                  text: 'Submit for Review',
+                  onPressed: () {
+                    controller.submit();
+                  },
+                ),
+        ),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFFAF9F8),
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          elevation: 0,
+          centerTitle: false,
+          titleSpacing: 16,
+          leadingWidth: 72,
+          leading: const Padding(
+            padding: EdgeInsets.only(left: 24.0),
+            child: CustomBackButton(
+              backgroundColor: Colors.white,
+            ),
+          ),
+          title: Text(
+            'Preview Food',
+            style: GoogleFonts.outfit(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              PreviewFoodSliverHeader(
+                expandedHeight: 340,
+                collapsedHeight: 180,
+                floatingCardOverhang: 55,
+                imagePath: AppAssets.homeRecipeCardImage3,
+                imageFile: controller.images.isNotEmpty ? controller.images.first : null,
+                foodName: controller.foodName.value.isNotEmpty
+                    ? controller.foodName.value
+                    : 'Paneer Butter Masala',
+                restaurantName: controller.restaurantName.value,
+                floatingCard: PreviewFoodHeaderCard(
+                  price: '\$${controller.price.value.toStringAsFixed(2)}',
+                  rating: '5.0',
+                  reviewCount: '(New)',
+                  time: controller.preparationTime.value.isNotEmpty
+                      ? controller.preparationTime.value
+                      : '25 mins',
+                  mealType: controller.category.value,
+                ),
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _TabBarDelegate(
+                  Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Container(
+                          height: 50,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.grey.shade200),
                           ),
-                          child: const Column(
-                            children: [
-                              PreviewIngredientTile(
-                                name: 'Paneer',
-                                quantity: '200g',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Butter',
-                                quantity: '3 tbsp',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Tomato Puree',
-                                quantity: '2 cups',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Heavy Cream',
-                                quantity: '1/2 cup',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Garam Masala',
-                                quantity: '1 tsp',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Kasuri Methi',
-                                quantity: '1 tbsp',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Garlic Paste',
-                                quantity: '1 tbsp',
-                              ),
-                              PreviewIngredientTile(
-                                name: 'Ginger Paste',
-                                quantity: '1 tbsp',
-                                isLast: true,
-                              ),
+                          child: TabBar(
+                            controller: controller.tabController,
+                            indicator: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            indicatorPadding: const EdgeInsets.all(4),
+                            dividerColor: Colors.transparent,
+                            labelColor: Colors.white,
+                            unselectedLabelColor: AppColors.textSecondary,
+                            labelStyle: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            unselectedLabelStyle: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            tabs: const [
+                              Tab(text: 'Details'),
+                              Tab(text: 'Ingredients'),
+                              Tab(text: 'Method'),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                  // Method Tab
-                  SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+              ),
+            ];
+          },
+          body: TabBarView(
+            controller: controller.tabController,
+            children: [
+              // Details Tab
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      'DESCRIPTION',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      controller.description.value.isNotEmpty
+                          ? controller.description.value
+                          : 'No description provided.',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+              // Ingredients Tab
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const SizedBox(height: 8),
                         Text(
-                          'STEP-BY-STEP INSTRUCTIONS',
+                          'INGREDIENTS',
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        const PreviewMethodStepCard(
-                          stepNumber: 1,
-                          title: 'Prepare the paneer',
-                          description: 'Cut the paneer into bite-sized cubes. Soak them in warm water for 15 minutes to make them soft.',
-                          isActive: true,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF4F2EE),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${controller.ingredients.length} items',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        const PreviewMethodStepCard(
-                          stepNumber: 2,
-                          title: 'Make the gravy base',
-                          description: 'Melt butter in a pan, add ginger-garlic paste and sauté. Add tomato puree and cook until oil separates.',
-                          isActive: true,
-                        ),
-                        const SizedBox(height: 16),
-                        const PreviewMethodStepCard(
-                          stepNumber: 3,
-                          title: 'Add spices',
-                          description: 'Add garam masala, red chili powder, salt, and kasuri methi. Mix well and cook for 2 minutes.',
-                          isActive: true,
-                        ),
-                        const SizedBox(height: 16),
-                        const PreviewMethodStepCard(
-                          stepNumber: 4,
-                          title: 'Add cream and paneer',
-                          description: 'Lower the heat, stir in the heavy cream, and add the paneer cubes. Simmer for 5-7 minutes.',
-                          isActive: true,
-                        ),
-                        const SizedBox(height: 16),
-                        const PreviewMethodStepCard(
-                          stepNumber: 5,
-                          title: 'Garnish and serve',
-                          description: 'Garnish with a drizzle of cream and fresh cilantro. Serve hot with naan or rice.',
-                          isActive: true,
-                        ),
-                        const SizedBox(height: 32),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: controller.ingredients.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24.0),
+                              child: Center(
+                                child: Text(
+                                  'No ingredients added',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 14,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Column(
+                              children: [
+                                for (int i = 0; i < controller.ingredients.length; i++)
+                                  PreviewIngredientTile(
+                                    name: controller.ingredients[i]['name']?.toString() ?? '',
+                                    quantity:
+                                        '${controller.ingredients[i]['quantity'] ?? ''} ${controller.ingredients[i]['unit'] ?? ''}'
+                                            .trim(),
+                                    isLast: i == controller.ingredients.length - 1,
+                                  ),
+                              ],
+                            ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
-      ),
-    );
+              // Method Tab
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      'STEP-BY-STEP INSTRUCTIONS',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (controller.cookingSteps.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24.0),
+                        child: Center(
+                          child: Text(
+                            'No instructions added',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      for (int i = 0; i < controller.cookingSteps.length; i++) ...[
+                        PreviewMethodStepCard(
+                          stepNumber: i + 1,
+                          title: 'Step ${i + 1}',
+                          description: controller.cookingSteps[i],
+                          isActive: true,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     });
   }
 }

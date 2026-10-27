@@ -24,6 +24,9 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // Gmail : cinova2653@moblha.com
+  // Password : 123456789
+
   @override
   Widget build(BuildContext context) {
     // ScreenUtilInit is used for responsive UI

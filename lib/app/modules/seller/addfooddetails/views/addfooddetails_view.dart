@@ -13,7 +13,6 @@ import '../controllers/addfooddetails_controller.dart';
 import '../widgets/ingredient_input_row.dart';
 import '../widgets/step_input_row.dart';
 import '../widgets/delivery_option_card.dart';
-import '../../../../routes/app_routes.dart';
 
 class AddfooddetailsView extends GetView<AddfooddetailsController> {
   const AddfooddetailsView({super.key});
@@ -57,9 +56,8 @@ class AddfooddetailsView extends GetView<AddfooddetailsController> {
             CustomTextField(
               label: 'Preparation Time',
               hint: '45 minutes',
-              controller: TextEditingController(text: controller.preparationTime.value),
+              controller: controller.preparationTimeController,
               isRequired: true,
-              onChanged: (val) => controller.preparationTime.value = val,
             ),
             const SizedBox(height: 24),
             
@@ -187,9 +185,7 @@ class AddfooddetailsView extends GetView<AddfooddetailsController> {
             const SizedBox(height: 32),
             PrimaryButton(
               text: 'Continue',
-              onPressed: () {
-                Get.toNamed(Routes.previewfood);
-              },
+              onPressed: controller.validateAndContinue,
             ),
           ],
         ),

@@ -1,4 +1,3 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:daily_meal_and_grocery_app/core/utils/app_assets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

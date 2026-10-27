@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../widgets/primary_button.dart';
-import '../../../navbar/controllers/navbar_controller.dart';
 
 class SubmitSuccessWidget extends StatefulWidget {
   const SubmitSuccessWidget({super.key});
