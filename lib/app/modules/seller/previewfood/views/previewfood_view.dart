@@ -316,7 +316,7 @@ class PreviewfoodView extends GetView<PreviewfoodController> {
 }
 
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  _TabBarDelegate(this.tabBar, {this.height = 90.0});
+  _TabBarDelegate(this.tabBar) : height = 90.0;
 
   final Widget tabBar;
   final double height;
