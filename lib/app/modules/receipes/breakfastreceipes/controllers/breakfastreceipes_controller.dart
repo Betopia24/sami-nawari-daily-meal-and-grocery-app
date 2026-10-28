@@ -40,23 +40,10 @@ class BreakfastreceipesController extends GetxController {
         }
       }
 
-      // 3. If still empty, check all /foods from server
-      if (parsedList.isEmpty) {
-        final allFoodsResponse = await NetworkCaller.getRequest(Urls.foods);
-        if (allFoodsResponse.isSuccess && allFoodsResponse.responseData != null) {
-          parsedList = _parseRecipeItems(allFoodsResponse.responseData);
-        }
-      }
-
-      if (parsedList.isNotEmpty) {
-        recipes.assignAll(parsedList);
-      } else {
-        // Fallback to curated breakfast recipes if server has no items yet
-        recipes.assignAll(_fallbackBreakfastRecipes);
-      }
+      recipes.assignAll(parsedList);
     } catch (e) {
       debugPrint('Error fetching breakfast recipes: $e');
-      recipes.assignAll(_fallbackBreakfastRecipes);
+      recipes.clear();
     } finally {
       isLoading.value = false;
     }
@@ -92,7 +79,7 @@ class BreakfastreceipesController extends GetxController {
           }
 
           return {
-            'id': map['id']?.toString() ?? '',
+            'id': map['id']?.toString() ?? map['_id']?.toString() ?? '',
             'imagePath': imgList.isNotEmpty
                 ? imgList.first
                 : AppAssets.homeBreakfastCardImage,
@@ -124,61 +111,4 @@ class BreakfastreceipesController extends GetxController {
   void onTagSelected(int index) {
     selectedTagIndex.value = index;
   }
-
-  static final List<Map<String, dynamic>> _fallbackBreakfastRecipes = [
-    {
-      'id': '6a8d6ca9e87759724844e5ec',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'tags': ['High Protein', 'Healthy', 'Quick'],
-      'title': 'Avocado Toast with Poached Egg',
-      'time': '15 min',
-      'calories': '380 kcal',
-      'rating': 4.8,
-    },
-    {
-      'id': '6a897de42f4aa7b54cd9298b',
-      'imagePath': AppAssets.homeLunchCardImage,
-      'tags': ['Traditional', 'Spicy'],
-      'title': 'Thai Green Curry',
-      'time': '35 min',
-      'calories': '520 kcal',
-      'rating': 4.7,
-    },
-    {
-      'id': '6a8d6ca9e87759724844e5ec',
-      'imagePath': AppAssets.homeDinnerCardImage,
-      'tags': ['High Protein'],
-      'title': 'Lemon Herb Salmon',
-      'time': '25 min',
-      'calories': '440 kcal',
-      'rating': 4.9,
-    },
-    {
-      'id': '6a897de42f4aa7b54cd9298b',
-      'imagePath': AppAssets.homeSnacksCardImage,
-      'tags': ['Healthy'],
-      'title': 'Mushroom Risotto',
-      'time': '45 min',
-      'calories': '490 kcal',
-      'rating': 4.6,
-    },
-    {
-      'id': '6a8d6ca9e87759724844e5ec',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'tags': ['Quick', 'Healthy'],
-      'title': 'Acai Power Bowl',
-      'time': '10 min',
-      'calories': '310 kcal',
-      'rating': 4.8,
-    },
-    {
-      'id': '6a897de42f4aa7b54cd9298b',
-      'imagePath': AppAssets.homeLunchCardImage,
-      'tags': ['Traditional'],
-      'title': 'Shakshuka',
-      'time': '30 min',
-      'calories': '350 kcal',
-      'rating': 4.7,
-    },
-  ];
 }

@@ -16,15 +16,15 @@ class ReceipedetailsController extends GetxController {
 
   // Recipe basic info
   final recipeId = ''.obs;
-  final recipeName = 'Avocado Toast with Poached Egg'.obs;
-  final recipeImage = AppAssets.homeBreakfastCardImage.obs;
-  final category = 'American'.obs;
-  final rating = 4.8.obs;
-  final reviewCount = '(2,340)'.obs;
-  final tags = <String>['High Protein', 'Healthy', 'Quick'].obs;
-  final prepTime = '5m'.obs;
-  final cookTime = '10m'.obs;
-  final calories = '380'.obs;
+  final recipeName = ''.obs;
+  final recipeImage = ''.obs;
+  final category = ''.obs;
+  final rating = 0.0.obs;
+  final reviewCount = ''.obs;
+  final tags = <String>[].obs;
+  final prepTime = ''.obs;
+  final cookTime = ''.obs;
+  final calories = ''.obs;
 
   // Ingredients data
   final rawIngredients = <Map<String, dynamic>>[].obs;
@@ -43,9 +43,12 @@ class ReceipedetailsController extends GetxController {
   void _initFromArguments() {
     final args = Get.arguments;
     if (args is Map) {
-      recipeId.value = args['id']?.toString() ?? '';
+      recipeId.value = args['id']?.toString() ?? args['_id']?.toString() ?? '';
       if (args['title'] != null && args['title'].toString().isNotEmpty) {
         recipeName.value = args['title'].toString();
+      }
+      if (args['name'] != null && args['name'].toString().isNotEmpty) {
+        recipeName.value = args['name'].toString();
       }
       if (args['imagePath'] != null && args['imagePath'].toString().isNotEmpty) {
         recipeImage.value = args['imagePath'].toString();
@@ -73,15 +76,21 @@ class ReceipedetailsController extends GetxController {
       recipeId.value = args;
     }
 
-    // Always fetch live data from server for the food ID
-    final targetId = (recipeId.value.isNotEmpty && recipeId.value.length == 24)
-        ? recipeId.value
-        : '6a8d6ca9e87759724844e5ec';
-    fetchRecipeDetails(targetId);
+    // Fetch live data from server for the food ID if available
+    final targetId = recipeId.value;
+    if (targetId.isNotEmpty) {
+      fetchRecipeDetails(targetId);
+    } else {
+      isLoading.value = false;
+    }
   }
 
   Future<void> fetchRecipeDetails(String id) async {
-    final targetId = (id.length == 24) ? id : '6a8d6ca9e87759724844e5ec';
+    if (id.isEmpty) {
+      isLoading.value = false;
+      return;
+    }
+    final targetId = id;
 
     try {
       isLoading.value = true;
@@ -113,7 +122,9 @@ class ReceipedetailsController extends GetxController {
           if (cat != null && cat.isNotEmpty) {
             newTags.add(cat.capitalizeFirst ?? cat);
           }
-          newTags.addAll(['Healthy', 'Quick', 'High Protein']);
+          if (newTags.isEmpty) {
+            newTags.addAll(['Healthy', 'Quick', 'Delicious']);
+          }
           tags.value = newTags.toSet().take(3).toList();
 
           if (data['preparationTime'] != null) {
@@ -130,8 +141,6 @@ class ReceipedetailsController extends GetxController {
                 .toString()
                 .replaceAll('kcal', '')
                 .trim();
-          } else {
-            calories.value = '380';
           }
 
           // Parse ingredients from API
@@ -154,46 +163,13 @@ class ReceipedetailsController extends GetxController {
 
           // Check if this food is bookmarked by the user
           checkBookmarkStatus(targetId);
-        } else {
-          _loadFallbackData('breakfast_1');
         }
-      } else {
-        _loadFallbackData('breakfast_1');
       }
     } catch (e) {
       debugPrint('Error fetching recipe details: $e');
-      _loadFallbackData('breakfast_1');
     } finally {
       isLoading.value = false;
     }
-  }
-
-  void _loadFallbackData(String id) {
-    final recipe = _curatedRecipes[id] ?? _curatedRecipes['breakfast_1']!;
-    recipeName.value = recipe['title'] as String;
-    recipeImage.value = recipe['imagePath'] as String;
-    category.value = recipe['category'] as String;
-    rating.value = (recipe['rating'] as num).toDouble();
-    reviewCount.value = recipe['reviewCount'] as String;
-    tags.value = List<String>.from(recipe['tags'] as List);
-    prepTime.value = recipe['prepTime'] as String;
-    cookTime.value = recipe['cookTime'] as String;
-    calories.value = recipe['calories'] as String;
-    baseServings = recipe['baseServings'] as int? ?? 2;
-    servings.value = baseServings;
-
-    rawIngredients.value = List<Map<String, dynamic>>.from(
-      (recipe['ingredients'] as List).map((i) => Map<String, dynamic>.from(i as Map)),
-    );
-    _recalculateIngredients();
-
-    methodSteps.value = List<Map<String, String>>.from(
-      (recipe['methodSteps'] as List).map(
-        (s) => Map<String, String>.from((s as Map).map((k, v) => MapEntry(k.toString(), v.toString()))),
-      ),
-    );
-
-    proTips.value = List<String>.from(recipe['proTips'] as List);
   }
 
   void _generateMethodSteps(String description, String name) {
@@ -277,9 +253,8 @@ class ReceipedetailsController extends GetxController {
   }
 
   void toggleBookmark() {
-    final targetFoodId = (recipeId.value.length == 24)
-        ? recipeId.value
-        : '6a8d6ca9e87759724844e5ec';
+    final targetFoodId = recipeId.value;
+    if (targetFoodId.isEmpty) return;
 
     // 1. Instant optimistic UI update without waiting
     final previousState = isBookmarked.value;
@@ -360,249 +335,4 @@ class ReceipedetailsController extends GetxController {
     }
     return unit.isNotEmpty ? '$formatted $unit' : formatted;
   }
-
-  // Curated fallback database for rich offline/preview experience
-  static final Map<String, Map<String, dynamic>> _curatedRecipes = {
-    'breakfast_1': {
-      'title': 'Avocado Toast with Poached Egg',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'category': 'American',
-      'rating': 4.8,
-      'reviewCount': '(2,340)',
-      'tags': ['High Protein', 'Healthy', 'Quick'],
-      'prepTime': '5m',
-      'cookTime': '10m',
-      'calories': '380',
-      'baseServings': 2,
-      'ingredients': [
-        {'name': 'Sourdough bread', 'baseQuantity': 2.0, 'unit': 'slices'},
-        {'name': 'Ripe avocado', 'baseQuantity': 1.0, 'unit': 'large'},
-        {'name': 'Eggs', 'baseQuantity': 2.0, 'unit': 'large'},
-        {'name': 'Cherry tomatoes', 'baseQuantity': 6.0, 'unit': 'pieces'},
-        {'name': 'Lemon juice', 'baseQuantity': 1.0, 'unit': 'tbsp'},
-        {'name': 'Red pepper flakes', 'baseQuantity': 0.5, 'unit': 'tsp'},
-        {'name': 'Sea salt', 'baseQuantity': 0.25, 'unit': 'tsp'},
-        {'name': 'Fresh chives', 'baseQuantity': 1.0, 'unit': 'tbsp'},
-      ],
-      'methodSteps': [
-        {
-          'title': 'Toast the bread',
-          'description':
-              'Toast sourdough bread until golden and crispy on both sides. A good toast should have crunch but still be chewy inside.',
-        },
-        {
-          'title': 'Mash the avocado',
-          'description':
-              'Halve the avocado and scoop into a bowl. Add lemon juice, a pinch of salt, and red pepper flakes. Mash with a fork — keep it slightly chunky for texture.',
-        },
-        {
-          'title': 'Prepare for poaching',
-          'description':
-              'Bring 3 inches of water to a gentle simmer in a wide saucepan. Add a small splash of white vinegar — this helps the egg white hold together.',
-        },
-        {
-          'title': 'Poach the eggs',
-          'description':
-              'Crack each egg into a small cup. Create a gentle whirlpool with a spoon, then slide the egg gently into the center. Cook 3 minutes for a runny yolk.',
-        },
-        {
-          'title': 'Assemble',
-          'description':
-              'Spread avocado mixture generously over the toast. Use a slotted spoon to lift the egg out and blot with a paper towel, then place on top.',
-        },
-        {
-          'title': 'Garnish & Serve',
-          'description':
-              'Top with halved cherry tomatoes, snipped chives, and a pinch of flaky sea salt. Serve immediately.',
-        },
-      ],
-      'proTips': [
-        'Use the freshest eggs possible — older eggs spread more in water.',
-        'Add a drop of white vinegar to the poaching water to keep the whites together.',
-        'For perfectly ripe avocado: the skin should yield slightly when pressed.',
-        'Toast the bread just before serving so it stays crispy.',
-      ],
-    },
-    'breakfast_2': {
-      'title': 'Thai Green Curry',
-      'imagePath': AppAssets.homeLunchCardImage,
-      'category': 'Thai',
-      'rating': 4.7,
-      'reviewCount': '(1,850)',
-      'tags': ['Traditional', 'Spicy'],
-      'prepTime': '15m',
-      'cookTime': '20m',
-      'calories': '520',
-      'baseServings': 2,
-      'ingredients': [
-        {'name': 'Green curry paste', 'baseQuantity': 3.0, 'unit': 'tbsp'},
-        {'name': 'Coconut milk', 'baseQuantity': 400.0, 'unit': 'ml'},
-        {'name': 'Chicken breast / Tofu', 'baseQuantity': 300.0, 'unit': 'g'},
-        {'name': 'Thai eggplant', 'baseQuantity': 100.0, 'unit': 'g'},
-        {'name': 'Bamboo shoots', 'baseQuantity': 50.0, 'unit': 'g'},
-        {'name': 'Fish sauce', 'baseQuantity': 1.5, 'unit': 'tbsp'},
-        {'name': 'Palm sugar', 'baseQuantity': 1.0, 'unit': 'tbsp'},
-        {'name': 'Thai basil leaves', 'baseQuantity': 1.0, 'unit': 'handful'},
-      ],
-      'methodSteps': [
-        {
-          'title': 'Fry curry paste',
-          'description':
-              'Heat a spoonful of coconut cream in a wok and fry the green curry paste until fragrant and oil separates.',
-        },
-        {
-          'title': 'Cook protein',
-          'description':
-              'Add sliced chicken breast and stir-fry until sealed and lightly cooked through.',
-        },
-        {
-          'title': 'Simmer with vegetables',
-          'description':
-              'Pour in remaining coconut milk, bring to a gentle boil, then add eggplants and bamboo shoots.',
-        },
-        {
-          'title': 'Season and serve',
-          'description':
-              'Stir in fish sauce and palm sugar. Remove from heat and stir in fresh Thai basil. Serve hot with jasmine rice.',
-        },
-      ],
-      'proTips': [
-        'Do not boil coconut milk vigorously or it will separate.',
-        'Fresh kaffir lime leaves add authentic citrus depth.',
-      ],
-    },
-    'breakfast_3': {
-      'title': 'Lemon Herb Salmon',
-      'imagePath': AppAssets.homeDinnerCardImage,
-      'category': 'Mediterranean',
-      'rating': 4.9,
-      'reviewCount': '(3,120)',
-      'tags': ['High Protein', 'Healthy'],
-      'prepTime': '10m',
-      'cookTime': '15m',
-      'calories': '440',
-      'baseServings': 2,
-      'ingredients': [
-        {'name': 'Salmon fillets', 'baseQuantity': 2.0, 'unit': 'fillets'},
-        {'name': 'Lemon juice & zest', 'baseQuantity': 1.0, 'unit': 'lemon'},
-        {'name': 'Fresh dill & parsley', 'baseQuantity': 2.0, 'unit': 'tbsp'},
-        {'name': 'Garlic cloves', 'baseQuantity': 2.0, 'unit': 'minced'},
-        {'name': 'Olive oil', 'baseQuantity': 1.5, 'unit': 'tbsp'},
-        {'name': 'Sea salt & black pepper', 'baseQuantity': 0.5, 'unit': 'tsp'},
-      ],
-      'methodSteps': [
-        {
-          'title': 'Season salmon',
-          'description':
-              'Pat salmon fillets dry with paper towels. Rub with olive oil, minced garlic, lemon zest, salt, and pepper.',
-        },
-        {
-          'title': 'Sear in pan',
-          'description':
-              'Heat skillet over medium-high heat. Place salmon skin-side down and sear for 4–5 minutes until crispy.',
-        },
-        {
-          'title': 'Finish with butter & herbs',
-          'description':
-              'Flip gently, squeeze fresh lemon juice and add fresh dill and parsley. Cook for another 3–4 minutes.',
-        },
-      ],
-      'proTips': [
-        'Ensure the skillet is nice and hot before placing the fish for crispy skin.',
-        'Rest for 2 minutes before serving so juices redistribute.',
-      ],
-    },
-    'breakfast_4': {
-      'title': 'Mushroom Risotto',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'category': 'Italian',
-      'rating': 4.6,
-      'reviewCount': '(980)',
-      'tags': ['Healthy', 'Traditional'],
-      'prepTime': '15m',
-      'cookTime': '30m',
-      'calories': '490',
-      'baseServings': 2,
-      'ingredients': [
-        {'name': 'Arborio rice', 'baseQuantity': 200.0, 'unit': 'g'},
-        {'name': 'Cremini mushrooms', 'baseQuantity': 250.0, 'unit': 'g'},
-        {'name': 'Vegetable broth (warm)', 'baseQuantity': 750.0, 'unit': 'ml'},
-        {'name': 'Shallot & garlic', 'baseQuantity': 2.0, 'unit': 'chopped'},
-        {'name': 'Parmesan cheese', 'baseQuantity': 40.0, 'unit': 'g'},
-        {'name': 'Butter & olive oil', 'baseQuantity': 2.0, 'unit': 'tbsp'},
-      ],
-      'methodSteps': [
-        {
-          'title': 'Sauté mushrooms',
-          'description':
-              'Cook sliced mushrooms in butter until golden brown and tender. Set half aside for garnish.',
-        },
-        {
-          'title': 'Toast rice',
-          'description':
-              'In the same pan, sauté shallots and garlic, add Arborio rice, and toast for 2 minutes until translucent around the edges.',
-        },
-        {
-          'title': 'Add broth gradually',
-          'description':
-              'Add warm broth one ladle at a time, stirring continuously until absorbed before adding the next.',
-        },
-        {
-          'title': 'Fold in cheese',
-          'description':
-              'Remove from heat, stir in cold butter, grated parmesan, and remaining mushrooms until creamy.',
-        },
-      ],
-      'proTips': [
-        'Always keep the broth simmering gently in a saucepan next to the risotto.',
-        'Never rinse Arborio rice; surface starch creates the creaminess.',
-      ],
-    },
-    'breakfast_5': {
-      'title': 'Acai Power Bowl',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'category': 'Breakfast',
-      'rating': 4.8,
-      'reviewCount': '(1,420)',
-      'tags': ['Quick', 'Healthy'],
-      'prepTime': '10m',
-      'cookTime': '0m',
-      'calories': '320',
-      'baseServings': 1,
-      'ingredients': [
-        {'name': 'Frozen acai puree', 'baseQuantity': 1.0, 'unit': 'pack'},
-        {'name': 'Frozen banana', 'baseQuantity': 1.0, 'unit': 'medium'},
-        {'name': 'Almond milk', 'baseQuantity': 60.0, 'unit': 'ml'},
-        {'name': 'Granola', 'baseQuantity': 30.0, 'unit': 'g'},
-        {'name': 'Fresh berries & kiwi', 'baseQuantity': 50.0, 'unit': 'g'},
-        {'name': 'Chia seeds & honey', 'baseQuantity': 1.0, 'unit': 'tbsp'},
-      ],
-      'methodSteps': [
-        {
-          'title': 'Blend base',
-          'description':
-              'Blend acai packet, frozen banana, and a splash of almond milk until thick and smooth, like soft-serve ice cream.',
-        },
-        {
-          'title': 'Pour into bowl',
-          'description':
-              'Transfer the thick puree into a chilled bowl and smooth the surface.',
-        },
-        {
-          'title': 'Arrange toppings',
-          'description':
-              'Decorate neatly with sliced strawberries, banana coins, blueberries, crunchy granola, and chia seeds.',
-        },
-        {
-          'title': 'Drizzle honey',
-          'description':
-              'Finish with a light drizzle of pure honey or peanut butter. Enjoy immediately!',
-        },
-      ],
-      'proTips': [
-        'Keep liquid to a minimum so the acai bowl stays thick and spoonable.',
-        'Freeze your bowl for 10 minutes beforehand to keep it cold longer.',
-      ],
-    },
-  };
 }

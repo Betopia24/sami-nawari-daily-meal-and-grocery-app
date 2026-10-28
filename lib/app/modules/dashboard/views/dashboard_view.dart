@@ -190,32 +190,21 @@ class DashboardView extends GetView<DashboardController> {
     return Obx(() {
       final foods = controller.recommendedFoods;
       if (foods.isEmpty) {
-        // Graceful fallback cards
-        return SizedBox(
-          height: 250,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            children: [
-              RecipeCard(
-                title: 'Steamed Veg Dumplings',
-                imagePath: AppAssets.homeRecipeCardImage1,
-                tag: 'Chef special',
-                time: '50m',
-                calories: '310 kcal',
-                rating: '4.6',
-                onTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a8d6ca9e87759724844e5ec'),
-              ),
-              RecipeCard(
-                title: 'Lemon Lentil Soup',
-                imagePath: AppAssets.homeRecipeCardImage3,
-                tag: 'Popular',
-                time: '25m',
-                calories: '290 kcal',
-                rating: '4.5',
-                onTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a897de42f4aa7b54cd9298b'),
-              ),
-            ],
+        return Container(
+          height: 100,
+          margin: const EdgeInsets.symmetric(horizontal: 24.0),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: const Text(
+            'No recommended recipes yet',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
           ),
         );
       }
@@ -249,34 +238,21 @@ class DashboardView extends GetView<DashboardController> {
     return Obx(() {
       final foods = controller.homemadeFoods;
       if (foods.isEmpty) {
-        // Graceful fallback cards
-        return SizedBox(
-          height: 330,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            children: [
-              HomemadeFoodCard(
-                title: 'Chicken Biryani Tiffin',
-                subtitle: "Amina's Home Kitchen",
-                imagePath: AppAssets.homeRecipeCardImage3,
-                distance: '0.8 km',
-                rating: '4.9 (214)',
-                price: '\$6.50',
-                onAddTap: () {},
-                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a8d6ca9e87759724844e5ec'),
-              ),
-              HomemadeFoodCard(
-                title: 'Steamed Veg Dumplings',
-                subtitle: "Mei's Dumpling Table",
-                imagePath: AppAssets.homeRecipeCardImage1,
-                distance: '1.4 km',
-                rating: '4.7 (132)',
-                price: '\$4.00',
-                onAddTap: () {},
-                onViewDetailsTap: () => Get.toNamed(Routes.fooddetails, arguments: '6a897de42f4aa7b54cd9298b'),
-              ),
-            ],
+        return Container(
+          height: 100,
+          margin: const EdgeInsets.symmetric(horizontal: 24.0),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: const Text(
+            'No homemade foods available right now',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
           ),
         );
       }

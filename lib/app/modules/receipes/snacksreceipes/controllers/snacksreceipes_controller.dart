@@ -40,14 +40,10 @@ class SnacksreceipesController extends GetxController {
         }
       }
 
-      if (parsedList.isNotEmpty) {
-        recipes.assignAll(parsedList);
-      } else {
-        recipes.assignAll(_fallbackSnacksRecipes);
-      }
+      recipes.assignAll(parsedList);
     } catch (e) {
       debugPrint('Error fetching snacks recipes: $e');
-      recipes.assignAll(_fallbackSnacksRecipes);
+      recipes.clear();
     } finally {
       isLoading.value = false;
     }
@@ -83,7 +79,7 @@ class SnacksreceipesController extends GetxController {
           }
 
           return {
-            'id': map['id']?.toString() ?? '',
+            'id': map['id']?.toString() ?? map['_id']?.toString() ?? '',
             'imagePath': imgList.isNotEmpty
                 ? imgList.first
                 : AppAssets.homeSnacksCardImage,
@@ -115,34 +111,4 @@ class SnacksreceipesController extends GetxController {
   void onTagSelected(int index) {
     selectedTagIndex.value = index;
   }
-
-  static final List<Map<String, dynamic>> _fallbackSnacksRecipes = [
-    {
-      'id': 'snack_1',
-      'imagePath': AppAssets.homeSnacksCardImage,
-      'tags': ['Quick', 'Healthy'],
-      'title': 'Greek Yogurt Berry Parfait',
-      'time': '10 min',
-      'calories': '220 kcal',
-      'rating': 4.8,
-    },
-    {
-      'id': 'snack_2',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'tags': ['Sweet', 'Quick'],
-      'title': 'Honey Oat Energy Bites',
-      'time': '15 min',
-      'calories': '180 kcal',
-      'rating': 4.7,
-    },
-    {
-      'id': 'snack_3',
-      'imagePath': AppAssets.homeLunchCardImage,
-      'tags': ['Savory', 'Healthy'],
-      'title': 'Crispy Roasted Chickpeas',
-      'time': '25 min',
-      'calories': '210 kcal',
-      'rating': 4.6,
-    },
-  ];
 }

@@ -40,14 +40,10 @@ class LunchreceipesController extends GetxController {
         }
       }
 
-      if (parsedList.isNotEmpty) {
-        recipes.assignAll(parsedList);
-      } else {
-        recipes.assignAll(_fallbackLunchRecipes);
-      }
+      recipes.assignAll(parsedList);
     } catch (e) {
       debugPrint('Error fetching lunch recipes: $e');
-      recipes.assignAll(_fallbackLunchRecipes);
+      recipes.clear();
     } finally {
       isLoading.value = false;
     }
@@ -83,7 +79,7 @@ class LunchreceipesController extends GetxController {
           }
 
           return {
-            'id': map['id']?.toString() ?? '',
+            'id': map['id']?.toString() ?? map['_id']?.toString() ?? '',
             'imagePath': imgList.isNotEmpty
                 ? imgList.first
                 : AppAssets.homeLunchCardImage,
@@ -115,34 +111,4 @@ class LunchreceipesController extends GetxController {
   void onTagSelected(int index) {
     selectedTagIndex.value = index;
   }
-
-  static final List<Map<String, dynamic>> _fallbackLunchRecipes = [
-    {
-      'id': 'lunch_1',
-      'imagePath': AppAssets.homeLunchCardImage,
-      'tags': ['Quick', 'Light'],
-      'title': 'Thai Green Curry Bowl',
-      'time': '25 min',
-      'calories': '450 kcal',
-      'rating': 4.8,
-    },
-    {
-      'id': 'lunch_2',
-      'imagePath': AppAssets.homeBreakfastCardImage,
-      'tags': ['Hearty', 'Quick'],
-      'title': 'Grilled Chicken Caesar Wrap',
-      'time': '15 min',
-      'calories': '380 kcal',
-      'rating': 4.7,
-    },
-    {
-      'id': 'lunch_3',
-      'imagePath': AppAssets.homeDinnerCardImage,
-      'tags': ['Salads', 'Light'],
-      'title': 'Mediterranean Quinoa Salad',
-      'time': '20 min',
-      'calories': '320 kcal',
-      'rating': 4.9,
-    },
-  ];
 }

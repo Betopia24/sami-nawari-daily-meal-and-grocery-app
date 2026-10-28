@@ -40,14 +40,10 @@ class DinnerreceipesController extends GetxController {
         }
       }
 
-      if (parsedList.isNotEmpty) {
-        recipes.assignAll(parsedList);
-      } else {
-        recipes.assignAll(_fallbackDinnerRecipes);
-      }
+      recipes.assignAll(parsedList);
     } catch (e) {
       debugPrint('Error fetching dinner recipes: $e');
-      recipes.assignAll(_fallbackDinnerRecipes);
+      recipes.clear();
     } finally {
       isLoading.value = false;
     }
@@ -83,7 +79,7 @@ class DinnerreceipesController extends GetxController {
           }
 
           return {
-            'id': map['id']?.toString() ?? '',
+            'id': map['id']?.toString() ?? map['_id']?.toString() ?? '',
             'imagePath': imgList.isNotEmpty
                 ? imgList.first
                 : AppAssets.homeDinnerCardImage,
@@ -115,34 +111,4 @@ class DinnerreceipesController extends GetxController {
   void onTagSelected(int index) {
     selectedTagIndex.value = index;
   }
-
-  static final List<Map<String, dynamic>> _fallbackDinnerRecipes = [
-    {
-      'id': 'dinner_1',
-      'imagePath': AppAssets.homeDinnerCardImage,
-      'tags': ['High Protein', 'Family'],
-      'title': 'Lemon Herb Salmon with Veggies',
-      'time': '25 min',
-      'calories': '440 kcal',
-      'rating': 4.9,
-    },
-    {
-      'id': 'dinner_2',
-      'imagePath': AppAssets.homeLunchCardImage,
-      'tags': ['Traditional', 'Comfort'],
-      'title': 'Classic Beef Bourguignon',
-      'time': '50 min',
-      'calories': '580 kcal',
-      'rating': 4.8,
-    },
-    {
-      'id': 'dinner_3',
-      'imagePath': AppAssets.homeSnacksCardImage,
-      'tags': ['Quick', 'Comfort'],
-      'title': 'Creamy Mushroom Pasta',
-      'time': '20 min',
-      'calories': '490 kcal',
-      'rating': 4.7,
-    },
-  ];
 }
