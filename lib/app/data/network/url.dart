@@ -64,6 +64,9 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String grocery = '/grocery';
   static const String groceryInvitations = '/grocery/invitations';
+  static String groceryListDetails(String listId) => '/grocery/$listId';
+  static String groceryItem(String listId) => '/grocery/$listId/item';
+  static String groceryItemUpdate(String listId, String itemId) => '/grocery/$listId/item/$itemId';
 
   // ---------------------------------------------------------------------------
   // BOOKMARKS & REVIEWS

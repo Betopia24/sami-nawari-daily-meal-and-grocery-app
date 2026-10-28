@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/utils/app_colors.dart';
-import '../../../../core/utils/app_assets.dart';
 import '../controllers/groceries_controller.dart';
 import 'add_grocery_item_bottom_sheet.dart';
 
@@ -140,6 +139,11 @@ class _SearchGroceryItemBottomSheetState extends State<SearchGroceryItemBottomSh
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
+              onSubmitted: (val) {
+                if (val.trim().isNotEmpty) {
+                  _addItemDirectly(val.trim(), Icons.shopping_bag_outlined);
+                }
+              },
               style: GoogleFonts.outfit(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -167,15 +171,10 @@ class _SearchGroceryItemBottomSheetState extends State<SearchGroceryItemBottomSh
 
   void _addItemDirectly(String label, IconData icon) {
     final controller = Get.find<GroceriesController>();
-    final newItem = GroceryItemModel(
-      title: label,
-      iconAsset: AppAssets.veganEmojiIcon, 
+    controller.addGroceryItem(
+      name: label,
       fallbackIcon: icon,
-      sizeInfo: '',
-      tagInfo: '',
-      addedBy: 'Me',
     );
-    controller.pendingItems.insert(0, newItem);
     Get.back();
   }
 

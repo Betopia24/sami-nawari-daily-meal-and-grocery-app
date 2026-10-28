@@ -11,6 +11,7 @@ import '../widgets/grocery_item_card.dart';
 import '../controllers/groceries_controller.dart';
 import '../widgets/floating_search_bar.dart';
 import '../widgets/meal_inspiration_bottom_sheet.dart';
+import '../widgets/groceries_board_shimmer.dart';
 
 class GroceriesBoardView extends GetView<GroceriesController> {
   const GroceriesBoardView({super.key});
@@ -23,370 +24,406 @@ class GroceriesBoardView extends GetView<GroceriesController> {
         bottom: false,
         child: Stack(
           children: [
-            SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Custom Header
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Groceries',
-                              style: GoogleFonts.outfit(
-                                fontSize: 24.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+            RefreshIndicator(
+              onRefresh: controller.refreshActiveList,
+              color: AppColors.primary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Custom Header
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 10.h,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Groceries',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 24.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'Shopping Planner',
-                              style: GoogleFonts.outfit(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.textSecondary,
+                              Text(
+                                'Shopping Planner',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () {
-                            Get.bottomSheet(
-                              const MealInspirationBottomSheet(),
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 10.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(14.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.auto_awesome,
-                                  color: Colors.white,
-                                  size: 20.sp,
-                                ),
-                                SizedBox(width: 6.w),
-                                Text(
-                                  'Inspiration',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // View All Button
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Obx(() {
-                          if (controller.groceryLists.isNotEmpty) {
-                            return PopupMenuButton<int>(
-                              onSelected: (int index) {
-                                controller.setActiveList(index);
-                              },
-                              offset: Offset(0, 30.h),
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              Get.bottomSheet(
+                                const MealInspirationBottomSheet(),
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 10.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(14.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    'View All',
-                                    style: GoogleFonts.outfit(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4.w),
                                   Icon(
-                                    Icons.keyboard_arrow_down,
-                                    color: AppColors.primary,
-                                    size: 16.sp,
+                                    Icons.auto_awesome,
+                                    color: Colors.white,
+                                    size: 20.sp,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    'Inspiration',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ],
                               ),
-                              itemBuilder: (BuildContext context) {
-                                return List.generate(
-                                  controller.groceryLists.length,
-                                  (index) {
-                                    final list = controller.groceryLists[index];
-                                    return PopupMenuItem<int>(
-                                      value: index,
-                                      child: Row(
-                                        children: [
-                                          if (list.icon is IconData)
-                                            Icon(
-                                              list.icon as IconData,
-                                              size: 16.sp,
-                                              color: AppColors.textPrimary,
-                                            )
-                                          else if (list.icon is String)
-                                            Text(
-                                              list.icon as String,
-                                              style: TextStyle(
-                                                fontSize: 16.sp,
-                                              ),
-                                            )
-                                          else
-                                            SizedBox(
-                                              width: 16.sp,
-                                              height: 16.sp,
-                                            ),
-                                          SizedBox(width: 8.w),
-                                          Expanded(
-                                            child: Text(
-                                              list.name,
-                                              style: GoogleFonts.outfit(
-                                                color: AppColors.textPrimary,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 14.sp,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        }),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  // Tab Bar and Main Board Content Layered seamlessly
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // 1. Inactive Tabs (drawn furthest behind, receives shadow)
-                      Positioned(
-                        top: 0,
-                        left: 20.w,
-                        right: 0,
-                        child: const GroceriesTabBar(isBackground: true),
-                      ),
-
-                      // 2. Main Board Content (drawn middle, casts shadow onto inactive tabs)
-                      Padding(
-                        padding: EdgeInsets.only(top: 42.h),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 15,
-                                offset: const Offset(0, 0),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 20.w,
-                              vertical: 24.h,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Section Header
-                                Obx(() {
-                                  final lists = controller.groceryLists;
-                                  if (lists.isEmpty) {
-                                    return const GroceriesSectionHeader(
-                                      title: "No Grocery Lists",
-                                      peopleCount: 0,
-                                    );
-                                  }
+                          ),
+                        ],
+                      ),
+                    ),
 
-                                  return Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: GroceriesSectionHeader(
-                                          title: lists[0].name,
-                                          peopleCount:
-                                              lists[0].sharedWithFamily ? 3 : 1,
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }),
-
-                                SizedBox(height: 16.h),
-
-                                // Subtitle
-                                Obx(() => Text(
-                                  '${controller.pendingItems.length} Items',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF7D7A75),
-                                  ),
-                                )),
-
-                                SizedBox(height: 16.h),
-
-                                // Items Grid (Pending)
-                                Obx(
-                                  () => _buildItemsGrid(
-                                    items: controller.pendingItems,
-                                    isCompleted: false,
-                                  ),
+                    // View All Button
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Obx(() {
+                            if (controller.groceryLists.isNotEmpty) {
+                              return PopupMenuButton<int>(
+                                onSelected: (int index) {
+                                  controller.setActiveList(index);
+                                },
+                                offset: Offset(0, 30.h),
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'View All',
+                                      style: GoogleFonts.outfit(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: AppColors.primary,
+                                      size: 16.sp,
+                                    ),
+                                  ],
+                                ),
+                                itemBuilder: (BuildContext context) {
+                                  return List.generate(
+                                    controller.groceryLists.length,
+                                    (index) {
+                                      final list =
+                                          controller.groceryLists[index];
+                                      return PopupMenuItem<int>(
+                                        value: index,
+                                        child: Row(
+                                          children: [
+                                            if (list.icon is IconData)
+                                              Icon(
+                                                list.icon as IconData,
+                                                size: 16.sp,
+                                                color: AppColors.textPrimary,
+                                              )
+                                            else if (list.icon is String)
+                                              Text(
+                                                list.icon as String,
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                ),
+                                              )
+                                            else
+                                              SizedBox(
+                                                width: 16.sp,
+                                                height: 16.sp,
+                                              ),
+                                            SizedBox(width: 8.w),
+                                            Expanded(
+                                              child: Text(
+                                                list.name,
+                                                style: GoogleFonts.outfit(
+                                                  color: AppColors.textPrimary,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14.sp,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          }),
+                        ],
+                      ),
+                    ),
 
-                                // Recently Used (Completed) Section
-                                Obx(() {
-                                  final recent = controller.recentlyUsedItems;
-                                  if (recent.isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
+                    SizedBox(height: 8.h),
 
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 24.h),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
+                    // Tab Bar and Main Board Content Layered seamlessly
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // 1. Inactive Tabs (drawn furthest behind, receives shadow)
+                        Positioned(
+                          top: 0,
+                          left: 20.w,
+                          right: 0,
+                          child: const GroceriesTabBar(isBackground: true),
+                        ),
+
+                        // 2. Main Board Content (drawn middle, casts shadow onto inactive tabs)
+                        Padding(
+                          padding: EdgeInsets.only(top: 42.h),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 0),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 20.w,
+                                vertical: 24.h,
+                              ),
+                              child: Obx(() {
+                                if (controller.isLoading.value) {
+                                  return const GroceriesBoardShimmer(
+                                    itemCount: 6,
+                                  );
+                                }
+
+                                final lists = controller.groceryLists;
+                                final activeTitle = lists.isNotEmpty
+                                    ? lists[0].name
+                                    : "Groceries";
+                                final activeCount = lists.isNotEmpty
+                                    ? lists[0].memberCount
+                                    : 1;
+                                final pending = controller.pendingItems;
+                                final recent = controller.recentlyUsedItems;
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Section Header
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: GroceriesSectionHeader(
+                                            title: activeTitle,
+                                            peopleCount: activeCount,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    SizedBox(height: 16.h),
+
+                                    // Subtitle
+                                    Text(
+                                      '${pending.length} Items',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFF7D7A75),
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 16.h),
+
+                                    // Empty state if both lists are empty
+                                    if (pending.isEmpty && recent.isEmpty)
+                                      Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 40.h,
+                                          ),
+                                          child: Column(
                                             children: [
                                               Icon(
-                                                Icons.history_rounded,
-                                                size: 18.sp,
-                                                color: AppColors.primary,
+                                                Icons.shopping_basket_outlined,
+                                                size: 48.sp,
+                                                color: AppColors.textSecondary
+                                                    .withValues(alpha: 0.4),
                                               ),
-                                              SizedBox(width: 6.w),
+                                              SizedBox(height: 12.h),
                                               Text(
-                                                'Recently Used',
+                                                'No grocery items yet',
                                                 style: GoogleFonts.outfit(
-                                                  fontSize: 16.sp,
+                                                  fontSize: 15.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: AppColors.textPrimary,
                                                 ),
                                               ),
-                                              SizedBox(width: 6.w),
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 6.w,
-                                                  vertical: 2.h,
+                                              SizedBox(height: 6.h),
+                                              Text(
+                                                'Tap the + button below to add items to this list',
+                                                style: GoogleFonts.outfit(
+                                                  fontSize: 12.sp,
+                                                  color:
+                                                      AppColors.textSecondary,
                                                 ),
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.primary
-                                                      .withValues(alpha: 0.1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(10.r),
-                                                ),
-                                                child: Text(
-                                                  '${recent.length}',
-                                                  style: GoogleFonts.outfit(
-                                                    fontSize: 10.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: AppColors.primary,
-                                                  ),
-                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
                                             ],
                                           ),
-                                          Text(
-                                            'Tap to restore',
-                                            style: GoogleFonts.outfit(
-                                              fontSize: 11.sp,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 16.h),
+                                        ),
+                                      )
+                                    else ...[
+                                      // Items Grid (Pending)
                                       _buildItemsGrid(
-                                        items: recent,
-                                        isCompleted: true,
+                                        items: pending,
+                                        isCompleted: false,
                                       ),
-                                    ],
-                                  );
-                                }),
 
-                                SizedBox(
-                                  height: 100.h,
-                                ), // Bottom padding for navigation bar and search bar
-                              ],
+                                      // Recently Used (Completed) Section
+                                      if (recent.isNotEmpty) ...[
+                                        SizedBox(height: 24.h),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.history_rounded,
+                                                  size: 18.sp,
+                                                  color: AppColors.primary,
+                                                ),
+                                                SizedBox(width: 6.w),
+                                                Text(
+                                                  'Recently Used',
+                                                  style: GoogleFonts.outfit(
+                                                    fontSize: 16.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 6.w),
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 6.w,
+                                                    vertical: 2.h,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.primary
+                                                        .withValues(alpha: 0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10.r,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    '${recent.length}',
+                                                    style: GoogleFonts.outfit(
+                                                      fontSize: 10.sp,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Text(
+                                              'Tap to restore',
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 11.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 16.h),
+                                        _buildItemsGrid(
+                                          items: recent,
+                                          isCompleted: true,
+                                        ),
+                                      ],
+                                    ],
+
+                                    SizedBox(height: 100.h),
+                                  ],
+                                );
+                              }),
                             ),
                           ),
                         ),
-                      ),
 
-                      // 3. Active Tab (drawn second, on top, hiding the shadow beneath it)
-                      Positioned(
-                        top: 0,
-                        left: 20.w,
-                        right: 0,
-                        child: const GroceriesTabBar(isBackground: false),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Floating Search Bar
-            Positioned(
-              bottom: 0, 
-              left: 20.w,
-              right: 20.w,
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: const FloatingSearchBar(),
+                        // 3. Active Tab (drawn second, on top, hiding the shadow beneath it)
+                        Positioned(
+                          top: 0,
+                          left: 20.w,
+                          right: 0,
+                          child: const GroceriesTabBar(isBackground: false),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            // Expandable Floating Action Button / Search Dock at Bottom Right
+            const FloatingSearchBar(),
           ],
         ),
       ),
@@ -404,8 +441,10 @@ class GroceriesBoardView extends GetView<GroceriesController> {
       if (i > 0) {
         rows.add(SizedBox(height: 12.h));
       }
-      final rowItems =
-          items.sublist(i, (i + 3 > items.length) ? items.length : i + 3);
+      final rowItems = items.sublist(
+        i,
+        (i + 3 > items.length) ? items.length : i + 3,
+      );
       rows.add(
         Row(
           children: [
@@ -423,7 +462,8 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                           tagInfo: rowItems[col].tagInfo,
                           addedBy: rowItems[col].addedBy,
                           isCompleted: isCompleted,
-                          completedAgo: rowItems[col].completedAgo ??
+                          completedAgo:
+                              rowItems[col].completedAgo ??
                               (isCompleted ? 'Recently' : null),
                           onTap: () {
                             HapticFeedback.lightImpact();
@@ -450,8 +490,6 @@ class GroceriesBoardView extends GetView<GroceriesController> {
       );
     }
 
-    return Column(
-      children: rows,
-    );
+    return Column(children: rows);
   }
 }
