@@ -42,12 +42,41 @@ class DinnerreceipesView extends GetView<DinnerreceipesController> {
                 }
 
                 if (controller.filteredRecipes.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No recipes found',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
+                  return RefreshIndicator(
+                    onRefresh: controller.fetchRecipes,
+                    color: AppColors.primary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 80),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.restaurant_menu_outlined,
+                              size: 56,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'No recipes found',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Pull down to refresh',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );

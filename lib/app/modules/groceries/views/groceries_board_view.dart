@@ -23,6 +23,7 @@ class GroceriesBoardView extends GetView<GroceriesController> {
       body: SafeArea(
         bottom: false,
         child: Stack(
+          fit: StackFit.expand,
           children: [
             RefreshIndicator(
               onRefresh: controller.refreshActiveList,
@@ -224,6 +225,9 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                         Padding(
                           padding: EdgeInsets.only(top: 42.h),
                           child: Container(
+                            constraints: BoxConstraints(
+                              minHeight: MediaQuery.of(context).size.height - 220.h,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [
@@ -400,7 +404,7 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                       ],
                                     ],
 
-                                    SizedBox(height: 100.h),
+                                    SizedBox(height: 180.h),
                                   ],
                                 );
                               }),

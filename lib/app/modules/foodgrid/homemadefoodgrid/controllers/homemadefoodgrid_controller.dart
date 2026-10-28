@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../../../data/models/food_item_model.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 
 class HomemadefoodgridController extends GetxController {
@@ -30,17 +29,13 @@ class HomemadefoodgridController extends GetxController {
 
       if (response.isSuccess && response.responseData != null) {
         final list = _parseFoodList(response.responseData);
-        if (list.isNotEmpty) {
-          foods.assignAll(_combineWithFallback(list));
-          return;
-        }
+        foods.assignAll(list);
+      } else {
+        foods.clear();
       }
-
-      // 2. Fallback if empty
-      foods.assignAll(_fallbackHomemadeFoods);
     } catch (e) {
       debugPrint('Error fetching homemade foods: $e');
-      foods.assignAll(_fallbackHomemadeFoods);
+      foods.clear();
     } finally {
       isLoading.value = false;
     }
@@ -90,17 +85,6 @@ class HomemadefoodgridController extends GetxController {
     }
   }
 
-  List<FoodItemModel> _combineWithFallback(List<FoodItemModel> serverList) {
-    final existingIds = serverList.map((e) => e.id).toSet();
-    final combined = List<FoodItemModel>.from(serverList);
-    for (final item in _fallbackHomemadeFoods) {
-      if (!existingIds.contains(item.id)) {
-        combined.add(item);
-      }
-    }
-    return combined;
-  }
-
   List<FoodItemModel> _parseFoodList(dynamic rawResponse) {
     try {
       dynamic rawData;
@@ -126,77 +110,4 @@ class HomemadefoodgridController extends GetxController {
     }
     return [];
   }
-
-  static final List<FoodItemModel> _fallbackHomemadeFoods = [
-    FoodItemModel(
-      id: '6a8d6ca9e87759724844e5ec',
-      name: 'Spanakopita',
-      sellerBusinessName: "Maria's Kitchen",
-      sellerAddress: '1.1 km away',
-      price: 4.5,
-      rating: '4.8 (110)',
-      images: [
-        'https://res.cloudinary.com/dgk8lgdzb/image/upload/v1787653287/uploads/tkue6iscqbdqq8kqoygp.jpg',
-      ],
-      pickupAvailable: true,
-      deliveryAvailable: true,
-    ),
-    FoodItemModel(
-      id: '6a897de42f4aa7b54cd9298b',
-      name: 'Margherita Pizza',
-      sellerBusinessName: "Luca's Pasta Club",
-      sellerAddress: '1.5 km away',
-      price: 12.0,
-      rating: '4.9 (185)',
-      images: [
-        'https://res.cloudinary.com/dgk8lgdzb/image/upload/v1787395554/uploads/ke0aoe73jkzg6yowz3ao.jpg',
-      ],
-      pickupAvailable: true,
-      deliveryAvailable: true,
-    ),
-    FoodItemModel(
-      id: 'food_biryani_tiffin',
-      name: 'Chicken Biryani Tiffin',
-      sellerBusinessName: "Amina's Home Kitchen",
-      sellerAddress: '0.8 km away',
-      price: 6.5,
-      rating: '4.9 (214)',
-      images: [AppAssets.homeRecipeCardImage1],
-      pickupAvailable: true,
-      deliveryAvailable: true,
-    ),
-    FoodItemModel(
-      id: 'food_steamed_dumplings',
-      name: 'Steamed Veg Dumplings',
-      sellerBusinessName: "Mei's Dumpling Table",
-      sellerAddress: '1.4 km away',
-      price: 4.0,
-      rating: '4.7 (132)',
-      images: [AppAssets.homeRecipeCardImage2],
-      pickupAvailable: true,
-      deliveryAvailable: true,
-    ),
-    FoodItemModel(
-      id: 'food_lentil_soup',
-      name: 'Lemon Lentil Soup & Bread',
-      sellerBusinessName: "Nur's Soup House",
-      sellerAddress: '2.1 km away',
-      price: 3.5,
-      rating: '4.8 (96)',
-      images: [AppAssets.homeRecipeCardImage3],
-      pickupAvailable: true,
-      deliveryAvailable: true,
-    ),
-    FoodItemModel(
-      id: 'food_lamb_kofta',
-      name: 'Lamb Kofta with Rice',
-      sellerBusinessName: "Chen's Dim Sum",
-      sellerAddress: '0.7 km away',
-      price: 7.0,
-      rating: '4.9 (88)',
-      images: [AppAssets.homeRecipeCardImage2],
-      pickupAvailable: true,
-      deliveryAvailable: true,
-    ),
-  ];
 }

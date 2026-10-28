@@ -9,7 +9,12 @@ import 'search_grocery_item_bottom_sheet.dart';
 import 'add_grocery_item_bottom_sheet.dart';
 
 class FloatingSearchBar extends StatefulWidget {
-  const FloatingSearchBar({super.key});
+  final double? bottomOffset;
+
+  const FloatingSearchBar({
+    super.key,
+    this.bottomOffset,
+  });
 
   @override
   State<FloatingSearchBar> createState() => _FloatingSearchBarState();
@@ -93,18 +98,21 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
     final fullWidth = screenWidth - 40.w;
     final double collapsedSize = 56.w;
 
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    // Navbar height (70) + bottom margin (16) + bottomPadding = 86 + bottomPadding
+    // Add ~14.h margin to sit comfortably right above the bottom navigation bar:
+    final double defaultBottomOffset = bottomPadding + 50.h;
+    final double effectiveBottom = keyboardInset > 0
+        ? (keyboardInset + 16.h)
+        : (widget.bottomOffset ?? defaultBottomOffset);
+
     // 1. If completely collapsed, render ONLY the isolated bottom-right FAB
     if (!_isExpanded && !_animController.isAnimating) {
       return Positioned(
         right: 20.w,
-        bottom: 0,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 16.h),
-            child: _buildFab(collapsedSize),
-          ),
-        ),
+        bottom: effectiveBottom,
+        child: _buildFab(collapsedSize),
       );
     }
 
@@ -138,26 +146,22 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
           Positioned(
             left: 20.w,
             right: 20.w,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 16.h),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: AnimatedBuilder(
-                    animation: _expandAnimation,
-                    builder: (context, child) {
-                      final t = _expandAnimation.value;
-                      final currentWidth =
-                          collapsedSize + (fullWidth - collapsedSize) * t;
+            bottom: effectiveBottom,
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: AnimatedBuilder(
+                animation: _expandAnimation,
+                builder: (context, child) {
+                  final t = _expandAnimation.value;
+                  final currentWidth =
+                      collapsedSize + (fullWidth - collapsedSize) * t;
 
-                      return Container(
-                        width: currentWidth,
-                        height: 56.h,
-                        decoration: BoxDecoration(
-                          color: Color.lerp(
-                            AppColors.primary,
+                  return Container(
+                    width: currentWidth,
+                    height: 56.h,
+                    decoration: BoxDecoration(
+                      color: Color.lerp(
+                        AppColors.primary,
                             Colors.white,
                             t,
                           ),
@@ -200,12 +204,10 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        );
+      }
 
   /// Collapsed standalone FAB widget
   Widget _buildFab(double size) {
