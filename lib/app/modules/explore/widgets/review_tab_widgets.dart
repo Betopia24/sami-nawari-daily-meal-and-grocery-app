@@ -171,7 +171,9 @@ class ReviewItemCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18.r,
-                backgroundImage: AssetImage(imagePath),
+                backgroundImage: (imagePath.startsWith('http://') || imagePath.startsWith('https://'))
+                    ? NetworkImage(imagePath) as ImageProvider
+                    : AssetImage(imagePath.isNotEmpty ? imagePath : 'assets/images/homereceipecardimage2.jpg') as ImageProvider,
                 backgroundColor: Colors.grey.shade200,
               ),
               SizedBox(width: 12.w),

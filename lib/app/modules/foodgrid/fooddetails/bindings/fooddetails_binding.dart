@@ -8,6 +8,6 @@ class FooddetailsBinding extends Bindings {
     if (Get.isRegistered<FooddetailsController>()) {
       Get.delete<FooddetailsController>(force: true);
     }
-    Get.lazyPut<FooddetailsController>(() => FooddetailsController());
+    Get.put<FooddetailsController>(FooddetailsController());
   }
 }

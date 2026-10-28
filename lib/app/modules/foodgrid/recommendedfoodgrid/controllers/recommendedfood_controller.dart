@@ -7,7 +7,7 @@ import '../../../../data/network/url.dart';
 import '../../../../../core/utils/app_assets.dart';
 
 class RecommendedfoodController extends GetxController {
-  final isLoading = false.obs;
+  final isLoading = true.obs;
   final foods = <FoodItemModel>[].obs;
 
   @override
@@ -21,6 +21,7 @@ class RecommendedfoodController extends GetxController {
   Future<void> fetchRecommendedFoods() async {
     try {
       isLoading.value = true;
+      foods.clear();
 
       // 1. First attempt: AI recommendations endpoint
       try {

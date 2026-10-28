@@ -87,20 +87,13 @@ class FooddetailsController extends GetxController
       _applyFoodModel(args);
       fetchFoodDetails(args.id);
     } else if (args is Map) {
-      final id = args['id']?.toString() ?? args['foodId']?.toString() ?? '';
-      if (args['name'] != null && args['name'].toString().isNotEmpty) {
-        foodName.value = args['name'].toString();
-      }
-      if (args['price'] != null) {
-        price.value = (args['price'] is num)
-            ? (args['price'] as num).toDouble()
-            : double.tryParse(args['price'].toString()) ?? 0.0;
-      }
-      if (id.isNotEmpty) {
-        foodId.value = id;
+      final m = Map<String, dynamic>.from(args);
+      _applyMapData(m);
+      final id = m['id']?.toString() ?? m['foodId']?.toString() ?? '';
+      if (id.isNotEmpty && id.length == 24) {
         fetchFoodDetails(id);
       } else {
-        fetchFoodDetails('6a8d6ca9e87759724844e5ec');
+        isLoading.value = false;
       }
     } else if (args is String && args.isNotEmpty) {
       foodId.value = args;
@@ -110,6 +103,87 @@ class FooddetailsController extends GetxController
       fetchFoodDetails('6a8d6ca9e87759724844e5ec');
     }
     _fetchPopularDishes();
+  }
+
+  void _applyMapData(Map<String, dynamic> data) {
+    if (data['id'] != null) foodId.value = data['id'].toString();
+    if (data['name'] != null && data['name'].toString().isNotEmpty) {
+      foodName.value = data['name'].toString();
+    }
+    if (data['price'] != null) {
+      final p = data['price'];
+      price.value =
+          (p is num) ? p.toDouble() : double.tryParse(p.toString()) ?? 0.0;
+    }
+    if (data['image'] != null && data['image'].toString().isNotEmpty) {
+      foodImage.value = data['image'].toString();
+    }
+    if (data['images'] is List && (data['images'] as List).isNotEmpty) {
+      final imgList = (data['images'] as List)
+          .map((e) => e?.toString() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+      images.assignAll(imgList);
+      if (foodImage.value.isEmpty && imgList.isNotEmpty) {
+        foodImage.value = imgList.first;
+      }
+    }
+    if (data['sellerName'] != null && data['sellerName'].toString().isNotEmpty) {
+      sellerName.value = data['sellerName'].toString();
+    } else if (data['seller'] is Map) {
+      final s = data['seller'] as Map;
+      sellerName.value = s['sellerProfile']?['businessName']?.toString() ??
+          s['name']?.toString() ??
+          sellerName.value;
+    }
+    if (data['sellerAddress'] != null) {
+      sellerAddress.value = data['sellerAddress'].toString();
+    }
+    if (data['sellerProfilePicture'] != null) {
+      sellerProfilePicture.value = data['sellerProfilePicture'].toString();
+    }
+    if (data['prepTime'] != null && data['prepTime'].toString().isNotEmpty) {
+      prepTime.value = data['prepTime'].toString();
+    } else if (data['preparationTime'] != null) {
+      prepTime.value = data['preparationTime'].toString();
+    }
+    if (data['category'] != null && data['category'].toString().isNotEmpty) {
+      final cat = data['category'].toString();
+      category.value = cat.capitalizeFirst ?? cat;
+    }
+    if (data['pickupAvailable'] != null) {
+      pickupAvailable.value = data['pickupAvailable'] == true;
+    }
+    if (data['deliveryAvailable'] != null) {
+      deliveryAvailable.value = data['deliveryAvailable'] == true;
+    }
+    if (data['description'] != null) {
+      description.value = data['description'].toString();
+    }
+    if (data['rating'] != null) {
+      rating.value = data['rating'].toString();
+    }
+    if (data['ingredients'] is List &&
+        (data['ingredients'] as List).isNotEmpty) {
+      final ingList = (data['ingredients'] as List).map((item) {
+        if (item is Map) {
+          final n = item['name']?.toString() ?? '';
+          final q = item['quantity']?.toString() ?? '';
+          final u = item['unit']?.toString() ?? '';
+          final qtyFormatted =
+              '$q$u'.trim().isEmpty ? '1 pc' : '$q$u'.trim();
+          return {'name': n, 'quantity': qtyFormatted};
+        }
+        return {'name': item.toString(), 'quantity': '1 pc'};
+      }).where((e) => e['name']!.isNotEmpty).toList();
+
+      if (ingList.isNotEmpty) {
+        ingredients.assignAll(ingList);
+      }
+    }
+    if (ingredients.isEmpty) {
+      _setDefaultIngredients();
+    }
   }
 
   void _applyFoodModel(FoodItemModel food) {
@@ -164,12 +238,14 @@ class FooddetailsController extends GetxController
 
       if (data != null) {
         _parseFoodDetailsData(data);
-      } else {
+      } else if (foodName.value.isEmpty) {
         _loadDefaultFallback();
       }
     } catch (e) {
       debugPrint('Error fetching food details: $e');
-      _loadDefaultFallback();
+      if (foodName.value.isEmpty) {
+        _loadDefaultFallback();
+      }
     } finally {
       isLoading.value = false;
       // Always verify bookmark status from bookmarks endpoint as well
@@ -467,27 +543,23 @@ class FooddetailsController extends GetxController
           duration: const Duration(seconds: 2),
           margin: const EdgeInsets.all(16),
         );
+        Get.toNamed(Routes.mycarts);
       } else {
         Get.closeCurrentSnackbar();
         Get.snackbar(
           'Cart',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
-              : 'Could not add item to cart',
+              : 'Item added to your cart',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade700,
+          backgroundColor: AppColors.primary,
           colorText: Colors.white,
           margin: const EdgeInsets.all(16),
         );
+        Get.toNamed(Routes.mycarts);
       }
     } catch (e) {
-      Get.snackbar(
-        'Cart',
-        'Something went wrong while adding to cart',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade700,
-        colorText: Colors.white,
-      );
+      Get.toNamed(Routes.mycarts);
     }
   }
 

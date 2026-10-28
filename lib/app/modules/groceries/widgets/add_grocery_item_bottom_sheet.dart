@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../widgets/primary_button.dart';
-import '../../../../core/utils/app_assets.dart';
 import '../controllers/groceries_controller.dart';
 
 class AddGroceryItemBottomSheet extends StatefulWidget {
@@ -232,25 +231,35 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
               text: widget.itemToEdit != null ? 'Save Item' : 'Add Item',
               showArrow: false,
               prefixIcon: widget.itemToEdit != null ? Icons.save : Icons.add,
-              onPressed: () {
-                final newItem = GroceryItemModel(
-                  title: _nameController.text.isNotEmpty ? _nameController.text : 'New Item',
-                  iconAsset: widget.itemToEdit?.iconAsset ?? AppAssets.veganEmojiIcon, 
-                  fallbackIcon: widget.initialItemIcon ?? widget.itemToEdit?.fallbackIcon ?? Icons.shopping_bag_outlined,
-                  sizeInfo: '${_quantityController.text.isNotEmpty ? _quantityController.text : '1'} ${_selectedUnit.split(' ')[0]}',
-                  tagInfo: _selectedPriority != 'No priority' ? _selectedPriority : (_selectedCategory != 'Other' ? _selectedCategory : 'Normal'),
-                  addedBy: widget.itemToEdit?.addedBy ?? 'Me',
-                  isCompleted: widget.itemToEdit?.isCompleted ?? false,
-                  completedAgo: widget.itemToEdit?.completedAgo,
-                );
-                
+              onPressed: () async {
+                final name = _nameController.text.trim();
+                if (name.isEmpty) return;
+
+                final qty = num.tryParse(_quantityController.text.trim()) ?? 1;
                 final controller = Get.find<GroceriesController>();
+
                 if (widget.itemToEdit != null) {
-                  controller.updateItem(widget.itemToEdit!, newItem);
+                  await controller.updateGroceryItem(
+                    oldItem: widget.itemToEdit!,
+                    name: name,
+                    quantity: qty,
+                    unit: _selectedUnit,
+                    category: _selectedCategory,
+                    priority: _selectedPriority,
+                    notes: _notesController.text.trim(),
+                  );
                 } else {
-                  controller.pendingItems.insert(0, newItem);
+                  await controller.addGroceryItem(
+                    name: name,
+                    quantity: qty,
+                    unit: _selectedUnit,
+                    category: _selectedCategory,
+                    priority: _selectedPriority,
+                    notes: _notesController.text.trim(),
+                    fallbackIcon: widget.initialItemIcon,
+                  );
                 }
-                
+
                 Get.back();
               },
             ),
