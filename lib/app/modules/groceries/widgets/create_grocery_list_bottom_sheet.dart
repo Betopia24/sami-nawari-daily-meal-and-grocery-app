@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../widgets/primary_button.dart';
-import '../../../data/models/grocery_list_model.dart';
 import '../controllers/groceries_controller.dart';
 
 class CreateGroceryListBottomSheet extends StatefulWidget {
@@ -334,20 +333,18 @@ class _CreateGroceryListBottomSheetState extends State<CreateGroceryListBottomSh
                   child: PrimaryButton(
                     text: 'Create List',
                     showArrow: false,
-                    onPressed: () {
+                    onPressed: () async {
                       if (_nameController.text.trim().isEmpty) return;
                       
                       final controller = Get.find<GroceriesController>();
-                      final newList = GroceryListModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      final success = await controller.createNewListApi(
                         name: _nameController.text.trim(),
                         description: _descController.text.trim(),
                         icon: _icons[_selectedIconIndex],
-                        sharedWithFamily: _shareWithFamily,
                       );
-                      
-                      controller.createNewList(newList);
-                      Get.back();
+                      if (success) {
+                        Get.back();
+                      }
                     },
                   ),
                 ),

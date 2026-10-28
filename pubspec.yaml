@@ -47,6 +47,8 @@ dependencies:
   shimmer: ^4.0.0
   geocoding: ^5.0.0
   flutter_spinkit: ^5.2.2
+  google_maps_flutter: ^2.18.1
+  geolocator: ^14.1.2
 
 dev_dependencies:
   flutter_test:

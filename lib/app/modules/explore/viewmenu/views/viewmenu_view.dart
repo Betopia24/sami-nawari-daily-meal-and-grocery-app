@@ -10,6 +10,7 @@ import '../../widgets/popular_dish_horizontal_card.dart';
 import '../../widgets/menu_dish_card.dart';
 import '../../widgets/about_tab_widgets.dart';
 import '../../widgets/review_tab_widgets.dart';
+import '../../widgets/viewmenu_shimmer.dart';
 import '../../../../widgets/custom_switch_tab.dart';
 import '../controllers/viewmenu_controller.dart';
 
@@ -123,6 +124,17 @@ class ViewmenuView extends GetView<ViewmenuController> {
               SliverToBoxAdapter(child: SizedBox(height: 24.h)),
 
               Obx(() {
+                if (controller.isLoading.value) {
+                  final tab = controller.selectedTab.value;
+                  if (tab == 1) {
+                    return const ViewMenuAboutShimmer();
+                  } else if (tab == 2) {
+                    return const ViewMenuReviewsShimmer();
+                  } else {
+                    return const ViewMenuShimmer();
+                  }
+                }
+
                 final tab = controller.selectedTab.value;
                 if (tab == 1) {
                   return _buildAboutContent();
@@ -227,6 +239,7 @@ class ViewmenuView extends GetView<ViewmenuController> {
                           image: dish['image'],
                           price: (dish['price'] as num).toDouble(),
                           isPopular: dish['isPopular'] ?? false,
+                          onTap: () => controller.goToFoodDetails(dish),
                         );
                       },
                     ),
@@ -281,6 +294,7 @@ class ViewmenuView extends GetView<ViewmenuController> {
                   prepTime: item['prepTime'],
                   rating: (item['rating'] as num).toDouble(),
                   isPopular: item['isPopular'] ?? false,
+                  onTap: () => controller.goToFoodDetails(item),
                 );
               }, childCount: controller.filteredMenuItems.length),
             ),

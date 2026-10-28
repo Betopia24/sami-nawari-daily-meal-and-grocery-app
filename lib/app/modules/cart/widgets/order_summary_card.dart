@@ -34,12 +34,7 @@ class OrderSummaryCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  restaurantImage,
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
+                child: _buildAvatar(restaurantImage),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -58,6 +53,38 @@ class OrderSummaryCard extends StatelessWidget {
           const SizedBox(height: 16),
           ...items,
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar(String imagePath) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _buildFallbackAvatar(),
+      );
+    }
+    return Image.asset(
+      imagePath.isNotEmpty ? imagePath : 'assets/images/home_recipe_card_image1.png',
+      width: 40,
+      height: 40,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => _buildFallbackAvatar(),
+    );
+  }
+
+  Widget _buildFallbackAvatar() {
+    return Container(
+      width: 40,
+      height: 40,
+      color: Colors.grey.shade200,
+      child: const Icon(
+        Icons.storefront_outlined,
+        size: 20,
+        color: AppColors.iconGrey,
       ),
     );
   }

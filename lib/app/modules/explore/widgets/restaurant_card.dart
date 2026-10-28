@@ -33,17 +33,12 @@ class RestaurantCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-                child: Image.asset(
-                  restaurant['image'],
-                  height: 140.h,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: _buildImage(restaurant['image']),
               ),
               Positioned(
                 top: 12.h,
                 right: 12.w,
-                child: _buildStatusBadge(restaurant['isOpen']),
+                child: _buildStatusBadge(restaurant['isOpen'] == true),
               ),
             ],
           ),
@@ -126,11 +121,12 @@ class RestaurantCard extends StatelessWidget {
                 // Order Options
                 Row(
                   children: [
-                    if (restaurant['hasPickup'])
+                    if (restaurant['hasPickup'] == true)
                       _buildServiceChip('Pickup', true),
-                    if (restaurant['hasPickup'] && restaurant['hasDelivery'])
+                    if (restaurant['hasPickup'] == true &&
+                        restaurant['hasDelivery'] == true)
                       SizedBox(width: 8.w),
-                    if (restaurant['hasDelivery'])
+                    if (restaurant['hasDelivery'] == true)
                       _buildServiceChip('Delivery', false),
                   ],
                 ),
@@ -276,6 +272,36 @@ class RestaurantCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImage(dynamic imagePath) {
+    final String path = imagePath?.toString() ?? '';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        height: 140.h,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Image.asset(
+          'assets/images/homelunchcardimage.png',
+          height: 140.h,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : 'assets/images/homelunchcardimage.png',
+      height: 140.h,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Image.asset(
+        'assets/images/homelunchcardimage.png',
+        height: 140.h,
+        width: double.infinity,
+        fit: BoxFit.cover,
       ),
     );
   }

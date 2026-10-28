@@ -1,8 +1,7 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'explore_map_view.dart';
 
+/// Backward-compatible wrapper delegating to ExploreMapView
 class MockMapView extends StatelessWidget {
   const MockMapView({super.key});
 
@@ -101,5 +100,6 @@ class MapGridPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
+    return const ExploreMapView();
   }
 }

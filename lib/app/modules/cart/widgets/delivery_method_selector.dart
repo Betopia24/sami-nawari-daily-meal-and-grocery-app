@@ -6,11 +6,15 @@ import '../../../../core/utils/app_colors.dart';
 class DeliveryMethodSelector extends StatelessWidget {
   final List<Widget> options;
   final String? noticeText;
+  final String? title;
+  final String? subtitle;
 
   const DeliveryMethodSelector({
     super.key,
     required this.options,
     this.noticeText,
+    this.title,
+    this.subtitle,
   });
 
   @override
@@ -20,7 +24,7 @@ class DeliveryMethodSelector extends StatelessWidget {
       children: [
         const SizedBox(height: 16),
         Text(
-          'Delivery Method',
+          title ?? 'Delivery Method',
           style: GoogleFonts.outfit(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -29,7 +33,7 @@ class DeliveryMethodSelector extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Choose how you want to receive your food?',
+          subtitle ?? 'Choose how you want to receive your food?',
           style: GoogleFonts.outfit(
             fontSize: 14,
             fontWeight: FontWeight.w400,

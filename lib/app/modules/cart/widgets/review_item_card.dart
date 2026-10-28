@@ -33,12 +33,7 @@ class ReviewItemCard extends StatelessWidget {
           // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              imagePath,
-              width: 72,
-              height: 72,
-              fit: BoxFit.cover,
-            ),
+            child: _buildImage(imagePath),
           ),
           const SizedBox(width: 16),
           // Details
@@ -77,6 +72,35 @@ class ReviewItemCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image.asset(
+          'assets/graphics/homerecipecardimage1.png',
+          width: 72,
+          height: 72,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : 'assets/graphics/homerecipecardimage1.png',
+      width: 72,
+      height: 72,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Image.asset(
+        'assets/graphics/homerecipecardimage1.png',
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
       ),
     );
   }
