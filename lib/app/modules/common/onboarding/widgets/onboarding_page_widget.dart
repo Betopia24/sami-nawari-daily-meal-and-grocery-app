@@ -29,7 +29,7 @@ class OnboardingPageWidget extends StatelessWidget {
             children: [
               Image.asset(imagePath, fit: BoxFit.cover),
               // Dark overlay
-              Container(color: Colors.black.withOpacity(0.5)),
+              Container(color: Colors.black.withValues(alpha: 0.5)),
               // Label and Title overlay
               Positioned(
                 left: 24.w,

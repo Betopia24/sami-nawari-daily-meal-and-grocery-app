@@ -8,7 +8,6 @@ import '../../../../widgets/custom_back_button.dart';
 import '../../../../widgets/custom_dropdown_field.dart';
 import '../../../../widgets/custom_text_field.dart';
 import '../../../../widgets/primary_button.dart';
-import '../../../../routes/app_routes.dart';
 import '../controllers/addnewfood_controller.dart';
 import '../widgets/image_picker_grid.dart';
 
@@ -99,9 +98,7 @@ class AddnewfoodView extends GetView<AddnewfoodController> {
             const SizedBox(height: 32),
             PrimaryButton(
               text: 'Continue',
-              onPressed: () {
-                Get.toNamed(Routes.addfooddetails);
-              },
+              onPressed: controller.validateAndContinue,
             ),
             const SizedBox(height: 24),
           ],

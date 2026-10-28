@@ -1,4 +1,3 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
-import '../../../../widgets/custom_back_button.dart';
 import '../../widgets/gender_selection.dart';
 import '../../widgets/profile_app_bar.dart';
 import '../../widgets/profile_section_card.dart';
@@ -72,7 +70,10 @@ class EditbuyerprofileView extends GetView<EditbuyerprofileController> {
               children: [
                 ProfileTextField(
                   label: 'Birthday',
+                  hintText: 'YYYY-MM-DD',
                   controller: controller.birthdayController,
+                  readOnly: true,
+                  onTap: () => controller.pickBirthday(context),
                   trailing: SvgPicture.asset(
                     AppAssets.calendarIcon,
                     width: 20,
@@ -103,9 +104,12 @@ class EditbuyerprofileView extends GetView<EditbuyerprofileController> {
           ],
         ),
       ),
-      bottomNavigationBar: ProfileBottomButton(
-        text: 'Save Changes',
-        onPressed: controller.saveChanges,
+      bottomNavigationBar: Obx(
+        () => ProfileBottomButton(
+          text: 'Save Changes',
+          isLoading: controller.isLoading.value,
+          onPressed: controller.saveChanges,
+        ),
       ),
     );
   }
@@ -119,24 +123,35 @@ class EditbuyerprofileView extends GetView<EditbuyerprofileController> {
             Stack(
               children: [
                 Obx(
-                  () => CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    backgroundImage: controller.profileImagePath.value != null
-                        ? FileImage(File(controller.profileImagePath.value!))
-                        : null,
-                    child: controller.profileImagePath.value == null
-                        ? SvgPicture.asset(
-                            AppAssets.singlePersonIcon,
-                            width: 40,
-                            height: 40,
-                            colorFilter: const ColorFilter.mode(
-                              AppColors.primary,
-                              BlendMode.srcIn,
-                            ),
-                          )
-                        : null,
-                  ),
+                  () {
+                    ImageProvider? provider;
+                    if (controller.profileImagePath.value != null) {
+                      provider =
+                          FileImage(File(controller.profileImagePath.value!));
+                    } else if (controller.networkProfileImageUrl.value != null &&
+                        controller
+                            .networkProfileImageUrl.value!.trim().isNotEmpty) {
+                      provider = NetworkImage(
+                          controller.networkProfileImageUrl.value!);
+                    }
+
+                    return CircleAvatar(
+                      radius: 40,
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                      backgroundImage: provider,
+                      child: provider == null
+                          ? SvgPicture.asset(
+                              AppAssets.singlePersonIcon,
+                              width: 40,
+                              height: 40,
+                              colorFilter: const ColorFilter.mode(
+                                AppColors.primary,
+                                BlendMode.srcIn,
+                              ),
+                            )
+                          : null,
+                    );
+                  },
                 ),
                 Positioned(
                   bottom: 0,

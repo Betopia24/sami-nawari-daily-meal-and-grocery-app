@@ -1,9 +1,7 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../widgets/primary_button.dart';
 import '../controllers/notificationaccess_controller.dart';
@@ -12,7 +10,7 @@ import '../../widgets/preference_title_section.dart';
 import '../../widgets/preference_option_card.dart';
 
 class NotificationaccessView extends GetView<NotificationaccessController> {
-  const NotificationaccessView({Key? key}) : super(key: key);
+  const NotificationaccessView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +59,7 @@ class NotificationaccessView extends GetView<NotificationaccessController> {
                               subtitle: option['subtitle']!,
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),

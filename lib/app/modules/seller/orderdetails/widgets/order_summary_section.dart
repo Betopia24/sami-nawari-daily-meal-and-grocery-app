@@ -8,11 +8,11 @@ class OrderSummarySection extends StatelessWidget {
   final String totalCost;
 
   const OrderSummarySection({
-    Key? key,
+    super.key,
     required this.items,
     required this.pickupCost,
     required this.totalCost,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,7 @@ class OrderSummarySection extends StatelessWidget {
               ],
             ),
           );
-        }).toList(),
+        }),
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
           child: Row(

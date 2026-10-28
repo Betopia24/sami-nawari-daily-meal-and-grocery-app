@@ -1,4 +1,3 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,7 +11,7 @@ import '../../widgets/preference_title_section.dart';
 import '../../widgets/preference_option_card.dart';
 
 class LocationaccessView extends GetView<LocationaccessController> {
-  const LocationaccessView({Key? key}) : super(key: key);
+  const LocationaccessView({super.key});
 
   @override
   Widget build(BuildContext context) {

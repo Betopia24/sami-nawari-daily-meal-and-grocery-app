@@ -1,4 +1,3 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -12,7 +11,7 @@ import '../../widgets/step_progress_indicator.dart';
 import '../controllers/questionprefs_controller.dart';
 
 class QuestionprefsView extends GetView<QuestionprefsController> {
-  const QuestionprefsView({Key? key}) : super(key: key);
+  const QuestionprefsView({super.key});
 
   @override
   Widget build(BuildContext context) {

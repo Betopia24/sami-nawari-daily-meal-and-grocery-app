@@ -110,6 +110,8 @@ import '../modules/seller/previewfood/bindings/previewfood_binding.dart';
 import '../modules/seller/previewfood/views/previewfood_view.dart';
 import '../modules/seller/orderdetails/bindings/orderdetails_binding.dart';
 import '../modules/seller/orderdetails/views/orderdetails_view.dart';
+import '../modules/seller/myfood/bindings/myfood_binding.dart';
+import '../modules/seller/myfood/views/myfood_view.dart';
 import '../modules/seller/addnewfood/bindings/addnewfood_binding.dart';
 import '../modules/seller/addnewfood/views/addnewfood_view.dart';
 import '../modules/seller/addfooddetails/bindings/addfooddetails_binding.dart';
@@ -419,6 +421,11 @@ class AppPages {
       name: Routes.orderdetails,
       page: () => const OrderdetailsView(),
       binding: OrderdetailsBinding(),
+    ),
+    GetPage(
+      name: Routes.myfood,
+      page: () => const MyFoodView(),
+      binding: MyFoodBinding(),
     ),
     GetPage(
       name: Routes.addnewfood,

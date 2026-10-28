@@ -99,9 +99,12 @@ class SellerregistrationView extends GetView<SellerregistrationController> {
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Obx(() => PrimaryButton(
-                text: controller.currentStep.value == 4 ? 'Submit Application' : 'Continue',
-                onPressed: controller.continueToNextStep,
-                showArrow: false,
+                text: controller.isLoading.value
+                    ? 'Submitting...'
+                    : (controller.currentStep.value == 4 ? 'Submit Application' : 'Continue'),
+                isEnabled: !controller.isLoading.value,
+                onPressed: controller.isLoading.value ? () {} : controller.continueToNextStep,
+                showArrow: !controller.isLoading.value,
               )),
             ),
           ],
@@ -428,7 +431,7 @@ class SellerregistrationView extends GetView<SellerregistrationController> {
         const SizedBox(height: 16),
         ToggleSettingCard(
           title: 'Pickup Available',
-          subtitle: 'Customers can pick up from\\nyour location',
+          subtitle: 'Customers can pick up from\nyour location',
           icon: AppAssets.pickupIcon,
           isToggled: controller.pickupAvailable.value,
           onChanged: (val) => controller.pickupAvailable.value = val,
@@ -469,13 +472,91 @@ class SellerregistrationView extends GetView<SellerregistrationController> {
           ),
         ),
         const SizedBox(height: 16),
-        DashedUploadArea(
-          title: 'Choose a file from your device',
-          subtitle: 'Maximum 500 KB file size',
-          onUpload: () {
-            // TODO: Implement file picking logic
-          },
-        ),
+        Obx(() {
+          if (controller.governmentIdPath.value.isNotEmpty) {
+            final fileName = controller.governmentIdPath.value.split('/').last;
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(controller.governmentIdPath.value),
+                      width: 54,
+                      height: 54,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.description_outlined, color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fileName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.outfit(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.check_circle, size: 14, color: Colors.green),
+                            const SizedBox(width: 4),
+                            Text(
+                              'ID Document Attached',
+                              style: GoogleFonts.outfit(
+                                fontSize: 13,
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: controller.removeGovernmentId,
+                    tooltip: 'Remove document',
+                  ),
+                ],
+              ),
+            );
+          }
+          return DashedUploadArea(
+            title: 'Choose a file from your device',
+            subtitle: 'Maximum 5 MB file size (JPG, PNG)',
+            onUpload: controller.pickGovernmentId,
+          );
+        }),
         const SizedBox(height: 48),
       ],
     );
@@ -495,6 +576,13 @@ class SellerregistrationView extends GetView<SellerregistrationController> {
             _buildInfoRow('Phone', _getVal(controller.phoneNumberController.text)),
             const SizedBox(height: 12),
             _buildInfoRow('Cuisine', controller.selectedCuisines.isEmpty ? '—' : controller.selectedCuisines.join(', ')),
+            const SizedBox(height: 12),
+            _buildInfoRow('Address', _getVal(controller.locationController.text)),
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              'Location (Point)',
+              '${controller.latitude.value.toStringAsFixed(4)}, ${controller.longitude.value.toStringAsFixed(4)}',
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -513,6 +601,27 @@ class SellerregistrationView extends GetView<SellerregistrationController> {
             _buildInfoRow('Pickup', controller.pickupAvailable.value ? 'Available' : 'Not available', valueColor: controller.pickupAvailable.value ? AppColors.primary : Colors.grey.shade600, valueBold: true),
             const SizedBox(height: 12),
             _buildInfoRow('Delivery', controller.deliveryAvailable.value ? 'Available' : 'Not available', valueColor: controller.deliveryAvailable.value ? AppColors.primary : Colors.grey.shade600, valueBold: true),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildReviewCard(
+          title: 'DOCUMENTS & VERIFICATION',
+          children: [
+            _buildInfoRow(
+              'Government ID',
+              controller.governmentIdPath.value.isNotEmpty
+                  ? controller.governmentIdPath.value.split('/').last
+                  : (controller.kitchenImages.isNotEmpty ? 'Kitchen photo attached' : 'None'),
+              valueBold: true,
+              valueColor: (controller.governmentIdPath.value.isNotEmpty || controller.kitchenImages.isNotEmpty)
+                  ? Colors.green.shade700
+                  : Colors.grey.shade600,
+            ),
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              'Kitchen Photos',
+              '${controller.kitchenImages.length} uploaded',
+            ),
           ],
         ),
         const SizedBox(height: 24),

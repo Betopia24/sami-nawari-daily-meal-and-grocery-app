@@ -57,6 +57,7 @@ abstract class Routes {
   static const SELLERREGISTRATION = _Paths.SELLERREGISTRATION;
   static const orderlist = _Paths.orderlist;
   static const orderdetails = _Paths.orderdetails;
+  static const myfood = _Paths.myfood;
   static const addnewfood = _Paths.addnewfood;
   static const addfooddetails = _Paths.addfooddetails;
   static const previewfood = _Paths.previewfood;
@@ -107,31 +108,8 @@ abstract class _Paths {
   static const savedreceipe = '/savedreceipe';
   static const favouriteseller = '/favouriteseller';
   static const notification = '/notification';
-
-  static const locationaccess = '/locationaccess';
-  static const foodpreferences = '/foodpreferences';
-  static const questionprefs = '/questionprefs';
-  static const notificationaccess = '/notificationaccess';
-
-  static const appsharing = '/appsharing';
-  static const languageandregion = '/languageandregion';
-  static const updatepassword = '/updatepassword';
-  static const familyinvite = '/familyinvite';
-  static const dietarypref = '/dietarypref';
-  static const privacypolicy = '/privacypolicy';
-  static const helpandsupport = '/helpandsupport';
-  static const rateapp = '/rateapp';
-  static const termandcondition = '/termandcondition';
-  static const alergiesandintolerence = '/alergiesandintolerence';
-  static const editbuyerprofile = '/editbuyerprofile';
   static const editSellerProfile = '/editsellerprofile';
-  static const mycarts = '/mycarts';
-  static const revieworder = '/revieworder';
-  static const deliveryselection = '/deliveryselection';
-  static const deliveryaddress = '/deliveryaddress';
-  static const placeorder = '/placeorder';
   static const orderplaced = '/orderplaced';
-  static const trackorder = '/trackorder';
   static const sharedmembers = '/sharedmembers';
   static const MEMBERINVITE = '/memberinvite';
   static const PERMISSIONSET = '/permissionset';
@@ -139,6 +117,7 @@ abstract class _Paths {
   static const SELLERREGISTRATION = '/sellerregistration';
   static const orderlist = '/orderlist';
   static const orderdetails = '/orderdetails';
+  static const myfood = '/myfood';
   static const addnewfood = '/addnewfood';
   static const addfooddetails = '/addfooddetails';
   static const previewfood = '/previewfood';

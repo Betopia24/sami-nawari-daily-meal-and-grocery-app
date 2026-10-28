@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../widgets/primary_button.dart';
-import '../../../navbar/controllers/navbar_controller.dart';
 
 class SubmitSuccessWidget extends StatefulWidget {
   const SubmitSuccessWidget({super.key});
@@ -180,10 +179,10 @@ class _SubmitSuccessWidgetState extends State<SubmitSuccessWidget>
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.08),
+                                  color: AppColors.primary.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: AppColors.primary.withOpacity(0.1),
+                                    color: AppColors.primary.withValues(alpha: 0.1),
                                   ),
                                 ),
                                 child: Column(

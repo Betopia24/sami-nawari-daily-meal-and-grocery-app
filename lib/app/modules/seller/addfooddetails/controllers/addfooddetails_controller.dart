@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../routes/app_routes.dart';
 
 class Ingredient {
   String name;
@@ -9,17 +11,34 @@ class Ingredient {
 }
 
 class AddfooddetailsController extends GetxController {
-  final preparationTime = ''.obs;
+  final preparationTimeController = TextEditingController(text: '25 mins');
+  final preparationTime = '25 mins'.obs;
   
   final ingredients = <Ingredient>[Ingredient()].obs;
   
   final cookingSteps = <String>[''].obs;
   
-  final isPickup = false.obs;
-  final isDelivery = false.obs;
+  final isPickup = true.obs;
+  final isDelivery = true.obs;
   final deliveryFee = '\$ 2.50'.obs;
   
-  final deliveryFees = ['\$ 2.50', '\$ 5.00', '\$ 10.00'];
+  final deliveryFees = ['\$ 1.50', '\$ 2.00', '\$ 2.50', '\$ 5.00', '\$ 10.00'];
+
+  Map<String, dynamic> stepOneData = {};
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.arguments is Map) {
+      stepOneData = Map<String, dynamic>.from(Get.arguments as Map);
+    }
+  }
+
+  @override
+  void onClose() {
+    preparationTimeController.dispose();
+    super.onClose();
+  }
 
   void addIngredient() {
     ingredients.add(Ingredient());
@@ -64,5 +83,66 @@ class AddfooddetailsController extends GetxController {
 
   void toggleDelivery() {
     isDelivery.value = !isDelivery.value;
+  }
+
+  void validateAndContinue() {
+    final prepTime = preparationTimeController.text.trim();
+    if (prepTime.isEmpty) {
+      Get.snackbar(
+        'Required Field',
+        'Please enter preparation time (e.g. 25 mins)',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final validIngredients = ingredients.where((i) => i.name.trim().isNotEmpty).toList();
+    if (validIngredients.isEmpty) {
+      Get.snackbar(
+        'Required Field',
+        'Please add at least one ingredient with a name',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (!isPickup.value && !isDelivery.value) {
+      Get.snackbar(
+        'Required Field',
+        'Please select at least one option: Pickup or Delivery',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final parsedDeliveryFee = isDelivery.value
+        ? (double.tryParse(deliveryFee.value.replaceAll(RegExp(r'[^\d.]'), '')) ?? 2.0)
+        : 0.0;
+
+    final combinedData = {
+      ...stepOneData,
+      'preparationTime': prepTime,
+      'ingredients': validIngredients
+          .map((i) => {
+                'name': i.name.trim(),
+                'quantity': num.tryParse(i.quantity.trim()) ?? 1,
+                'unit': i.unit.trim(),
+              })
+          .toList(),
+      'cookingSteps': cookingSteps
+          .where((s) => s.trim().isNotEmpty)
+          .toList(),
+      'pickupAvailable': isPickup.value,
+      'deliveryAvailable': isDelivery.value,
+      'deliveryFee': parsedDeliveryFee,
+    };
+
+    Get.toNamed(Routes.previewfood, arguments: combinedData);
   }
 }

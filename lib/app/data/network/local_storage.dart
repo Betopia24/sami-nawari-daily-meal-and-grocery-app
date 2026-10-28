@@ -139,6 +139,21 @@ class LocalStorage {
     return await prefs.setString(userKey, jsonEncode(userData));
   }
 
+  /// Save user role
+  static Future<bool> saveRole(String role) async {
+    final prefs = await _instance;
+    return await prefs.setString(roleKey, role);
+  }
+
+  /// Get user role
+  static Future<String?> getRole() async {
+    final prefs = await _instance;
+    return prefs.getString(roleKey);
+  }
+
+  /// Synchronous role getter
+  static String? get roleSync => _prefs?.getString(roleKey);
+
   /// Get user data as Map / JSON
   static Future<Map<String, dynamic>?> getUser() async {
     final prefs = await _instance;
@@ -154,6 +169,10 @@ class LocalStorage {
   /// Clear all authentication-related data (e.g., on logout)
   static Future<void> clearAuthData() async {
     final prefs = await _instance;
+    final currentUserId = prefs.getString(idKey) ?? prefs.getString(userIdKey);
+    if (currentUserId != null) {
+      await prefs.remove('pending_seller_approval_$currentUserId');
+    }
     await prefs.remove(idKey);
     await prefs.remove(userIdKey);
     await prefs.remove(accessTokenKey);
@@ -162,6 +181,27 @@ class LocalStorage {
     await prefs.remove('refresh_token');
     await prefs.remove(userKey);
     await prefs.remove(roleKey);
+    await prefs.remove('pending_seller_approval');
+  }
+
+  /// User-scoped pending seller request management
+  static Future<void> setPendingSellerApproval(String? userId, bool isPending) async {
+    final prefs = await _instance;
+    await prefs.remove('pending_seller_approval'); // remove legacy global key
+    if (userId != null && userId.isNotEmpty) {
+      if (isPending) {
+        await prefs.setBool('pending_seller_approval_$userId', true);
+      } else {
+        await prefs.remove('pending_seller_approval_$userId');
+      }
+    }
+  }
+
+  static Future<bool> isPendingSellerApproval(String? userId) async {
+    if (userId == null || userId.isEmpty) return false;
+    final prefs = await _instance;
+    await prefs.remove('pending_seller_approval'); // remove legacy global key
+    return prefs.getBool('pending_seller_approval_$userId') ?? false;
   }
 
   // ---------------------------------------------------------------------------

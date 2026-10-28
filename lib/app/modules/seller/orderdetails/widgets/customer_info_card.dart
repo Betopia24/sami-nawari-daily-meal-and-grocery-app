@@ -9,11 +9,11 @@ class CustomerInfoCard extends StatelessWidget {
   final String? imageUrl;
 
   const CustomerInfoCard({
-    Key? key,
+    super.key,
     required this.name,
     required this.phone,
     this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

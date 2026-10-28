@@ -6,7 +6,17 @@ import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../widgets/primary_button.dart';
 
-enum OrderStatus { delivered, pickedUp, preparing }
+enum OrderStatus {
+  delivered,
+  pickedUp,
+  preparing,
+  confirmed,
+  accepted,
+  outForDelivery,
+  pendingPayment,
+  completed,
+  cancelled,
+}
 
 enum OrderType { delivery, pickup }
 
@@ -34,13 +44,50 @@ class OrderCard extends StatelessWidget {
     this.onChevronTap,
   });
 
+  static OrderStatus statusFromString(String val) {
+    switch (val.toUpperCase()) {
+      case 'DELIVERED':
+        return OrderStatus.delivered;
+      case 'PICKED_UP':
+      case 'PICKEDUP':
+        return OrderStatus.pickedUp;
+      case 'COMPLETED':
+        return OrderStatus.completed;
+      case 'PREPARING':
+        return OrderStatus.preparing;
+      case 'CONFIRMED':
+        return OrderStatus.confirmed;
+      case 'ACCEPTED':
+        return OrderStatus.accepted;
+      case 'OUT_FOR_DELIVERY':
+      case 'OUTFORDELIVERY':
+        return OrderStatus.outForDelivery;
+      case 'PENDING_PAYMENT':
+      case 'PENDING':
+        return OrderStatus.pendingPayment;
+      case 'CANCELLED':
+      case 'REJECTED':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.confirmed;
+    }
+  }
+
   Color _getStatusColor() {
     switch (status) {
       case OrderStatus.delivered:
       case OrderStatus.pickedUp:
+      case OrderStatus.completed:
         return AppColors.primary;
       case OrderStatus.preparing:
+      case OrderStatus.outForDelivery:
+      case OrderStatus.pendingPayment:
         return AppColors.iconOrange;
+      case OrderStatus.confirmed:
+      case OrderStatus.accepted:
+        return const Color(0xFF2563EB); // Vibrant Blue
+      case OrderStatus.cancelled:
+        return Colors.red.shade600;
     }
   }
 
@@ -50,8 +97,20 @@ class OrderCard extends StatelessWidget {
         return 'Delivered';
       case OrderStatus.pickedUp:
         return 'Picked Up';
+      case OrderStatus.completed:
+        return 'Completed';
       case OrderStatus.preparing:
         return 'Preparing';
+      case OrderStatus.outForDelivery:
+        return 'Out for Delivery';
+      case OrderStatus.pendingPayment:
+        return 'Pending Payment';
+      case OrderStatus.confirmed:
+        return 'Confirmed';
+      case OrderStatus.accepted:
+        return 'Accepted';
+      case OrderStatus.cancelled:
+        return 'Cancelled';
     }
   }
 
@@ -183,7 +242,11 @@ class OrderCard extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    if (status == OrderStatus.preparing)
+                    if (status == OrderStatus.preparing ||
+                        status == OrderStatus.confirmed ||
+                        status == OrderStatus.accepted ||
+                        status == OrderStatus.outForDelivery ||
+                        status == OrderStatus.pendingPayment)
                       Expanded(
                         child: PrimaryButton(
                           text: 'Track Order',

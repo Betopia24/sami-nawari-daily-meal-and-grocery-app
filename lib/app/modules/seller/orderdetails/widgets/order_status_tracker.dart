@@ -5,12 +5,14 @@ import '../../../../../core/utils/app_colors.dart';
 class OrderStatusTracker extends StatefulWidget {
   final String currentStatus;
   final Function(String) onConfirm;
+  final bool isLoading;
 
   const OrderStatusTracker({
-    Key? key,
+    super.key,
     required this.currentStatus,
     required this.onConfirm,
-  }) : super(key: key);
+    this.isLoading = false,
+  });
 
   @override
   State<OrderStatusTracker> createState() => _OrderStatusTrackerState();
@@ -27,8 +29,29 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
 
   String? _selectedNextStep;
 
+  int _indexOf(String s) {
+    final clean = s.toUpperCase().replaceAll(' ', '_');
+    switch (clean) {
+      case 'ACCEPTED':
+        return 0;
+      case 'PREPARING':
+        return 1;
+      case 'OUT_FOR_DELIVERY':
+      case 'ON_THE_WAY':
+        return 2;
+      case 'DELIVERED':
+        return 3;
+      case 'COMPLETED':
+        return 4;
+      default:
+        return -1;
+    }
+  }
+
   bool _isStepCompleted(String step) {
-    return steps.indexOf(widget.currentStatus) >= steps.indexOf(step);
+    final cur = _indexOf(widget.currentStatus);
+    final target = _indexOf(step);
+    return cur >= target && cur >= 0;
   }
 
   bool _isStepSelected(String step) {
@@ -36,13 +59,15 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
   }
 
   void _toggleStep(String step) {
+    if (widget.isLoading) return;
+
     // Determine the immediate next step
-    final currentIndex = steps.indexOf(widget.currentStatus);
-    final targetIndex = steps.indexOf(step);
-    
+    final currentIndex = _indexOf(widget.currentStatus);
+    final targetIndex = _indexOf(step);
+
     // Can only select the immediate next step
     if (targetIndex != currentIndex + 1) return;
-    
+
     setState(() {
       if (_selectedNextStep == step) {
         _selectedNextStep = null; // uncheck
@@ -57,8 +82,8 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
     final isSelected = _isStepSelected(title);
     final isChecked = isCompleted || isSelected;
 
-    final currentIndex = steps.indexOf(widget.currentStatus);
-    final targetIndex = steps.indexOf(title);
+    final currentIndex = _indexOf(widget.currentStatus);
+    final targetIndex = _indexOf(title);
     final isLocked = targetIndex > currentIndex + 1;
 
     return GestureDetector(
@@ -75,7 +100,11 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
                 color: isChecked ? AppColors.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(
-                  color: isChecked ? AppColors.primary : (isLocked ? AppColors.borderGrey.withOpacity(0.5) : AppColors.borderGrey),
+                  color: isChecked
+                      ? AppColors.primary
+                      : (isLocked
+                          ? AppColors.borderGrey.withValues(alpha: 0.5)
+                          : AppColors.borderGrey),
                 ),
               ),
               child: isChecked
@@ -91,7 +120,9 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isLocked ? AppColors.textSecondary.withOpacity(0.5) : AppColors.textPrimary,
+                    color: isLocked
+                        ? AppColors.textSecondary.withValues(alpha: 0.5)
+                        : AppColors.textPrimary,
                   ),
                 ),
                 if (time != null) ...[
@@ -115,6 +146,9 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
 
   @override
   Widget build(BuildContext context) {
+    final curIndex = _indexOf(widget.currentStatus);
+    final isCompletedAll = curIndex == 4;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -136,19 +170,23 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
           const SizedBox(height: 12),
           const Divider(color: AppColors.borderGrey),
           const SizedBox(height: 16),
-          // For demo purposes, we show a time for 'Accepted' if it's completed
-          _buildStep('Accepted', time: _isStepCompleted('Accepted') ? '02:42 PM' : null),
-          _buildStep('Preparing', time: _isStepCompleted('Preparing') ? '03:00 PM' : null),
-          _buildStep('Out for Delivery', time: _isStepCompleted('Out for Delivery') ? '03:15 PM' : null),
-          _buildStep('Delivered', time: _isStepCompleted('Delivered') ? '03:45 PM' : null),
-          _buildStep('Completed', time: _isStepCompleted('Completed') ? '03:50 PM' : null),
-          if (widget.currentStatus != 'Completed') ...[
+          _buildStep('Accepted',
+              time: _isStepCompleted('Accepted') ? 'Accepted' : null),
+          _buildStep('Preparing',
+              time: _isStepCompleted('Preparing') ? 'Kitchen' : null),
+          _buildStep('Out for Delivery',
+              time: _isStepCompleted('Out for Delivery') ? 'On Way' : null),
+          _buildStep('Delivered',
+              time: _isStepCompleted('Delivered') ? 'Delivered' : null),
+          _buildStep('Completed',
+              time: _isStepCompleted('Completed') ? 'Finished' : null),
+          if (!isCompletedAll) ...[
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _selectedNextStep != null
+                onPressed: (_selectedNextStep != null && !widget.isLoading)
                     ? () {
                         widget.onConfirm(_selectedNextStep!);
                         setState(() {
@@ -164,14 +202,25 @@ class _OrderStatusTrackerState extends State<OrderStatusTracker> {
                   ),
                   elevation: 0,
                 ),
-                child: Text(
-                  'Confirm',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: _selectedNextStep != null ? Colors.white : AppColors.textSecondary,
-                  ),
-                ),
+                child: widget.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        'Confirm',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _selectedNextStep != null
+                              ? Colors.white
+                              : AppColors.textSecondary,
+                        ),
+                      ),
               ),
             ),
           ],

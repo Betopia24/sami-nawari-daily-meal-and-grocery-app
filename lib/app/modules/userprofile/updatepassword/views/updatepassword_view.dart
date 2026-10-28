@@ -1,4 +1,3 @@
-import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../../core/utils/app_colors.dart';
@@ -26,12 +25,7 @@ class UpdatepasswordView extends GetView<UpdatepasswordController> {
                 label: 'Current Password',
                 hintText: '********',
                 controller: controller.currentPasswordController,
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Current password is required';
-                  }
-                  return null;
-                },
+                validator: controller.validateCurrentPassword,
               ),
               const SizedBox(height: 24),
               ProfilePasswordField(
@@ -51,9 +45,12 @@ class UpdatepasswordView extends GetView<UpdatepasswordController> {
           ),
         ),
       ),
-      bottomNavigationBar: ProfileBottomButton(
-        text: 'Update Password',
-        onPressed: controller.saveChanges,
+      bottomNavigationBar: Obx(
+        () => ProfileBottomButton(
+          text: 'Update Password',
+          isLoading: controller.isLoading.value,
+          onPressed: controller.updatePassword,
+        ),
       ),
     );
   }

@@ -8,11 +8,11 @@ class AuthFooter extends StatelessWidget {
   final VoidCallback onActionPressed;
 
   const AuthFooter({
-    Key? key,
+    super.key,
     required this.text,
     required this.actionText,
     required this.onActionPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

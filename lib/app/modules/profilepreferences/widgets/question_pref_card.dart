@@ -11,13 +11,13 @@ class QuestionPrefCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const QuestionPrefCard({
-    Key? key,
+    super.key,
     required this.iconPathOrEmoji,
     required this.title,
     required this.subtitle,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   bool get _isAsset =>
       iconPathOrEmoji.endsWith('.png') || iconPathOrEmoji.endsWith('.svg');
@@ -39,7 +39,7 @@ class QuestionPrefCard extends StatelessWidget {
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -55,7 +55,7 @@ class QuestionPrefCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Colors.white.withOpacity(0.5)
+                    ? Colors.white.withValues(alpha: 0.5)
                     : AppColors.backgroundOffWhite,
                 shape: BoxShape.circle,
               ),
