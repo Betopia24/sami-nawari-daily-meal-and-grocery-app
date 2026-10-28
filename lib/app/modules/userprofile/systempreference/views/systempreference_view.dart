@@ -590,17 +590,18 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
       children: [
         ProfileMenuTile(
           iconPath: AppAssets.bankDetailsIcon,
-          title: 'Bank Details',
+          title: 'Stripe Connect',
           onTap: () => Get.toNamed(Routes.BANKDETAILS),
-        ),
-        ProfileMenuTile(
-          iconPath: AppAssets.paymentInformationIcon,
-          title: 'Payment Information',
-          onTap: () {
-            Get.toNamed(Routes.paymentinformation);
-          },
           showBottomDivider: false,
         ),
+        // ProfileMenuTile(
+        //   iconPath: AppAssets.paymentInformationIcon,
+        //   title: 'Payment Information',
+        //   onTap: () {
+        //     Get.toNamed(Routes.paymentinformation);
+        //   },
+        //   showBottomDivider: false,
+        // ),
       ],
     );
   }

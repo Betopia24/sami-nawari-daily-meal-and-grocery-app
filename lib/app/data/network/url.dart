@@ -75,7 +75,8 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String notifications = '/notifications';
   static const String readAllNotifications = '/notifications/read-all';
-  static const String singleReadNotification = '/notifications/notification_id/read';
+  static const String singleReadNotification =
+      '/notifications/notification_id/read';
 
   // ---------------------------------------------------------------------------
   // SELLER MODULE
@@ -88,6 +89,9 @@ class Urls {
   static const String updateFood = '/foods/seller/food_id';
   static const String deleteFood = '/foods/seller/:foodId';
   static const String orderStatusUpdate = '/orders/seller/order_id/status';
+  static const String stripeConnect = '/seller/stripe/connect';
+  static const String earningOverview = '/seller/earnings';
+  static const String earningHistory = '/seller/earnings/history';
 
   /// Helper to get the update food endpoint with food ID
   static String getUpdateFoodUrl(String foodId) =>

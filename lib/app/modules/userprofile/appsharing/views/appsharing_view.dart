@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
@@ -74,10 +75,19 @@ class AppsharingView extends GetView<AppsharingController> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.grey.shade200),
                     ),
-                    child: const Icon(
-                      Icons.qr_code_2,
+                    child: QrImageView(
+                      data: controller.appDownloadUrl,
+                      version: QrVersions.auto,
                       size: 160,
-                      color: AppColors.primary,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: AppColors.primary,
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: AppColors.primary,
+                      ),
+                      padding: EdgeInsets.zero,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -106,12 +116,22 @@ class AppsharingView extends GetView<AppsharingController> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  PrimaryButton(
-                    text: AppStrings.copyLinkButton,
-                    showArrow: false,
-                    isOutlined: true,
-                    prefixIcon: Icons.link,
-                    onPressed: () {},
+                  Builder(
+                    builder: (btnContext) {
+                      return PrimaryButton(
+                        text: AppStrings.copyLinkButton,
+                        showArrow: false,
+                        isOutlined: true,
+                        prefixIcon: Icons.link,
+                        onPressed: () {
+                          final box = btnContext.findRenderObject() as RenderBox?;
+                          final origin = box != null
+                              ? box.localToGlobal(Offset.zero) & box.size
+                              : null;
+                          controller.copyLink(sharePositionOrigin: origin);
+                        },
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                 ],

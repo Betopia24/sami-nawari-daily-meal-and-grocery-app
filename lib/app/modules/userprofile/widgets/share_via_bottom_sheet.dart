@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:daily_meal_and_grocery_app/core/utils/app_colors.dart';
+import 'package:daily_meal_and_grocery_app/core/utils/app_strings.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ShareViaBottomSheet extends StatelessWidget {
   const ShareViaBottomSheet({super.key});
+
+  void _share() {
+    Get.back();
+    Share.share(
+      AppStrings.shareAppMessage,
+      subject: AppStrings.shareAppSubject,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,35 +59,35 @@ class ShareViaBottomSheet extends StatelessWidget {
                   icon: Icons.chat,
                   iconColor: AppColors.socialWhatsApp, // WhatsApp Green
                   title: 'WhatsApp',
-                  onTap: () {},
+                  onTap: _share,
                 ),
                 _buildDivider(),
                 _buildShareOption(
                   icon: Icons.facebook,
                   iconColor: AppColors.socialFacebook, // Facebook Blue
                   title: 'Facebook',
-                  onTap: () {},
+                  onTap: _share,
                 ),
                 _buildDivider(),
                 _buildShareOption(
                   icon: Icons.message,
                   iconColor: AppColors.socialiMessage, // iMessage Green
                   title: 'Messages',
-                  onTap: () {},
+                  onTap: _share,
                 ),
                 _buildDivider(),
                 _buildShareOption(
                   icon: Icons.camera_alt,
                   iconColor: AppColors.socialInstagram, // Instagram Pink/Red
                   title: 'Instagram',
-                  onTap: () {},
+                  onTap: _share,
                 ),
                 _buildDivider(),
                 _buildShareOption(
                   icon: Icons.email,
                   iconColor: AppColors.socialEmail, // Mail Blue
                   title: 'Email',
-                  onTap: () {},
+                  onTap: _share,
                 ),
               ],
             ),
