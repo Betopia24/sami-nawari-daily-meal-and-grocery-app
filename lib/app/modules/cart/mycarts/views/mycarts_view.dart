@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../routes/app_routes.dart';
 import '../../widgets/cart_item_card.dart';
 import '../../widgets/cart_restaurant_card.dart';
 import '../../widgets/checkout_bottom_bar.dart';
-import '../../widgets/leave_review_card.dart';
 import '../../widgets/order_status_timeline_card.dart';
 import '../../widgets/track_order_details_card.dart';
 import '../../widgets/history_order_card.dart';
@@ -213,120 +213,205 @@ class MycartsView extends GetView<MycartsController> {
       }
 
       final activeList = controller.activeOrders;
-      final hasActive = activeList.isNotEmpty;
-      final firstOrder = hasActive ? activeList.first : null;
-
-      final restaurantName = firstOrder?['seller']?['name']?.toString() ??
-          firstOrder?['sellerName']?.toString() ??
-          "Maria's Kitchen";
-      final orderTitle = (firstOrder?['items'] is List &&
-              (firstOrder!['items'] as List).isNotEmpty)
-          ? firstOrder['items'][0]['foodName']?.toString() ??
-              'Classic Mezze Platter'
-          : 'Classic Mezze Platter';
-      final status = firstOrder?['status']?.toString() ?? 'Preparing';
-      final totalPrice = firstOrder?['totalPrice'] != null
-          ? '\$${(firstOrder!['totalPrice'] as num).toStringAsFixed(2)}'
-          : '\$20.50';
-      final address = firstOrder?['deliveryAddress'] is Map
-          ? '${firstOrder!['deliveryAddress']['streetAddress'] ?? ''}, ${firstOrder['deliveryAddress']['city'] ?? ''}'
-          : '123 Main St, San Francisco';
-
-      return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-        child: Column(
-          children: [
-            TrackOrderDetailsCard(
-              restaurantName: restaurantName,
-              restaurantImage: AppAssets.homeRecipeCardImage1,
-              orderName: orderTitle,
-              timeAgo: '15 min ago',
-              status: status,
-              eta: '~10 min',
-              itemsAndPrice: '1 item  •  $totalPrice',
-              paymentMethod: 'Cash on Delivery',
-              address: address,
-              onContactSeller: controller.onContactSeller,
-            ),
-            const SizedBox(height: 16),
-            OrderStatusTimelineCard(
-              steps: [
-                OrderStatusStep(
-                  title: 'Order Placed',
-                  time: '02:41 PM',
-                  isCompleted: true,
-                ),
-                OrderStatusStep(
-                  title: 'Accepted',
-                  time: '02:42 PM',
-                  isCompleted: true,
-                ),
-                OrderStatusStep(
-                  title: 'Preparing',
-                  time: '02:45 PM',
-                  isCompleted: true,
-                ),
-                OrderStatusStep(
-                  title: 'Out for Delivery',
-                  time: '03:15 PM',
-                  isCompleted: false,
-                ),
-                OrderStatusStep(
-                  title: 'Delivered',
-                  time: '03:25 PM',
-                  isCompleted: false,
-                ),
-                OrderStatusStep(
-                  title: 'Completed',
-                  time: '',
-                  isCompleted: false,
-                ),
-              ],
-              bottomActions: Row(
-                children: [
-                  Expanded(
-                    child: PrimaryButton(
-                      text: 'Refresh Status',
-                      showArrow: false,
-                      onPressed: controller.onRefreshStatus,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => controller.onCancelOrder(
-                        firstOrder?['id']?.toString(),
+      if (activeList.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: controller.fetchOrders,
+          color: AppColors.primary,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(32, 60, 32, 120),
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
                       ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFFFE4E6)),
+                      child: const Icon(
+                        Icons.access_time_outlined,
+                        size: 56,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'No Active Orders',
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'When you place an order, you can track its real-time preparation and delivery progress here.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
+                      onPressed: () => Get.toNamed(Routes.homemadefoodgrid),
                       child: Text(
-                        'Cancel Order',
+                        'Explore Foods',
                         style: GoogleFonts.outfit(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFEF4444),
+                          color: Colors.white,
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.fetchOrders,
+        color: AppColors.primary,
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+          itemCount: activeList.length,
+          itemBuilder: (context, orderIndex) {
+            final order = activeList[orderIndex];
+            final items = (order['items'] is List)
+                ? (order['items'] as List)
+                : [];
+            final firstItem =
+                items.isNotEmpty && items.first is Map ? items.first as Map : null;
+
+            final foodName =
+                firstItem?['foodName']?.toString() ?? 'Order Item';
+            final orderTitle = items.length > 1
+                ? '$foodName + ${items.length - 1} more'
+                : foodName;
+
+            final restaurantName = order['seller']?['sellerProfile']
+                        ?['businessName']
+                    ?.toString() ??
+                order['seller']?['name']?.toString() ??
+                order['sellerName']?.toString() ??
+                firstItem?['sellerName']?.toString() ??
+                'Kitchen';
+
+            final foodImage = firstItem?['image']?.toString() ??
+                firstItem?['foodImage']?.toString() ??
+                AppAssets.homeRecipeCardImage1;
+
+            final statusRaw = order['status']?.toString() ?? 'CONFIRMED';
+            final statusDisplay = controller.formatStatusTitle(statusRaw);
+
+            final totalPrice = order['totalPrice'] != null
+                ? '\$${(order['totalPrice'] as num).toStringAsFixed(2)}'
+                : '\$0.00';
+
+            final itemsCount = items.fold<int>(
+              0,
+              (sum, it) =>
+                  sum +
+                  ((it is Map ? it['quantity'] as num? : null)?.toInt() ?? 1),
+            );
+            final itemsCountStr = itemsCount > 0
+                ? '$itemsCount item${itemsCount > 1 ? 's' : ''}'
+                : '1 item';
+
+            final paymentMethodStr = controller.formatPaymentMethod(
+                order['paymentMethod']?.toString() ?? 'CASH_ON_DELIVERY');
+
+            final addrMap = order['deliveryAddress'] is Map
+                ? order['deliveryAddress'] as Map
+                : null;
+            final street = addrMap?['streetAddress']?.toString() ?? '';
+            final city = addrMap?['city']?.toString() ?? '';
+            final addressStr = (street.isNotEmpty && city.isNotEmpty)
+                ? '$street, $city'
+                : (street.isNotEmpty
+                    ? street
+                    : (city.isNotEmpty ? city : 'Delivery Address'));
+
+            final timeAgoStr =
+                controller.formatTimeAgo(order['createdAt']?.toString());
+            final timelineSteps = controller.buildTimelineSteps(order);
+
+            final canCancel = statusRaw.toUpperCase() == 'CONFIRMED' ||
+                statusRaw.toUpperCase() == 'PENDING_PAYMENT' ||
+                statusRaw.toUpperCase() == 'ACCEPTED';
+
+            return Column(
+              children: [
+                TrackOrderDetailsCard(
+                  restaurantName: restaurantName,
+                  restaurantImage: foodImage,
+                  orderName: orderTitle,
+                  timeAgo: timeAgoStr,
+                  status: statusDisplay,
+                  eta: '~20-30 min',
+                  itemsAndPrice: '$itemsCountStr  •  $totalPrice',
+                  paymentMethod: paymentMethodStr,
+                  address: addressStr,
+                  onContactSeller: () => controller.onContactSeller(order),
+                ),
+                const SizedBox(height: 16),
+                OrderStatusTimelineCard(
+                  steps: timelineSteps,
+                  bottomActions: Row(
+                    children: [
+                      Expanded(
+                        child: PrimaryButton(
+                          text: 'Refresh Status',
+                          showArrow: false,
+                          onPressed: controller.onRefreshStatus,
+                        ),
+                      ),
+                      if (canCancel) ...[
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => controller.onCancelOrder(
+                              order['id']?.toString(),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFFFFE4E6)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              'Cancel Order',
+                              style: GoogleFonts.outfit(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            LeaveReviewCard(
-              selectedRating: controller.selectedRating.value,
-              onRatingChanged: controller.setRating,
-              onSubmit: () => controller.onSubmitReview(
-                firstOrder?['id']?.toString(),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          },
         ),
       );
     });
@@ -334,90 +419,143 @@ class MycartsView extends GetView<MycartsController> {
 
   Widget _buildHistoryTab() {
     return Obx(() {
+      if (controller.isLoadingOrders.value &&
+          controller.historyOrders.isEmpty) {
+        return const ActiveOrdersShimmer();
+      }
+
       final historyList = controller.historyOrders;
 
-      if (historyList.isNotEmpty) {
-        return ListView.builder(
+      if (historyList.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: controller.fetchOrders,
+          color: AppColors.primary,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(32, 60, 32, 120),
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.history_outlined,
+                        size: 56,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'No Order History Yet',
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your delivered, completed, and past orders will show up here with receipts and reordering options.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () => Get.toNamed(Routes.homemadefoodgrid),
+                      child: Text(
+                        'Start Ordering',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.fetchOrders,
+        color: AppColors.primary,
+        child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
           itemCount: historyList.length,
           itemBuilder: (context, index) {
             final order = historyList[index];
-            final title = (order['items'] is List &&
-                    (order['items'] as List).isNotEmpty)
-                ? order['items'][0]['foodName']?.toString() ?? 'Food Item'
-                : 'Delicious Meal';
-            final seller = order['sellerName']?.toString() ?? "Kitchen";
-            final price = (order['totalPrice'] as num?)?.toDouble() ?? 20.0;
-            final status = order['status']?.toString() ?? 'Delivered';
+            final items = (order['items'] is List)
+                ? (order['items'] as List)
+                : [];
+            final firstItem =
+                items.isNotEmpty && items.first is Map ? items.first as Map : null;
+
+            final foodName =
+                firstItem?['foodName']?.toString() ?? 'Food Order';
+            final title = items.length > 1
+                ? '$foodName (+${items.length - 1} items)'
+                : foodName;
+
+            final seller = order['seller']?['sellerProfile']
+                        ?['businessName']
+                    ?.toString() ??
+                order['seller']?['name']?.toString() ??
+                order['sellerName']?.toString() ??
+                firstItem?['sellerName']?.toString() ??
+                'Kitchen';
+
+            final foodImg = firstItem?['image']?.toString() ??
+                firstItem?['foodImage']?.toString() ??
+                order['image']?.toString() ??
+                AppAssets.homeRecipeCardImage1;
+
+            final price =
+                (order['totalPrice'] as num?)?.toDouble() ?? 0.0;
+            final status = controller.formatStatusTitle(
+                order['status']?.toString() ?? 'Delivered');
+            final timeAgo =
+                controller.formatTimeAgo(order['createdAt']?.toString());
+            final qty = (firstItem?['quantity'] as num?)?.toInt() ?? 1;
+            final orderId = order['id']?.toString() ?? '';
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: HistoryOrderCard(
                 title: title,
                 restaurantName: seller,
-                imagePath: AppAssets.homeRecipeCardImage1,
+                imagePath: foodImg,
                 status: status,
-                timeAgo: 'Recently',
+                timeAgo: timeAgo,
                 price: price,
-                quantity: 1,
+                quantity: qty,
                 isReviewed: false,
-                onReceipt: () {},
-                onReview: () {},
-                onReorder: () {},
+                onReceipt: () => controller.showReceipt(order),
+                onReview: () => controller.openReviewDialog(order),
+                onReorder: () => controller.onReorder(orderId),
               ),
             );
           },
-        );
-      }
-
-      // Default curated history cards
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-        children: [
-          HistoryOrderCard(
-            title: 'Pork & Chive Dumplings (12pc)',
-            restaurantName: "Chen's Dim Sum",
-            imagePath: AppAssets.homeRecipeCardImage1,
-            status: 'Picked Up',
-            timeAgo: '3 days ago',
-            price: 22.00,
-            quantity: 2,
-            isReviewed: true,
-            reviewScore: 5,
-            onReceipt: () {},
-            onReview: () {},
-            onReorder: () {},
-          ),
-          const SizedBox(height: 16),
-          HistoryOrderCard(
-            title: 'Chiken Biriyani',
-            restaurantName: "Priya's Spice House",
-            imagePath: AppAssets.homeRecipeCardImage3,
-            status: 'Delivered',
-            timeAgo: '1 weeks ago',
-            price: 32.00,
-            quantity: 1,
-            isReviewed: false,
-            onReceipt: () {},
-            onReview: () {},
-            onReorder: () {},
-          ),
-          const SizedBox(height: 16),
-          HistoryOrderCard(
-            title: 'Classic Mezze Platter',
-            restaurantName: "Maria's Kitchen",
-            imagePath: AppAssets.homeRecipeCardImage2,
-            status: 'Delivered',
-            timeAgo: '2 weeks ago',
-            price: 20.50,
-            quantity: 1,
-            isReviewed: true,
-            reviewScore: 5,
-            onReceipt: () {},
-            onReview: () {},
-            onReorder: () {},
-          ),
-        ],
+        ),
       );
     });
   }

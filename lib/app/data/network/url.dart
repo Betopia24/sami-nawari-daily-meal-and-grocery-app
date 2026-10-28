@@ -59,6 +59,9 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String orders = '/orders';
   static const String sellerOrders = '/orders/seller';
+  static String orderDetails(String id) => '/orders/$id';
+  static String reorder(String id) => '/orders/$id/reorder';
+  static String cancelOrder(String id) => '/orders/$id/cancel';
 
   // ---------------------------------------------------------------------------
   // GROCERY
