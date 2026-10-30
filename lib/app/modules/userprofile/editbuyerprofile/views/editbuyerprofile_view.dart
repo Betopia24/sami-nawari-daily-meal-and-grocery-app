@@ -53,10 +53,6 @@ class EditbuyerprofileView extends GetView<EditbuyerprofileController> {
             ProfileSectionCard(
               children: [
                 ProfileTextField(
-                  label: 'Email',
-                  controller: controller.emailController,
-                ),
-                ProfileTextField(
                   label: 'Phone',
                   controller: controller.phoneController,
                   showBottomDivider: false,

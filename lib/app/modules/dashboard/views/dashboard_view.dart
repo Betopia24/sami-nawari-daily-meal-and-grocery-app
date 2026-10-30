@@ -137,7 +137,10 @@ class DashboardView extends GetView<DashboardController> {
                           title: 'Recommended For You',
                           subtitle: 'Based on your preferences, saves and favorites',
                           actionLabel: 'See all',
-                          onActionTap: () => Get.toNamed(Routes.recommendedfood),
+                          onActionTap: () => Get.toNamed(
+                            Routes.recommendedfood,
+                            arguments: controller.recommendedFoods.toList(),
+                          ),
                         ),
                         const SizedBox(height: 12),
                         _buildRecommendedList(),
@@ -169,7 +172,10 @@ class DashboardView extends GetView<DashboardController> {
                           title: 'Homemade Food Near You',
                           subtitle: 'Neighbour kitchens - pickup or seller delivery',
                           actionLabel: 'See all',
-                          onActionTap: () => Get.toNamed(Routes.homemadefoodgrid),
+                          onActionTap: () => Get.toNamed(
+                            Routes.homemadefoodgrid,
+                            arguments: controller.homemadeFoods.toList(),
+                          ),
                         ),
                         const SizedBox(height: 12),
                         _buildHomemadeList(),

@@ -239,7 +239,23 @@ class ExploreboardView extends GetView<ExploreboardController> {
                       return SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final restaurant = controller.restaurants[index];
-                          return RestaurantCard(restaurant: restaurant);
+                          final String sId = (restaurant['sellerId'] ??
+                                  restaurant['id'] ??
+                                  restaurant['_id'] ??
+                                  restaurant['userId'] ??
+                                  '')
+                              .toString();
+                          final bool isBookmarked =
+                              controller.bookmarkedSellerIds.contains(sId);
+
+                          return RestaurantCard(
+                            restaurant: restaurant,
+                            isBookmarked: isBookmarked,
+                            onBookmarkTap: () => controller.toggleSellerBookmark(
+                              sId,
+                              sellerName: restaurant['name']?.toString(),
+                            ),
+                          );
                         }, childCount: controller.restaurants.length),
                       );
                     }),

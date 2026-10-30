@@ -121,10 +121,6 @@ class EditsellerprofileView extends GetView<EditsellerprofileController> {
             ProfileSectionCard(
               children: [
                 ProfileTextField(
-                  label: 'Email',
-                  controller: controller.emailController,
-                ),
-                ProfileTextField(
                   label: 'Phone',
                   controller: controller.phoneController,
                   showBottomDivider: false,
@@ -229,9 +225,12 @@ class EditsellerprofileView extends GetView<EditsellerprofileController> {
           ],
         ),
       ),
-      bottomSheet: ProfileBottomButton(
-        text: 'Save Changes',
-        onPressed: controller.saveChanges,
+      bottomSheet: Obx(
+        () => ProfileBottomButton(
+          text: 'Save Changes',
+          isLoading: controller.isSaving.value,
+          onPressed: controller.saveChanges,
+        ),
       ),
     );
   }
