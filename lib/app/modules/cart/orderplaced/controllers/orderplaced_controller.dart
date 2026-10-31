@@ -6,7 +6,7 @@ import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import 'package:daily_meal_and_grocery_app/app/modules/cart/mycarts/controllers/mycarts_controller.dart' as import_mycarts;
 import 'package:daily_meal_and_grocery_app/app/modules/cart/views/stripe_payment_view.dart';
-import '../../../../routes/app_routes.dart';
+import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
 
 class OrderplacedController extends GetxController {
   final RxString restaurantName = "Seller's Kitchen".obs;
@@ -147,14 +147,15 @@ class OrderplacedController extends GetxController {
 
   void onTrackMyOrder() {
     if (Get.isRegistered<import_mycarts.MycartsController>()) {
-      final mc = Get.find<import_mycarts.MycartsController>();
-      if (mc.tabController.length > 1) {
-        mc.tabController.animateTo(1);
+      final cartController = Get.find<import_mycarts.MycartsController>();
+      if (cartController.tabController.length > 1) {
+        cartController.tabController.animateTo(1);
       }
-      mc.currentTabIndex.value = 1;
-      mc.fetchOrders();
+      cartController.currentTabIndex.value = 1;
+      cartController.fetchOrders();
     }
-    Get.offNamed(
+    
+    Get.toNamed(
       Routes.mycarts,
       arguments: {'mycarts_tab': 1},
     );

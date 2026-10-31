@@ -6,6 +6,8 @@ import '../../../../../core/utils/app_colors.dart';
 import '../../../../data/models/buyer_order_model.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
+import '../../../../routes/app_routes.dart';
+import '../../../cart/mycarts/controllers/mycarts_controller.dart';
 
 class OrderhistoryController extends GetxController {
   final selectedTabIndex = 0.obs;
@@ -56,8 +58,13 @@ class OrderhistoryController extends GetxController {
   }
 
   void trackOrder(BuyerOrder order) {
-    // Navigate to active orders in My Carts/Orders
-    Get.toNamed('/navbar', arguments: {'tab': 3, 'mycarts_tab': 1});
+    if (Get.isRegistered<MycartsController>()) {
+      final cartController = Get.find<MycartsController>();
+      cartController.tabController.animateTo(1);
+      cartController.currentTabIndex.value = 1;
+      cartController.fetchOrders();
+    }
+    Get.toNamed(Routes.mycarts, arguments: {'mycarts_tab': 1});
   }
 
   void reorder(BuyerOrder order) {
