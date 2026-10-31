@@ -257,72 +257,59 @@ class FooddetailsView extends GetView<FooddetailsController> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              Text(
-                                'Popular Dishes',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                              if (controller.popularDishes.isNotEmpty) ...[
+                                Text(
+                                  'Popular Dishes',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 220,
-                                child: controller.popularDishes.isNotEmpty
-                                    ? ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount:
-                                            controller.popularDishes.length,
-                                        itemBuilder: (context, index) {
-                                          final dish =
-                                              controller.popularDishes[index];
-                                          return PopularDishCard(
-                                            imagePath: dish.firstImage.isNotEmpty
-                                                ? dish.firstImage
-                                                : AppAssets.homeDinnerCardImage,
-                                            title: dish.name,
-                                            price:
-                                                '\$${dish.price.toStringAsFixed(2)}',
-                                            isPopular: index == 0,
-                                            onTap: () => controller
-                                                .navigateToFood(dish.id),
-                                          );
-                                        },
-                                      )
-                                    : ListView(
-                                        scrollDirection: Axis.horizontal,
-                                        children: const [
-                                          PopularDishCard(
-                                            imagePath:
-                                                AppAssets.homeDinnerCardImage,
-                                            title: 'Classic Mezze Platter',
-                                            price: '\$18.00',
-                                            isPopular: true,
-                                          ),
-                                          PopularDishCard(
-                                            imagePath:
-                                                AppAssets.homeLunchCardImage,
-                                            title: 'Chicken Shawarma',
-                                            price: '\$14.00',
-                                            isPopular: false,
-                                          ),
-                                        ],
-                                      ),
-                              ),
-                              const SizedBox(height: 24),
-                              StoreInfoTile(
-                                imagePath: controller
-                                        .sellerProfilePicture.value.isNotEmpty
-                                    ? controller.sellerProfilePicture.value
-                                    : AppAssets.homeRecipeCardImage3,
-                                title: controller.sellerName.value,
-                                subtitle: controller.sellerAddress.value.isNotEmpty
-                                    ? controller.sellerAddress.value
-                                    : 'Mezze platters & fresh pita',
-                                distance: '0.4 km away',
-                                isOpen: true,
-                              ),
-                              const SizedBox(height: 32),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  height: 220,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: controller.popularDishes.length,
+                                    itemBuilder: (context, index) {
+                                      final dish =
+                                          controller.popularDishes[index];
+                                      return PopularDishCard(
+                                        imagePath: dish.firstImage.isNotEmpty
+                                            ? dish.firstImage
+                                            : AppAssets.homeDinnerCardImage,
+                                        title: dish.name,
+                                        price:
+                                            '\$${dish.price.toStringAsFixed(2)}',
+                                        isPopular: index == 0,
+                                        onTap: () => controller
+                                            .navigateToFood(dish.id),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                              if (controller.sellerName.value.isNotEmpty ||
+                                  controller.sellerId.value.isNotEmpty) ...[
+                                StoreInfoTile(
+                                  imagePath: controller
+                                          .sellerProfilePicture.value.isNotEmpty
+                                      ? controller.sellerProfilePicture.value
+                                      : AppAssets.homeRecipeCardImage3,
+                                  title: controller.sellerName.value.isNotEmpty
+                                      ? controller.sellerName.value
+                                      : 'Alex Ketchecn',
+                                  subtitle: controller.sellerAddress.value.isNotEmpty
+                                      ? controller.sellerAddress.value
+                                      : 'Dhaka',
+                                  distance: '0.4 km away',
+                                  isOpen: true,
+                                  onTap: controller.goToSellerProfile,
+                                ),
+                                const SizedBox(height: 32),
+                              ],
                             ],
                           ),
                         ),
@@ -368,33 +355,57 @@ class FooddetailsView extends GetView<FooddetailsController> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
+                              if (controller.ingredients.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border:
+                                        Border.all(color: Colors.grey.shade200),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'No ingredients listed for this dish',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 14,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border:
+                                        Border.all(color: Colors.grey.shade200),
+                                  ),
+                                  child: Column(
+                                    children: controller.ingredients
+                                        .asMap()
+                                        .entries
+                                        .map((entry) {
+                                      final index = entry.key;
+                                      final item = entry.value;
+                                      final isLast = index ==
+                                          controller.ingredients.length - 1;
+                                      return IngredientItem(
+                                        name: item['name'] ?? '',
+                                        quantity: item['quantity'] ?? '',
+                                        isLast: isLast,
+                                      );
+                                    }).toList(),
+                                  ),
                                 ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border:
-                                      Border.all(color: Colors.grey.shade200),
-                                ),
-                                child: Column(
-                                  children: controller.ingredients
-                                      .asMap()
-                                      .entries
-                                      .map((entry) {
-                                    final index = entry.key;
-                                    final item = entry.value;
-                                    final isLast = index ==
-                                        controller.ingredients.length - 1;
-                                    return IngredientItem(
-                                      name: item['name'] ?? '',
-                                      quantity: item['quantity'] ?? '',
-                                      isLast: isLast,
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
                               const SizedBox(height: 32),
                             ],
                           ),

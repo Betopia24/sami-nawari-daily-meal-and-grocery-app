@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/utils/app_assets.dart';
+import '../../../../../core/utils/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../data/models/cart_model.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../routes/app_routes.dart';
+import '../../widgets/order_status_timeline_card.dart';
 
 class MycartsController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -321,32 +324,122 @@ class MycartsController extends GetxController
           ordersList = rawData;
         }
 
-        if (ordersList != null && ordersList.isNotEmpty) {
-          final List<Map<String, dynamic>> active = [];
-          final List<Map<String, dynamic>> history = [];
+        final List<Map<String, dynamic>> active = [];
+        final List<Map<String, dynamic>> history = [];
 
+        if (ordersList != null) {
           for (final o in ordersList) {
-            if (o is Map<String, dynamic>) {
-              final status = o['status']?.toString().toUpperCase() ?? '';
+            if (o is Map) {
+              final map = Map<String, dynamic>.from(o);
+              final status = map['status']?.toString().toUpperCase() ?? '';
               if (status == 'DELIVERED' ||
                   status == 'COMPLETED' ||
                   status == 'CANCELLED') {
-                history.add(o);
+                history.add(map);
               } else {
-                active.add(o);
+                active.add(map);
               }
             }
           }
-
-          if (active.isNotEmpty) activeOrders.assignAll(active);
-          if (history.isNotEmpty) historyOrders.assignAll(history);
         }
+
+        activeOrders.assignAll(active);
+        historyOrders.assignAll(history);
+      } else {
+        activeOrders.clear();
+        historyOrders.clear();
       }
     } catch (e) {
       debugPrint('Error fetching orders: $e');
+      activeOrders.clear();
+      historyOrders.clear();
     } finally {
       isLoadingOrders.value = false;
     }
+  }
+
+  List<OrderStatusStep> buildTimelineSteps(Map<String, dynamic> order) {
+    final status = (order['status']?.toString().toUpperCase() ?? 'CONFIRMED').trim();
+    final createdAtStr = order['createdAt']?.toString();
+    final updatedAtStr = order['updatedAt']?.toString();
+    final createdTime = formatClockTime(createdAtStr);
+    final updatedTime = formatClockTime(updatedAtStr);
+
+    int rank = 1;
+    switch (status) {
+      case 'PENDING_PAYMENT':
+      case 'CONFIRMED':
+        rank = 1;
+        break;
+      case 'ACCEPTED':
+        rank = 2;
+        break;
+      case 'PREPARING':
+        rank = 3;
+        break;
+      case 'OUT_FOR_DELIVERY':
+        rank = 4;
+        break;
+      case 'DELIVERED':
+        rank = 5;
+        break;
+      case 'COMPLETED':
+        rank = 6;
+        break;
+      case 'CANCELLED':
+        rank = -1;
+        break;
+      default:
+        rank = 1;
+    }
+
+    if (rank == -1) {
+      return [
+        OrderStatusStep(
+          title: 'Order Placed',
+          time: createdTime.isNotEmpty ? createdTime : 'Placed',
+          isCompleted: true,
+        ),
+        OrderStatusStep(
+          title: 'Order Cancelled',
+          time: updatedTime.isNotEmpty ? updatedTime : 'Cancelled',
+          isCompleted: true,
+        ),
+      ];
+    }
+
+    return [
+      OrderStatusStep(
+        title: 'Order Placed',
+        time: createdTime.isNotEmpty ? createdTime : 'Placed',
+        isCompleted: rank >= 1,
+      ),
+      OrderStatusStep(
+        title: 'Accepted',
+        time: rank >= 2 ? (updatedTime.isNotEmpty ? updatedTime : 'Accepted') : '',
+        isCompleted: rank >= 2,
+      ),
+      OrderStatusStep(
+        title: 'Preparing',
+        time: rank >= 3 ? (updatedTime.isNotEmpty ? updatedTime : 'In Kitchen') : '',
+        isCompleted: rank >= 3,
+      ),
+      OrderStatusStep(
+        title: 'Out for Delivery',
+        time: rank >= 4 ? (updatedTime.isNotEmpty ? updatedTime : 'On the way') : '',
+        isCompleted: rank >= 4,
+      ),
+      OrderStatusStep(
+        title: 'Delivered',
+        time: rank >= 5 ? (updatedTime.isNotEmpty ? updatedTime : 'Delivered') : '',
+        isCompleted: rank >= 5,
+      ),
+      OrderStatusStep(
+        title: 'Completed',
+        time: rank >= 6 ? (updatedTime.isNotEmpty ? updatedTime : 'Completed') : '',
+        isCompleted: rank >= 6,
+      ),
+    ];
   }
 
   void setRating(int rating) {
@@ -370,50 +463,468 @@ class MycartsController extends GetxController
             ? activeOrders.first['id']?.toString()
             : null);
 
+    if (targetId == null || targetId.isEmpty) return;
+
     Get.defaultDialog(
       title: 'Cancel Order',
+      titleStyle: GoogleFonts.outfit(fontWeight: FontWeight.w700),
       middleText: 'Are you sure you want to cancel this order?',
+      middleTextStyle: GoogleFonts.outfit(),
       textConfirm: 'Yes, Cancel',
       textCancel: 'Keep Order',
       confirmTextColor: Colors.white,
       buttonColor: const Color(0xFFEF4444),
       onConfirm: () async {
         Get.back();
-        if (targetId != null && targetId.isNotEmpty) {
-          final response = await NetworkCaller.patchRequest(
-            '${Urls.orders}/$targetId/cancel',
+        final response = await NetworkCaller.patchRequest(
+          Urls.cancelOrder(targetId),
+        );
+        if (response.isSuccess) {
+          Get.snackbar(
+            'Order Cancelled',
+            'Your order has been cancelled successfully.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFEF4444),
+            colorText: Colors.white,
           );
-          if (response.isSuccess) {
-            Get.snackbar(
-              'Order Cancelled',
-              'Your order has been cancelled successfully.',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: const Color(0xFFEF4444),
-              colorText: Colors.white,
-            );
-            fetchOrders();
-          } else {
-            Get.snackbar(
-              'Cancel Order',
-              response.errorMessage.isNotEmpty
-                  ? response.errorMessage
-                  : 'Order cancelled.',
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          }
+          fetchOrders();
+        } else {
+          Get.snackbar(
+            'Cancel Order',
+            response.errorMessage.isNotEmpty
+                ? response.errorMessage
+                : 'Failed to cancel order.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
         }
       },
     );
   }
 
-  void onContactSeller() {
+  void onContactSeller([Map<String, dynamic>? order]) {
+    final phone = order?['contactPhone']?.toString() ??
+        order?['seller']?['phone']?.toString() ??
+        '';
     Get.snackbar(
       'Contact Seller',
-      'Opening chat with kitchen...',
+      phone.isNotEmpty ? 'Seller contact: $phone' : 'Connecting to seller...',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.black87,
       colorText: Colors.white,
     );
+  }
+
+  Future<void> onReorder(String orderId) async {
+    if (orderId.isEmpty) return;
+    try {
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+      final response = await NetworkCaller.postRequest(Urls.reorder(orderId));
+      Get.back(); // Dismiss progress
+      if (response.isSuccess) {
+        Get.snackbar(
+          'Reordered Successfully',
+          'Your reorder has been placed!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.primary,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        await fetchOrders();
+        await fetchCart();
+      } else {
+        Get.snackbar(
+          'Reorder',
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to reorder. Please try adding items manually.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade700,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.back();
+      debugPrint('Error reordering: $e');
+    }
+  }
+
+  void openReviewDialog(Map<String, dynamic> order) {
+    final items = (order['items'] is List) ? (order['items'] as List) : [];
+    final firstItem = items.isNotEmpty && items.first is Map ? items.first as Map : null;
+    final foodId = firstItem?['foodId']?.toString() ?? '';
+    final orderId = order['id']?.toString() ?? '';
+    final foodName = firstItem?['foodName']?.toString() ?? 'Meal';
+
+    int dialogRating = 5;
+    final commentController = TextEditingController();
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text(
+              'Review $foodName',
+              style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'How was your food experience?',
+                  style: GoogleFonts.outfit(fontSize: 14, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    final starIndex = index + 1;
+                    return IconButton(
+                      icon: Icon(
+                        starIndex <= dialogRating ? Icons.star : Icons.star_border,
+                        color: AppColors.secondary,
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          dialogRating = starIndex;
+                        });
+                      },
+                    );
+                  }),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: commentController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Write a few words about your order...',
+                    hintStyle: GoogleFonts.outfit(fontSize: 13, color: Colors.grey),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  Get.back();
+                  await submitReviewApi(
+                    orderId: orderId,
+                    foodId: foodId,
+                    rating: dialogRating,
+                    comment: commentController.text.trim().isNotEmpty
+                        ? commentController.text.trim()
+                        : 'Great food, freshly prepared and delicious!',
+                  );
+                },
+                child: Text('Submit', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> submitReviewApi({
+    required String orderId,
+    required String foodId,
+    required int rating,
+    required String comment,
+  }) async {
+    try {
+      final response = await NetworkCaller.postRequest(
+        Urls.reviews,
+        body: {
+          if (orderId.isNotEmpty) 'orderId': orderId,
+          if (foodId.isNotEmpty) 'foodId': foodId,
+          'rating': rating,
+          'comment': comment,
+        },
+      );
+      if (response.isSuccess) {
+        Get.snackbar(
+          'Review Submitted',
+          'Thank you for your valuable feedback!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.primary,
+          colorText: Colors.white,
+        );
+        fetchOrders();
+      } else {
+        Get.snackbar(
+          'Review',
+          response.errorMessage.isNotEmpty ? response.errorMessage : 'Failed to submit review.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade700,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error submitting review: $e');
+    }
+  }
+
+  void showReceipt(Map<String, dynamic> order) {
+    final items = (order['items'] is List) ? (order['items'] as List) : [];
+    final orderNumber = order['orderNumber']?.toString() ?? 'N/A';
+    final dateStr = formatDateTime(order['createdAt']?.toString());
+    final subTotal = (order['subTotal'] as num?)?.toDouble() ?? 0.0;
+    final deliveryFee = (order['deliveryFee'] as num?)?.toDouble() ?? 0.0;
+    final discount = (order['discount'] as num?)?.toDouble() ?? 0.0;
+    final total = (order['totalPrice'] as num?)?.toDouble() ?? 0.0;
+    final paymentMethod = formatPaymentMethod(order['paymentMethod']?.toString() ?? 'CASH_ON_DELIVERY');
+    final status = formatStatusTitle(order['status']?.toString() ?? 'COMPLETED');
+
+    final addrMap = order['deliveryAddress'] is Map ? order['deliveryAddress'] as Map : null;
+    final street = addrMap?['streetAddress']?.toString() ?? '';
+    final city = addrMap?['city']?.toString() ?? '';
+    final fullAddr = (street.isNotEmpty && city.isNotEmpty) ? '$street, $city' : (street.isNotEmpty ? street : city);
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Order Receipt',
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF5EF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      status,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF3A8F5C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Order #$orderNumber • $dateStr',
+                style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const Divider(height: 32),
+              Text(
+                'Items',
+                style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              ...items.map((it) {
+                if (it is! Map) return const SizedBox.shrink();
+                final name = it['foodName']?.toString() ?? 'Item';
+                final qty = (it['quantity'] as num?)?.toInt() ?? 1;
+                final unitPrice = (it['unitPrice'] as num?)?.toDouble() ?? 0.0;
+                final sub = (it['subtotal'] as num?)?.toDouble() ?? (qty * unitPrice);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '$name × $qty',
+                          style: GoogleFonts.outfit(fontSize: 14, color: AppColors.textPrimary),
+                        ),
+                      ),
+                      Text(
+                        '\$${sub.toStringAsFixed(2)}',
+                        style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const Divider(height: 24),
+              _receiptRow('Subtotal', '\$${subTotal.toStringAsFixed(2)}'),
+              _receiptRow('Delivery Fee', '\$${deliveryFee.toStringAsFixed(2)}'),
+              if (discount > 0) _receiptRow('Discount', '-\$${discount.toStringAsFixed(2)}'),
+              const Divider(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total',
+                    style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    '\$${total.toStringAsFixed(2)}',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (fullAddr.isNotEmpty) ...[
+                Text(
+                  'Delivered to: $fullAddr',
+                  style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 4),
+              ],
+              Text(
+                'Payment: $paymentMethod',
+                style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onPressed: () => Get.back(),
+                  child: Text(
+                    'Close',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  Widget _receiptRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textSecondary)),
+          Text(value, style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  String formatTimeAgo(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Recently';
+    final dt = DateTime.tryParse(dateStr);
+    if (dt == null) return 'Recently';
+    final diff = DateTime.now().difference(dt.toLocal());
+    if (diff.inDays >= 365) return '${(diff.inDays / 365).floor()}y ago';
+    if (diff.inDays >= 30) return '${(diff.inDays / 30).floor()}mo ago';
+    if (diff.inDays >= 7) return '${(diff.inDays / 7).floor()}w ago';
+    if (diff.inDays > 0) return '${diff.inDays}d ago';
+    if (diff.inHours > 0) return '${diff.inHours}h ago';
+    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+    return 'Just now';
+  }
+
+  String formatClockTime(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    final dt = DateTime.tryParse(dateStr);
+    if (dt == null) return '';
+    final local = dt.toLocal();
+    final hour = local.hour == 0 ? 12 : (local.hour > 12 ? local.hour - 12 : local.hour);
+    final minute = local.minute.toString().padLeft(2, '0');
+    final period = local.hour >= 12 ? 'PM' : 'AM';
+    return '${hour.toString().padLeft(2, '0')}:$minute $period';
+  }
+
+  String formatDateTime(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    final dt = DateTime.tryParse(dateStr);
+    if (dt == null) return '';
+    final local = dt.toLocal();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${local.day} ${months[local.month - 1]} ${local.year}, ${formatClockTime(dateStr)}';
+  }
+
+  String formatStatusTitle(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING_PAYMENT':
+        return 'Payment Pending';
+      case 'CONFIRMED':
+        return 'Order Placed';
+      case 'ACCEPTED':
+        return 'Accepted';
+      case 'PREPARING':
+        return 'Preparing';
+      case 'OUT_FOR_DELIVERY':
+        return 'Out for Delivery';
+      case 'DELIVERED':
+        return 'Delivered';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'CANCELLED':
+        return 'Cancelled';
+      default:
+        if (status.isEmpty) return 'Active';
+        return status[0].toUpperCase() + status.substring(1).toLowerCase();
+    }
+  }
+
+  String formatPaymentMethod(String method) {
+    switch (method.toUpperCase()) {
+      case 'CASH_ON_DELIVERY':
+        return 'Cash on Delivery';
+      case 'STRIPE':
+      case 'CARD':
+        return 'Card Payment';
+      case 'WALLET':
+        return 'Wallet';
+      default:
+        return 'Cash on Delivery';
+    }
   }
 
   void onSubmitReview([String? orderId, String? foodId]) {
@@ -428,28 +939,18 @@ class MycartsController extends GetxController
       return;
     }
 
-    final targetOrderId = orderId ??
+    final targetOrderId = (orderId ??
         (activeOrders.isNotEmpty
             ? activeOrders.first['id']?.toString()
-            : '6a8d619cb0849aa54585717b');
-    final targetFoodId = foodId ?? '6a897de42f4aa7b54cd9298b';
+            : null)) ??
+        '';
+    final targetFoodId = foodId ?? '';
 
-    NetworkCaller.postRequest(
-      Urls.reviews,
-      body: {
-        'orderId': targetOrderId,
-        'foodId': targetFoodId,
-        'rating': selectedRating.value,
-        'comment': 'The food was absolutely delicious and freshly prepared!',
-      },
-    );
-
-    Get.snackbar(
-      'Review Submitted',
-      'Thank you for your feedback!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
+    submitReviewApi(
+      orderId: targetOrderId,
+      foodId: targetFoodId,
+      rating: selectedRating.value,
+      comment: 'The food was absolutely delicious and freshly prepared!',
     );
     selectedRating.value = 0;
   }

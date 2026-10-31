@@ -6,55 +6,91 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:daily_meal_and_grocery_app/core/utils/app_colors.dart';
 import '../../../../widgets/custom_back_button.dart';
+import '../../../../widgets/nutrition_goal_card.dart';
 import '../controllers/nutritionboard_controller.dart';
 import '../widgets/meal_plan_banner_card.dart';
-import '../../../../widgets/nutrition_goal_card.dart';
+import '../widgets/nutrition_board_shimmer.dart';
 
 class NutritionboardView extends GetView<NutritionboardController> {
-  const NutritionboardView({super.key});
+  final bool? showBackButton;
+
+  const NutritionboardView({
+    super.key,
+    this.showBackButton,
+  });
+
+  bool _shouldShowBackButton(BuildContext context) {
+    if (showBackButton != null) return showBackButton!;
+    if (Get.arguments is Map && (Get.arguments as Map).containsKey('showBackButton')) {
+      return Get.arguments['showBackButton'] as bool;
+    }
+    return Navigator.canPop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                SizedBox(height: 20.h),
-                _buildPersonalizedSection(),
-                SizedBox(height: 16.h),
-                _buildCreateMealPlanBanner(),
-                SizedBox(height: 24.h),
-                _buildGoalGrid(),
-                SizedBox(height: 24.h),
-                _buildDisclaimerCard(),
-                SizedBox(height: 140.h), // Bottom padding for navbar
-              ]),
-            ),
+      body: RefreshIndicator(
+        onRefresh: controller.refreshData,
+        color: AppColors.primary,
+        backgroundColor: Colors.white,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
-        ],
+          slivers: [
+            _buildSliverAppBar(context),
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              sliver: SliverToBoxAdapter(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const NutritionBoardShimmer();
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20.h),
+                      _buildPersonalizedSection(),
+                      SizedBox(height: 16.h),
+                      _buildCreateMealPlanBanner(),
+                      SizedBox(height: 24.h),
+                      _buildGoalGrid(),
+                      SizedBox(height: 24.h),
+                      _buildDisclaimerCard(),
+                      SizedBox(height: 140.h), // Bottom padding for navbar
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   // ─── Sliver App Bar ──────────────────────────────────────────────────────────
 
-  Widget _buildSliverAppBar() {
+  Widget _buildSliverAppBar(BuildContext context) {
+    final bool shouldShowBack = _shouldShowBackButton(context);
+
     return SliverAppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
       floating: false,
       snap: false,
       pinned: true,
-      leadingWidth: 72.w,
-      leading: Padding(
-        padding: EdgeInsets.only(left: 20.w),
-        child: const Center(child: CustomBackButton()),
-      ),
+      automaticallyImplyLeading: false,
+      leadingWidth: shouldShowBack ? 72.w : 0,
+      leading: shouldShowBack
+          ? Padding(
+              padding: EdgeInsets.only(left: 20.w),
+              child: const Center(child: CustomBackButton()),
+            )
+          : null,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -76,7 +112,7 @@ class NutritionboardView extends GetView<NutritionboardController> {
           ),
         ],
       ),
-      titleSpacing: 8.w,
+      titleSpacing: shouldShowBack ? 8.w : 20.w,
     );
   }
 
@@ -111,12 +147,15 @@ class NutritionboardView extends GetView<NutritionboardController> {
 
   Widget _buildCreateMealPlanBanner() {
     return Obx(() {
-      if (controller.hasMealPlan.value) {
-        // Show the active plan banner with mealplan graphic
-        return MealPlanBannerCard(onViewPlan: controller.onViewTodaysPlan);
+      if (controller.hasMealPlan.value && controller.latestInsight.value != null) {
+        // Show the active plan banner with dynamic API macros and insight summary
+        return MealPlanBannerCard(
+          onViewPlan: controller.onViewTodaysPlan,
+          insight: controller.latestInsight.value,
+        );
       }
 
-      // Show the "Create Meal Plan" CTA
+      // Show the "Create Your Meal Plan" CTA
       return GestureDetector(
         onTap: controller.onCreateMealPlan,
         child: Container(
@@ -223,42 +262,49 @@ class NutritionboardView extends GetView<NutritionboardController> {
   // ─── AI Disclaimer Card ───────────────────────────────────────────────────
 
   Widget _buildDisclaimerCard() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.r),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundLightGreen,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.15),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 2.h),
-            child: Icon(
-              Icons.auto_awesome,
-              color: AppColors.primary,
-              size: 20.sp,
-            ),
+    return Obx(() {
+      final suggestions = controller.latestInsight.value?.insight?.suggestions;
+      final guidanceText = (suggestions != null && suggestions.isNotEmpty)
+          ? suggestions.first
+          : 'AI-based food guidance. Always consult a healthcare professional for personal medical advice.';
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(18.r),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundLightGreen,
+          borderRadius: BorderRadius.circular(18.r),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.15),
+            width: 1,
           ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Text(
-              'AI-based food guidance. Always consult a healthcare professional for personal medical advice.',
-              style: GoogleFonts.outfit(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w500,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 2.h),
+              child: Icon(
+                Icons.auto_awesome,
                 color: AppColors.primary,
-                height: 1.5,
+                size: 20.sp,
               ),
             ),
-          ),
-        ],
-      ),
-    );
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                guidanceText,
+                style: GoogleFonts.outfit(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

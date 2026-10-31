@@ -45,9 +45,9 @@ class NetworkCaller {
     _dio = Dio(
       BaseOptions(
         baseUrl: Urls.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
+        connectTimeout: const Duration(seconds: 45),
+        receiveTimeout: const Duration(seconds: 45),
+        sendTimeout: const Duration(seconds: 45),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -87,6 +87,11 @@ class NetworkCaller {
               );
             }
             options.headers['Authorization'] = 'Bearer $token';
+
+            final userId = LocalStorage.idSync ?? await LocalStorage.getId();
+            if (userId != null && userId.isNotEmpty && !options.headers.containsKey('X-User-ID')) {
+              options.headers['X-User-ID'] = userId;
+            }
           }
         }
         return handler.next(options);

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../data/models/food_item_model.dart';
 import '../../../../data/network/network.dart';
@@ -19,9 +18,12 @@ class FooddetailsController extends GetxController
   // Food details
   final RxString foodId = ''.obs;
   final RxString foodName = ''.obs;
+  final RxString sellerId = ''.obs;
+  final RxString sellerOwnerName = ''.obs;
   final RxString sellerName = ''.obs;
   final RxString sellerProfilePicture = ''.obs;
   final RxString sellerAddress = ''.obs;
+  final RxString sellerCuisine = ''.obs;
   final RxString foodImage = ''.obs;
   final RxList<String> images = <String>[].obs;
   final RxDouble price = 0.0.obs;
@@ -61,9 +63,12 @@ class FooddetailsController extends GetxController
   void resetData() {
     foodId.value = '';
     foodName.value = '';
+    sellerId.value = '';
+    sellerOwnerName.value = '';
     sellerName.value = '';
     sellerProfilePicture.value = '';
     sellerAddress.value = '';
+    sellerCuisine.value = '';
     foodImage.value = '';
     images.clear();
     price.value = 0.0;
@@ -77,6 +82,7 @@ class FooddetailsController extends GetxController
     ingredients.clear();
     quantity.value = 1;
     isBookmarked.value = false;
+    popularDishes.clear();
   }
 
   void _initFromArguments() {
@@ -90,7 +96,7 @@ class FooddetailsController extends GetxController
       final m = Map<String, dynamic>.from(args);
       _applyMapData(m);
       final id = m['id']?.toString() ?? m['foodId']?.toString() ?? '';
-      if (id.isNotEmpty && id.length == 24) {
+      if (id.isNotEmpty) {
         fetchFoodDetails(id);
       } else {
         isLoading.value = false;
@@ -99,14 +105,17 @@ class FooddetailsController extends GetxController
       foodId.value = args;
       fetchFoodDetails(args);
     } else {
-      // Default fallback id: first live food item on backend
-      fetchFoodDetails('6a8d6ca9e87759724844e5ec');
+      isLoading.value = false;
     }
-    _fetchPopularDishes();
   }
 
   void _applyMapData(Map<String, dynamic> data) {
     if (data['id'] != null) foodId.value = data['id'].toString();
+    if (data['sellerId'] != null) {
+      sellerId.value = data['sellerId'].toString();
+    } else if (data['userId'] != null) {
+      sellerId.value = data['userId'].toString();
+    }
     if (data['name'] != null && data['name'].toString().isNotEmpty) {
       foodName.value = data['name'].toString();
     }
@@ -132,11 +141,26 @@ class FooddetailsController extends GetxController
       sellerName.value = data['sellerName'].toString();
     } else if (data['seller'] is Map) {
       final s = data['seller'] as Map;
-      sellerName.value = s['sellerProfile']?['businessName']?.toString() ??
-          s['name']?.toString() ??
-          sellerName.value;
+      if (s['id'] != null && sellerId.value.isEmpty) {
+        sellerId.value = s['id'].toString();
+      }
+      if (s['name'] != null) {
+        sellerOwnerName.value = s['name'].toString();
+      }
+      if (s['sellerProfile'] is Map) {
+        final sp = s['sellerProfile'] as Map;
+        sellerName.value = sp['businessName']?.toString() ?? s['name']?.toString() ?? '';
+        if (sp['address'] != null) {
+          sellerAddress.value = sp['address'].toString();
+        }
+        if (sp['cuisine'] != null) {
+          sellerCuisine.value = sp['cuisine'].toString();
+        }
+      } else {
+        sellerName.value = s['name']?.toString() ?? '';
+      }
     }
-    if (data['sellerAddress'] != null) {
+    if (data['sellerAddress'] != null && data['sellerAddress'].toString().isNotEmpty) {
       sellerAddress.value = data['sellerAddress'].toString();
     }
     if (data['sellerProfilePicture'] != null) {
@@ -171,25 +195,22 @@ class FooddetailsController extends GetxController
           final q = item['quantity']?.toString() ?? '';
           final u = item['unit']?.toString() ?? '';
           final qtyFormatted =
-              '$q$u'.trim().isEmpty ? '1 pc' : '$q$u'.trim();
+              '$q$u'.trim().isEmpty ? '' : '$q$u'.trim();
           return {'name': n, 'quantity': qtyFormatted};
         }
-        return {'name': item.toString(), 'quantity': '1 pc'};
+        return {'name': item.toString(), 'quantity': ''};
       }).where((e) => e['name']!.isNotEmpty).toList();
 
-      if (ingList.isNotEmpty) {
-        ingredients.assignAll(ingList);
-      }
-    }
-    if (ingredients.isEmpty) {
-      _setDefaultIngredients();
+      ingredients.assignAll(ingList);
     }
   }
 
   void _applyFoodModel(FoodItemModel food) {
     foodId.value = food.id;
+    if (food.sellerId.isNotEmpty) sellerId.value = food.sellerId;
     if (food.name.isNotEmpty) foodName.value = food.name;
     if (food.displaySeller.isNotEmpty) sellerName.value = food.displaySeller;
+    if (food.sellerName.isNotEmpty) sellerOwnerName.value = food.sellerName;
     if (food.sellerAddress.isNotEmpty) sellerAddress.value = food.sellerAddress;
     if (food.sellerProfilePicture.isNotEmpty) {
       sellerProfilePicture.value = food.sellerProfilePicture;
@@ -208,15 +229,17 @@ class FooddetailsController extends GetxController
   }
 
   Future<void> fetchFoodDetails(String id) async {
-    final validId =
-        (id.isNotEmpty && id.length == 24) ? id : '6a8d6ca9e87759724844e5ec';
-    foodId.value = validId;
+    if (id.isEmpty) {
+      isLoading.value = false;
+      return;
+    }
+    foodId.value = id;
 
     try {
       isLoading.value = true;
       // Try explore food details first as it provides isBookmarked directly
       final response =
-          await NetworkCaller.getRequest('${Urls.exploreFoods}/$validId');
+          await NetworkCaller.getRequest('${Urls.exploreFoods}/$id');
 
       Map<String, dynamic>? data;
       if (response.isSuccess && response.responseData != null) {
@@ -227,7 +250,7 @@ class FooddetailsController extends GetxController
       } else {
         // Fallback to /foods/:id
         final fallbackResponse =
-            await NetworkCaller.getRequest('${Urls.foods}/$validId');
+            await NetworkCaller.getRequest('${Urls.foods}/$id');
         if (fallbackResponse.isSuccess && fallbackResponse.responseData != null) {
           final body = fallbackResponse.responseData;
           data = body is Map<String, dynamic>
@@ -238,18 +261,14 @@ class FooddetailsController extends GetxController
 
       if (data != null) {
         _parseFoodDetailsData(data);
-      } else if (foodName.value.isEmpty) {
-        _loadDefaultFallback();
       }
     } catch (e) {
       debugPrint('Error fetching food details: $e');
-      if (foodName.value.isEmpty) {
-        _loadDefaultFallback();
-      }
     } finally {
       isLoading.value = false;
-      // Always verify bookmark status from bookmarks endpoint as well
-      checkBookmarkStatus(validId);
+      // Fetch popular dishes and bookmark status
+      await _fetchPopularDishes();
+      checkBookmarkStatus(id);
     }
   }
 
@@ -265,6 +284,9 @@ class FooddetailsController extends GetxController
     }
 
     if (food['id'] != null) foodId.value = food['id'].toString();
+    if (food['sellerId'] != null && food['sellerId'].toString().isNotEmpty) {
+      sellerId.value = food['sellerId'].toString();
+    }
     if (food['name'] != null && food['name'].toString().isNotEmpty) {
       foodName.value = food['name'].toString();
     }
@@ -315,7 +337,11 @@ class FooddetailsController extends GetxController
     // Seller
     if (food['seller'] is Map) {
       final seller = food['seller'] as Map;
+      if (seller['id'] != null && sellerId.value.isEmpty) {
+        sellerId.value = seller['id'].toString();
+      }
       final sellerNameVal = seller['name']?.toString() ?? '';
+      sellerOwnerName.value = sellerNameVal;
       String businessName = '';
       String address = '';
 
@@ -323,6 +349,9 @@ class FooddetailsController extends GetxController
         final profile = seller['sellerProfile'] as Map;
         businessName = profile['businessName']?.toString() ?? '';
         address = profile['address']?.toString() ?? '';
+        if (profile['cuisine'] != null) {
+          sellerCuisine.value = profile['cuisine'].toString();
+        }
         if (profile['averageRating'] != null &&
             (profile['averageRating'] as num) > 0) {
           rating.value = (profile['averageRating'] as num).toStringAsFixed(1);
@@ -335,7 +364,7 @@ class FooddetailsController extends GetxController
 
       sellerName.value = businessName.isNotEmpty
           ? businessName
-          : (sellerNameVal.isNotEmpty ? sellerNameVal : "Maria's Kitchen");
+          : (sellerNameVal.isNotEmpty ? sellerNameVal : '');
 
       if (address.isNotEmpty) {
         sellerAddress.value = address;
@@ -355,74 +384,114 @@ class FooddetailsController extends GetxController
           final q = item['quantity']?.toString() ?? '';
           final u = item['unit']?.toString() ?? '';
           final qtyFormatted =
-              '$q$u'.trim().isEmpty ? '1 pc' : '$q$u'.trim();
+              '$q$u'.trim().isEmpty ? '' : '$q$u'.trim();
           return {'name': n, 'quantity': qtyFormatted};
         }
-        return {'name': item.toString(), 'quantity': '1 pc'};
+        return {'name': item.toString(), 'quantity': ''};
       }).where((e) => e['name']!.isNotEmpty).toList();
 
-      if (ingList.isNotEmpty) {
-        ingredients.assignAll(ingList);
-      } else {
-        _setDefaultIngredients();
-      }
+      ingredients.assignAll(ingList);
     } else {
-      _setDefaultIngredients();
+      ingredients.clear();
     }
-  }
-
-  void _setDefaultIngredients() {
-    ingredients.assignAll([
-      {'name': 'Chickpeas', 'quantity': '200g'},
-      {'name': 'Tahini', 'quantity': '3 tbsp'},
-      {'name': 'Lemon juice', 'quantity': '2 tbsp'},
-      {'name': 'Garlic', 'quantity': '2 cloves'},
-      {'name': 'Baba ganoush', 'quantity': '100g'},
-      {'name': 'Tabbouleh', 'quantity': '80g'},
-      {'name': 'Kalamata olives', 'quantity': '60g'},
-      {'name': 'Fresh pita bread', 'quantity': '4 pcs'},
-    ]);
-  }
-
-  void _loadDefaultFallback() {
-    foodName.value = 'Spanakopita';
-    sellerName.value = "Maria's Kitchen";
-    sellerAddress.value = '123 Market St, San Francisco, CA';
-    price.value = 4.50;
-    prepTime.value = '15 mins';
-    category.value = 'Lunch';
-    rating.value = '4.8';
-    reviewCount.value = '84 reviews';
-    description.value =
-        'Authentic Greek spinach pie with fresh herbs and crisp pastry from Maria’s Kitchen.';
-    foodImage.value = AppAssets.homeRecipeCardImage3;
-    _setDefaultIngredients();
   }
 
   Future<void> _fetchPopularDishes() async {
     try {
-      final response = await NetworkCaller.getRequest(Urls.foods);
-      if (response.isSuccess && response.responseData != null) {
-        dynamic rawData = response.responseData;
-        if (rawData is Map && rawData['data'] != null) {
-          rawData = rawData['data'];
-          if (rawData is Map && rawData['data'] is List) {
-            rawData = rawData['data'];
+      final List<FoodItemModel> dishes = [];
+
+      // 1. Fetch other dishes from this seller if available
+      if (sellerId.value.isNotEmpty) {
+        try {
+          final sellerMenuResponse =
+              await NetworkCaller.getRequest(Urls.sellerMenu(sellerId.value));
+          if (sellerMenuResponse.isSuccess && sellerMenuResponse.responseData != null) {
+            final body = sellerMenuResponse.responseData;
+            dynamic rawData = body is Map ? (body['data'] ?? body) : null;
+            List<dynamic>? itemsList;
+            if (rawData is Map && rawData['data'] is List) {
+              itemsList = rawData['data'] as List;
+            } else if (rawData is Map && rawData['items'] is List) {
+              itemsList = rawData['items'] as List;
+            } else if (rawData is List) {
+              itemsList = rawData;
+            }
+
+            if (itemsList != null) {
+              for (final item in itemsList) {
+                if (item is Map) {
+                  final model = FoodItemModel.fromJson(Map<String, dynamic>.from(item));
+                  if (model.id.isNotEmpty &&
+                      model.id != foodId.value &&
+                      !dishes.any((d) => d.id == model.id)) {
+                    dishes.add(model);
+                  }
+                }
+              }
+            }
           }
-        }
-        if (rawData is List) {
-          final list = rawData
-              .map((e) => FoodItemModel.fromJson(e as Map<String, dynamic>))
-              .where((food) => food.id != foodId.value)
-              .toList();
-          if (list.isNotEmpty) {
-            popularDishes.assignAll(list);
-          }
+        } catch (e) {
+          debugPrint('Error fetching seller menu for popular dishes: $e');
         }
       }
+
+      // 2. Fetch other foods across platform
+      try {
+        final response = await NetworkCaller.getRequest(Urls.foods);
+        if (response.isSuccess && response.responseData != null) {
+          dynamic rawData = response.responseData;
+          if (rawData is Map && rawData['data'] != null) {
+            rawData = rawData['data'];
+            if (rawData is Map && rawData['data'] is List) {
+              rawData = rawData['data'];
+            }
+          }
+          if (rawData is List) {
+            for (final item in rawData) {
+              if (item is Map) {
+                final model = FoodItemModel.fromJson(Map<String, dynamic>.from(item));
+                if (model.id.isNotEmpty &&
+                    model.id != foodId.value &&
+                    !dishes.any((d) => d.id == model.id)) {
+                  dishes.add(model);
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error fetching foods for popular dishes: $e');
+      }
+
+      popularDishes.assignAll(dishes);
     } catch (e) {
       debugPrint('Error fetching popular dishes: $e');
     }
+  }
+
+  void goToSellerProfile() {
+    final sId = sellerId.value.isNotEmpty ? sellerId.value : '';
+    if (sId.isEmpty && sellerName.value.isEmpty) return;
+
+    final restaurantArgs = {
+      'id': sId,
+      'sellerId': sId,
+      'userId': sId,
+      'name': sellerName.value.isNotEmpty ? sellerName.value : 'Alex Ketchecn',
+      'owner': sellerOwnerName.value.isNotEmpty ? sellerOwnerName.value : sellerName.value,
+      'cuisine': sellerCuisine.value.isNotEmpty ? sellerCuisine.value : 'Homemade',
+      'address': sellerAddress.value.isNotEmpty ? sellerAddress.value : 'Dhaka',
+      'image': sellerProfilePicture.value,
+      'rating': double.tryParse(rating.value) ?? 4.8,
+      'reviews': int.tryParse(reviewCount.value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+      'distance': '0.4 km',
+      'time': prepTime.value.isNotEmpty ? prepTime.value : '25 min',
+      'isOpen': true,
+      'hasPickup': pickupAvailable.value,
+      'hasDelivery': deliveryAvailable.value,
+    };
+
+    Get.toNamed(Routes.viewmenu, arguments: restaurantArgs);
   }
 
   void navigateToFood(String newFoodId) {
@@ -435,6 +504,7 @@ class FooddetailsController extends GetxController
   }
 
   Future<void> checkBookmarkStatus(String targetId) async {
+    if (targetId.isEmpty) return;
     try {
       final response = await NetworkCaller.getRequest(Urls.bookmarks);
       if (response.isSuccess && response.responseData != null) {
@@ -458,15 +528,13 @@ class FooddetailsController extends GetxController
   }
 
   void toggleBookmark() {
-    final targetId =
-        foodId.value.isNotEmpty ? foodId.value : '6a8d6ca9e87759724844e5ec';
+    final targetId = foodId.value;
+    if (targetId.isEmpty) return;
 
-    // 1. Instant optimistic UI update
     final previousState = isBookmarked.value;
     final newState = !previousState;
     isBookmarked.value = newState;
 
-    // 2. Fire API request
     NetworkCaller.postRequest(
       Urls.toggleBookmark,
       body: {'foodId': targetId},
@@ -490,7 +558,6 @@ class FooddetailsController extends GetxController
           margin: const EdgeInsets.all(16),
         );
       } else {
-        // Revert on failure
         isBookmarked.value = previousState;
         Get.closeCurrentSnackbar();
         Get.snackbar(
@@ -521,8 +588,8 @@ class FooddetailsController extends GetxController
   }
 
   Future<void> addToCart() async {
-    final targetId =
-        foodId.value.isNotEmpty ? foodId.value : '6a8d6ca9e87759724844e5ec';
+    final targetId = foodId.value;
+    if (targetId.isEmpty) return;
 
     try {
       final response = await NetworkCaller.postRequest(
@@ -570,7 +637,6 @@ class FooddetailsController extends GetxController
   Future<void> refreshFoodDetails() async {
     if (foodId.value.isNotEmpty) {
       await fetchFoodDetails(foodId.value);
-      await _fetchPopularDishes();
     }
   }
 

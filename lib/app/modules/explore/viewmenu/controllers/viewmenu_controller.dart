@@ -123,10 +123,11 @@ class ViewmenuController extends GetxController
     } catch (e) {
       debugPrint('Error loading seller live menu data: $e');
     } finally {
-      if (allMenuItems.isEmpty) {
+      if (allMenuItems.isEmpty &&
+          (sellerId == '1' || sellerId == '2' || sellerId == '3')) {
         _loadFallbackById(sellerId);
-        filteredMenuItems.assignAll(allMenuItems);
       }
+      filteredMenuItems.assignAll(allMenuItems);
       isLoading.value = false;
     }
   }
@@ -143,7 +144,7 @@ class ViewmenuController extends GetxController
         _loadPriyasSpiceHouse();
         break;
       default:
-        _loadMariasKitchen();
+        break;
     }
   }
 

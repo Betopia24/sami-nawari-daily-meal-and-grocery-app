@@ -209,58 +209,60 @@ class ViewmenuView extends GetView<ViewmenuController> {
     return SliverMainAxisGroup(
       slivers: [
         // ── Popular Dishes ──
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.only(left: 24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Popular Dishes',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                SizedBox(height: 14.h),
-                SizedBox(
-                  height: 168.h,
-                  child: Obx(
-                    () => ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.only(right: 24.w),
-                      itemCount: controller.popularDishes.length,
-                      separatorBuilder: (_, _) => SizedBox(width: 12.w),
-                      itemBuilder: (context, index) {
-                        final dish = controller.popularDishes[index];
-                        return PopularDishHorizontalCard(
-                          name: dish['name'],
-                          image: dish['image'],
-                          price: (dish['price'] as num).toDouble(),
-                          isPopular: dish['isPopular'] ?? false,
-                          onTap: () => controller.goToFoodDetails(dish),
-                        );
-                      },
+        if (controller.popularDishes.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Popular Dishes',
+                    style: GoogleFonts.outfit(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 14.h),
+                  SizedBox(
+                    height: 168.h,
+                    child: Obx(
+                      () => ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.only(right: 24.w),
+                        itemCount: controller.popularDishes.length,
+                        separatorBuilder: (_, _) => SizedBox(width: 12.w),
+                        itemBuilder: (context, index) {
+                          final dish = controller.popularDishes[index];
+                          return PopularDishHorizontalCard(
+                            name: dish['name'],
+                            image: dish['image'],
+                            price: (dish['price'] as num).toDouble(),
+                            isPopular: dish['isPopular'] ?? false,
+                            onTap: () => controller.goToFoodDetails(dish),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-
-        SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+          SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+        ],
 
         // ── Category filter chips ──
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Obx(() => _buildCategoryChips()),
+        if (controller.categories.length > 1) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Obx(() => _buildCategoryChips()),
+            ),
           ),
-        ),
-
-        SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+          SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+        ],
 
         // ── Complete Menu title ──
         SliverToBoxAdapter(
@@ -280,8 +282,24 @@ class ViewmenuView extends GetView<ViewmenuController> {
         SliverToBoxAdapter(child: SizedBox(height: 14.h)),
 
         // ── Menu items list ──
-        Obx(
-          () => SliverPadding(
+        Obx(() {
+          if (controller.filteredMenuItems.isEmpty) {
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 40.h),
+                child: Center(
+                  child: Text(
+                    'No menu items available',
+                    style: GoogleFonts.outfit(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+          return SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -298,8 +316,8 @@ class ViewmenuView extends GetView<ViewmenuController> {
                 );
               }, childCount: controller.filteredMenuItems.length),
             ),
-          ),
-        ),
+          );
+        }),
       ],
     );
   }
@@ -328,11 +346,15 @@ class ViewmenuView extends GetView<ViewmenuController> {
                 ),
                 SizedBox(height: 16.h),
                 OrderingInfoCard(
-                  minimumOrder: aboutData['orderingInfo']['minimumOrder'],
-                  deliveryCharge: aboutData['orderingInfo']['deliveryCharge'],
-                  pickupStatus: aboutData['orderingInfo']['pickupStatus'],
-                  prepTime: aboutData['orderingInfo']['prepTime'],
-                  distance: aboutData['orderingInfo']['distance'],
+                  minimumOrder: aboutData['orderingInfo']?['minimumOrder'] ?? '\$10',
+                  deliveryCharge:
+                      aboutData['orderingInfo']?['deliveryCharge'] ?? '\$2.00',
+                  pickupStatus:
+                      aboutData['orderingInfo']?['pickupStatus'] ?? 'Available',
+                  prepTime:
+                      aboutData['orderingInfo']?['prepTime'] ?? '~25 minutes',
+                  distance:
+                      aboutData['orderingInfo']?['distance'] ?? '1.0 km',
                 ),
               ],
             );

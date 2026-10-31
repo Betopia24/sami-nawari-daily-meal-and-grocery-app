@@ -80,12 +80,12 @@ class FoodItemModel {
       deliveryFee: parsedFee,
       status: json['status']?.toString() ?? '',
       sellerId: json['sellerId']?.toString() ?? '',
-      sellerName: seller?['name']?.toString() ?? 'Home Kitchen',
+      sellerName: seller?['name']?.toString() ?? '',
       sellerProfilePicture: seller?['profilePicture']?.toString() ?? '',
       sellerBusinessName: sellerProfile?['businessName']?.toString() ?? '',
-      sellerAddress: sellerProfile?['address']?.toString() ?? 'San Francisco, CA',
+      sellerAddress: sellerProfile?['address']?.toString() ?? '',
       rating: json['rating']?.toString() ?? '4.8',
-      calories: json['calories']?.toString() ?? '310 kcal',
+      calories: json['calories']?.toString() ?? '',
     );
   }
 

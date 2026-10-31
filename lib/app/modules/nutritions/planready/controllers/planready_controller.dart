@@ -3,6 +3,7 @@ import '../../../../routes/app_routes.dart';
 
 class PlanreadyController extends GetxController {
   final goal = ''.obs;
+  final mealPlanId = ''.obs;
 
   @override
   void onInit() {
@@ -13,6 +14,9 @@ class PlanreadyController extends GetxController {
       if (args.containsKey('goal')) {
         goal.value = args['goal'];
       }
+      if (args.containsKey('mealPlanId')) {
+        mealPlanId.value = args['mealPlanId']?.toString() ?? '';
+      }
     }
 
     if (goal.value.isEmpty) {
@@ -21,7 +25,12 @@ class PlanreadyController extends GetxController {
   }
 
   void onViewMealPlan() {
-    Get.toNamed(Routes.mealplan);
+    Get.toNamed(
+      Routes.mealplan,
+      arguments: {
+        if (mealPlanId.value.isNotEmpty) 'mealPlanId': mealPlanId.value,
+      },
+    );
   }
 
   void onGoHome() {

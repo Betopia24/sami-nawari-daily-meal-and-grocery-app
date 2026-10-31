@@ -118,12 +118,14 @@ class ExploreMapView extends GetView<ExploreboardController> {
                       ),
                     ),
                     SizedBox(width: 6.w),
-                    Text(
-                      '${controller.restaurants.length} Kitchens Nearby',
-                      style: GoogleFonts.outfit(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                    Obx(
+                      () => Text(
+                        '${controller.restaurants.length} Kitchens Nearby',
+                        style: GoogleFonts.outfit(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],

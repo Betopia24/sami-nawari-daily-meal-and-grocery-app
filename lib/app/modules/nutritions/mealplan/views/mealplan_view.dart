@@ -4,11 +4,13 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
+import '../../../../data/models/daily_meal_item_model.dart';
 import '../../../../widgets/custom_back_button.dart';
 import '../../../../widgets/primary_button.dart';
-
 import '../controllers/mealplan_controller.dart';
+import '../widgets/meal_plan_shimmer.dart';
 
 class MealplanView extends GetView<MealplanController> {
   const MealplanView({super.key});
@@ -40,120 +42,131 @@ class MealplanView extends GetView<MealplanController> {
           children: [
             const Divider(color: Color(0xFFF3F3F3), height: 1),
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Date Card
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3FAEE), // Light green background
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: AppColors.primary, width: 1),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.calendar_month_outlined, color: AppColors.primary, size: 28.sp),
-                          SizedBox(width: 16.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              child: RefreshIndicator(
+                onRefresh: controller.refreshMealPlan,
+                color: AppColors.primary,
+                backgroundColor: Colors.white,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return const MealPlanShimmer();
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Dynamic Date Card
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20.w,
+                            vertical: 16.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3FAEE),
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: AppColors.primary, width: 1),
+                          ),
+                          child: Row(
                             children: [
-                              Text(
-                                _getDayOfWeek(),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textDark,
-                                ),
+                              Icon(
+                                Icons.calendar_month_outlined,
+                                color: AppColors.primary,
+                                size: 28.sp,
                               ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                _getFormattedDate(),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textDark,
-                                ),
+                              SizedBox(width: 16.w),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    controller.dayOfWeek.value,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    controller.dateString.value,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
-                          )
-                        ],
-                      ),
-                    ),
-                    
-                    SizedBox(height: 24.h),
-                    
-                    Center(
-                      child: Text(
-                        'Your personalized meals for today',
-                        style: GoogleFonts.outfit(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    
-                    SizedBox(height: 24.h),
-                    
-                    Text(
-                      "Today's Meals",
-                      style: GoogleFonts.outfit(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                    
-                    _buildMealCard(
-                      time: '08:00 AM',
-                      title: 'Breakfast',
-                      subtitle: 'Oatmeal with Fruits',
-                    ),
-                    _buildMealCard(
-                      time: '01:00 PM',
-                      title: 'Lunch',
-                      subtitle: 'Grilled Chicken Bowl',
-                    ),
-                    _buildMealCard(
-                      time: '04:30 PM',
-                      title: 'Snacks',
-                      subtitle: 'Greek Yogurt with Berries',
-                    ),
-                    _buildMealCard(
-                      time: '08:00 PM',
-                      title: 'Dinner',
-                      subtitle: 'Lentil & Vegetable Curry',
-                    ),
-                    
-                    SizedBox(height: 24.h),
-                    
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/ideabulb_icon.svg',
-                          width: 24.w,
-                        ),
-                        SizedBox(width: 12.w),
-                        Text(
-                          'Drink enough water throughout the day',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
                           ),
                         ),
+
+                        SizedBox(height: 24.h),
+
+                        Center(
+                          child: Text(
+                            'Your personalized meals for today',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 24.h),
+
+                        Text(
+                          "Today's Meals",
+                          style: GoogleFonts.outfit(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Dynamic Meals List from API
+                        ...controller.meals.map(
+                          (meal) => _buildMealCard(
+                            meal: meal,
+                            onTap: () => controller.onMealItemTapped(meal),
+                          ),
+                        ),
+
+                        SizedBox(height: 24.h),
+
+                        // AI Advice / Tip Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/ideabulb_icon.svg',
+                              width: 24.w,
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                controller.tipText.value,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 16.h),
                       ],
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                  ],
+                    );
+                  }),
                 ),
               ),
             ),
@@ -172,87 +185,115 @@ class MealplanView extends GetView<MealplanController> {
   }
 
   Widget _buildMealCard({
-    required String time,
-    required String title,
-    required String subtitle,
+    required DailyMealItemModel meal,
+    required VoidCallback onTap,
   }) {
+    final defaultAsset = _getImageForMealType(meal.mealType);
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: const Color(0xFFF3F3F3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFFAFAFA),
-              image: const DecorationImage(
-                image: AssetImage('assets/images/homelunchcardimage.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16.r),
+          splashColor: AppColors.primary.withValues(alpha: 0.08),
+          highlightColor: AppColors.primary.withValues(alpha: 0.04),
+          child: Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Row(
               children: [
-                Text(
-                  time,
-                  style: GoogleFonts.outfit(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                Container(
+                  width: 52.w,
+                  height: 52.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFAFAFA),
+                    image: (meal.imageUrl != null && meal.imageUrl!.isNotEmpty)
+                        ? DecorationImage(
+                            image: NetworkImage(meal.imageUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : DecorationImage(
+                            image: AssetImage(defaultAsset),
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        meal.time,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        meal.title,
+                        style: GoogleFonts.outfit(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        meal.recipeTitle,
+                        style: GoogleFonts.outfit(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                SizedBox(width: 8.w),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16.sp,
+                  color: AppColors.textSecondary.withValues(alpha: 0.6),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  String _getFormattedDate() {
-    final now = DateTime.now();
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${months[now.month - 1]} ${now.day.toString().padLeft(2, '0')}, ${now.year}';
-  }
-  
-  String _getDayOfWeek() {
-    final now = DateTime.now();
-    const days = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-    ];
-    return days[now.weekday - 1];
+  String _getImageForMealType(String mealType) {
+    switch (mealType.toLowerCase()) {
+      case 'breakfast':
+        return AppAssets.homeBreakfastCardImage;
+      case 'lunch':
+        return AppAssets.homeLunchCardImage;
+      case 'snacks':
+      case 'snack':
+        return AppAssets.homeSnacksCardImage;
+      case 'dinner':
+        return AppAssets.homeDinnerCardImage;
+      default:
+        return AppAssets.homeLunchCardImage;
+    }
   }
 }

@@ -169,13 +169,26 @@ class _SearchGroceryItemBottomSheetState extends State<SearchGroceryItemBottomSh
     );
   }
 
-  void _addItemDirectly(String label, IconData icon) {
+  void _addItemDirectly(String label, IconData icon) async {
     final controller = Get.find<GroceriesController>();
-    controller.addGroceryItem(
+    Get.back();
+    final success = await controller.addGroceryItem(
       name: label,
       fallbackIcon: icon,
+      showSuccessSnackbar: false,
     );
-    Get.back();
+    if (success) {
+      Get.snackbar(
+        'Item Added',
+        '$label added to ${controller.activeGroceryList?.name ?? "grocery list"} successfully',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+      );
+    }
   }
 
   Widget _buildSuggestedChip(String label, IconData icon, bool outlined) {

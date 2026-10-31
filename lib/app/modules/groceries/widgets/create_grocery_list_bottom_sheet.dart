@@ -17,6 +17,7 @@ class CreateGroceryListBottomSheet extends StatefulWidget {
 class _CreateGroceryListBottomSheetState extends State<CreateGroceryListBottomSheet> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
+  bool _isLoading = false;
   bool _shareWithFamily = false;
   int _selectedIconIndex = 0;
 
@@ -309,7 +310,7 @@ class _CreateGroceryListBottomSheetState extends State<CreateGroceryListBottomSh
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Get.back(),
+                    onPressed: _isLoading ? null : () => Get.back(),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       backgroundColor: const Color(0xFFF3F3F3),
@@ -333,17 +334,60 @@ class _CreateGroceryListBottomSheetState extends State<CreateGroceryListBottomSh
                   child: PrimaryButton(
                     text: 'Create List',
                     showArrow: false,
+                    isLoading: _isLoading,
                     onPressed: () async {
-                      if (_nameController.text.trim().isEmpty) return;
+                      if (_nameController.text.trim().isEmpty) {
+                        Get.snackbar(
+                          'List Name Required',
+                          'Please enter a name for the list',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.amber.shade800,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          margin: EdgeInsets.all(16.w),
+                        );
+                        return;
+                      }
                       
-                      final controller = Get.find<GroceriesController>();
-                      final success = await controller.createNewListApi(
-                        name: _nameController.text.trim(),
-                        description: _descController.text.trim(),
-                        icon: _icons[_selectedIconIndex],
-                      );
+                      setState(() {
+                        _isLoading = true;
+                      });
+
+                      bool success = false;
+                      try {
+                        final controller = Get.find<GroceriesController>();
+                        success = await controller.createNewListApi(
+                          name: _nameController.text.trim(),
+                          description: _descController.text.trim(),
+                          icon: _icons[_selectedIconIndex],
+                        );
+                      } catch (e) {
+                        debugPrint('Error creating grocery list: $e');
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      }
+
                       if (success) {
-                        Get.back();
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        final listName = _nameController.text.trim();
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+
+                        Get.snackbar(
+                          'List Created',
+                          'Grocery list "$listName" created successfully',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: AppColors.primary,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 3),
+                          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                          icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+                        );
                       }
                     },
                   ),

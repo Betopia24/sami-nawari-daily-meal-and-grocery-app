@@ -40,6 +40,21 @@ class Urls {
   static const String aiRecommendRecipes = '/ai/recommendations/recipes';
 
   // ---------------------------------------------------------------------------
+  // AI MEAL PLANS & NUTRITION INSIGHTS (from OpenAPI spec)
+  // ---------------------------------------------------------------------------
+  static const String aiMealPlans = '/ai/meal-plans';
+  static const String aiMealPlansGenerate = '/ai/meal-plans/generate';
+  static String aiMealPlanSingle(String id) => '/ai/meal-plans/$id';
+  static String aiMealPlanInsights(String mealPlanId) => '/ai/meal-plans/$mealPlanId/insights';
+  static String aiMealPlanLatestInsight(String mealPlanId) => '/ai/meal-plans/$mealPlanId/insights/latest';
+  static String aiMealPlanReplacements(String mealPlanId, String itemId) =>
+      '/ai/meal-plans/$mealPlanId/items/$itemId/replacement-options';
+  static const String aiGroceryDraftFromMealPlan = '/ai/grocery-drafts/from-meal-plan';
+  static const String aiGroceryDraftFromRecipe = '/ai/grocery-drafts/from-recipe';
+  static const String aiCompatibilityCheck = '/ai/compatibility/check';
+  static const String aiCompatibilityBatch = '/ai/compatibility/check-batch';
+
+  // ---------------------------------------------------------------------------
   // EXPLORE & SELLERS
   // ---------------------------------------------------------------------------
   static const String exploreSellers = '/explore/sellers';
@@ -61,10 +76,19 @@ class Urls {
   static const String profileAlergies = '/users/update-allergies';
 
   // ---------------------------------------------------------------------------
-  // ORDERS
+  // ORDERS & PAYMENTS
   // ---------------------------------------------------------------------------
   static const String orders = '/orders';
   static const String sellerOrders = '/orders/seller';
+  static String orderDetails(String id) => '/orders/$id';
+  static String reorder(String id) => '/orders/$id/reorder';
+  static String cancelOrder(String id) => '/orders/$id/cancel';
+  static const String createCheckoutSession = '/payments/create-checkout-session';
+  static String retryPayment(String orderId) => '/payments/retry-payment/$orderId';
+  static const String sellerStripeConnect = '/seller/stripe/connect';
+  static const String sellerStripeStatus = '/seller/stripe/status';
+  static const String sellerStripeDashboardLink = '/seller/stripe/dashboard-link';
+  static const String sellerEarnings = '/seller/earnings';
 
   // ---------------------------------------------------------------------------
   // GROCERY
@@ -75,6 +99,12 @@ class Urls {
   static String groceryItem(String listId) => '/grocery/$listId/item';
   static String groceryItemUpdate(String listId, String itemId) =>
       '/grocery/$listId/item/$itemId';
+  static String groceryItemUpdate(String listId, String itemId) => '/grocery/$listId/item/$itemId';
+  static String groceryInvite(String listId) => '/grocery/$listId/invite';
+  static String groceryInvitationRespond(String invitationId) =>
+      '/grocery/invitations/$invitationId/respond';
+  static String groceryMember(String listId, String memberId) =>
+      '/grocery/$listId/member/$memberId';
 
   // ---------------------------------------------------------------------------
   // BOOKMARKS & REVIEWS

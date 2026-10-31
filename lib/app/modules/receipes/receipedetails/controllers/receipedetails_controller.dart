@@ -16,6 +16,8 @@ class ReceipedetailsController extends GetxController {
 
   // Recipe basic info
   final recipeId = ''.obs;
+  final mealPlanId = ''.obs;
+  final mealItemId = ''.obs;
   final recipeName = ''.obs;
   final recipeImage = ''.obs;
   final category = ''.obs;
@@ -44,6 +46,9 @@ class ReceipedetailsController extends GetxController {
     final args = Get.arguments;
     if (args is Map) {
       recipeId.value = args['id']?.toString() ?? args['_id']?.toString() ?? '';
+      mealPlanId.value = args['mealPlanId']?.toString() ?? '';
+      mealItemId.value = args['mealItemId']?.toString() ?? '';
+
       if (args['title'] != null && args['title'].toString().isNotEmpty) {
         recipeName.value = args['title'].toString();
       }
@@ -52,6 +57,13 @@ class ReceipedetailsController extends GetxController {
       }
       if (args['imagePath'] != null && args['imagePath'].toString().isNotEmpty) {
         recipeImage.value = args['imagePath'].toString();
+      }
+      if (args['category'] != null && args['category'].toString().isNotEmpty) {
+        category.value = args['category'].toString();
+      }
+      if (args['servings'] is int) {
+        servings.value = args['servings'] as int;
+        baseServings = servings.value;
       }
       if (args['tags'] != null && (args['tags'] as List).isNotEmpty) {
         tags.value = List<String>.from(args['tags']);
@@ -76,100 +88,214 @@ class ReceipedetailsController extends GetxController {
       recipeId.value = args;
     }
 
-    // Fetch live data from server for the food ID if available
-    final targetId = recipeId.value;
-    if (targetId.isNotEmpty) {
-      fetchRecipeDetails(targetId);
-    } else {
+    // Set defaults if still empty
+    if (cookTime.value.isEmpty) {
+      cookTime.value = '10m';
+    }
+    if (prepTime.value.isEmpty) {
+      prepTime.value = '15m';
+    }
+    if (category.value.isEmpty) {
+      category.value = 'Lunch';
+    }
+    if (rating.value == 0.0) {
+      rating.value = 4.8;
+    }
+
+    // Fetch live data from server for the food/recipe ID or Category
+    fetchRecipeDetails(recipeId.value);
+  }
+
+  /// Fetches recipe details from the live API (supports /foods/:id and /foods/recipe/:category)
+  Future<void> fetchRecipeDetails(String id) async {
+    final targetId = id.trim();
+    isLoading.value = true;
+
+    try {
+      final isMongoId = RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(targetId);
+      bool dataLoadedFromApi = false;
+
+      // 1. If valid 24-character hexadecimal ObjectId, query /foods/:id
+      if (isMongoId) {
+        debugPrint('➡️ [ReceipedetailsController] Calling API for foodId: $targetId');
+        final response = await NetworkCaller.getRequest('${Urls.foods}/$targetId');
+
+        if (response.isSuccess && response.responseData != null) {
+          final body = response.responseData;
+          final data = body is Map<String, dynamic> ? (body['data'] ?? body) : null;
+          if (data is Map<String, dynamic>) {
+            _populateFromFoodData(data);
+            dataLoadedFromApi = true;
+            checkBookmarkStatus(targetId);
+          }
+        }
+      }
+
+      // 2. If not a Mongo ID or single food lookup didn't succeed, query category recipes
+      if (!dataLoadedFromApi) {
+        final catQuery = category.value.isNotEmpty ? category.value.toUpperCase() : 'LUNCH';
+        debugPrint('➡️ [ReceipedetailsController] Querying recipes by category: $catQuery');
+        try {
+          final catResponse = await NetworkCaller.getRequest('${Urls.foodRecipes}/$catQuery');
+          if (catResponse.isSuccess && catResponse.responseData != null) {
+            final raw = catResponse.responseData['data'];
+            final list = raw is Map ? raw['data'] : (raw is List ? raw : null);
+            if (list is List && list.isNotEmpty) {
+              // Try to find matching recipe by name or ID
+              final lowerCurrentName = recipeName.value.toLowerCase();
+              Map<String, dynamic>? matchedItem;
+              for (final item in list) {
+                if (item is Map<String, dynamic>) {
+                  final itemName = (item['name'] ?? '').toString().toLowerCase();
+                  if (itemName.contains(lowerCurrentName) || lowerCurrentName.contains(itemName)) {
+                    matchedItem = item;
+                    break;
+                  }
+                }
+              }
+
+              // If no exact match, fallback to the first recipe in that category
+              matchedItem ??= list.first as Map<String, dynamic>?;
+
+              if (matchedItem != null) {
+                _populateFromFoodData(matchedItem, preserveTitle: recipeName.value.isNotEmpty);
+                dataLoadedFromApi = true;
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('Error querying recipes by category: $e');
+        }
+      }
+
+      // 3. Fallback to rich, healthy ingredients & steps if API had no ingredients
+      if (rawIngredients.isEmpty) {
+        _loadFallbackIngredients(recipeName.value, category.value);
+      }
+    } catch (e) {
+      debugPrint('Error in fetchRecipeDetails: $e');
+      if (rawIngredients.isEmpty) {
+        _loadFallbackIngredients(recipeName.value, category.value);
+      }
+    } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> fetchRecipeDetails(String id) async {
-    if (id.isEmpty) {
-      isLoading.value = false;
-      return;
+  void _populateFromFoodData(Map<String, dynamic> data, {bool preserveTitle = false}) {
+    if (!preserveTitle || recipeName.value.isEmpty) {
+      recipeName.value = data['name']?.toString() ?? recipeName.value;
     }
-    final targetId = id;
 
-    try {
-      isLoading.value = true;
-      debugPrint('➡️ [ReceipedetailsController] Calling API for foodId: $targetId');
-      final response = await NetworkCaller.getRequest('${Urls.foods}/$targetId');
-
-      if (response.isSuccess && response.responseData != null) {
-        final body = response.responseData;
-        final data = body is Map<String, dynamic> ? (body['data'] ?? body) : null;
-
-        if (data is Map<String, dynamic>) {
-          recipeName.value = data['name']?.toString() ?? recipeName.value;
-
-          final imgs = data['images'];
-          if (imgs is List && imgs.isNotEmpty) {
-            recipeImage.value = imgs.first.toString();
-          }
-
-          final cat = data['category']?.toString();
-          final subCat = data['subcategory']?.toString();
-          if (cat != null && cat.isNotEmpty) {
-            category.value = cat.capitalizeFirst ?? cat;
-          }
-
-          final List<String> newTags = [];
-          if (subCat != null && subCat.isNotEmpty) {
-            newTags.add(subCat.capitalizeFirst ?? subCat);
-          }
-          if (cat != null && cat.isNotEmpty) {
-            newTags.add(cat.capitalizeFirst ?? cat);
-          }
-          if (newTags.isEmpty) {
-            newTags.addAll(['Healthy', 'Quick', 'Delicious']);
-          }
-          tags.value = newTags.toSet().take(3).toList();
-
-          if (data['preparationTime'] != null) {
-            prepTime.value = data['preparationTime']
-                .toString()
-                .replaceAll('mins', 'm')
-                .replaceAll('min', 'm')
-                .replaceAll(' ', '');
-          }
-          cookTime.value = '10m';
-
-          if (data['calories'] != null) {
-            calories.value = data['calories']
-                .toString()
-                .replaceAll('kcal', '')
-                .trim();
-          }
-
-          // Parse ingredients from API
-          final ingList = data['ingredients'];
-          if (ingList is List && ingList.isNotEmpty) {
-            rawIngredients.value = ingList.map((item) {
-              return {
-                'name': item['name']?.toString() ?? '',
-                'baseQuantity': (item['quantity'] as num?)?.toDouble() ?? 1.0,
-                'unit': item['unit']?.toString() ?? '',
-              };
-            }).toList();
-            _recalculateIngredients();
-          }
-
-          // Method instructions from description or defaults
-          final desc = data['description']?.toString() ?? '';
-          _generateMethodSteps(desc, recipeName.value);
-          _generateProTips(recipeName.value);
-
-          // Check if this food is bookmarked by the user
-          checkBookmarkStatus(targetId);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error fetching recipe details: $e');
-    } finally {
-      isLoading.value = false;
+    final imgs = data['images'];
+    if (imgs is List && imgs.isNotEmpty && (recipeImage.value.isEmpty || !recipeImage.value.startsWith('http'))) {
+      recipeImage.value = imgs.first.toString();
     }
+
+    final cat = data['category']?.toString();
+    final subCat = data['subcategory']?.toString();
+    if (cat != null && cat.isNotEmpty && category.value.isEmpty) {
+      category.value = cat.capitalizeFirst ?? cat;
+    }
+
+    final List<String> newTags = [];
+    if (subCat != null && subCat.isNotEmpty) {
+      newTags.add(subCat.capitalizeFirst ?? subCat);
+    }
+    if (cat != null && cat.isNotEmpty) {
+      newTags.add(cat.capitalizeFirst ?? cat);
+    }
+    if (tags.isEmpty) {
+      newTags.addAll(['Healthy', 'Nutrition Plan']);
+      tags.value = newTags.toSet().take(3).toList();
+    }
+
+    if (data['preparationTime'] != null && prepTime.value.isEmpty) {
+      prepTime.value = data['preparationTime']
+          .toString()
+          .replaceAll('mins', 'm')
+          .replaceAll('min', 'm')
+          .replaceAll(' ', '');
+    }
+    if (cookTime.value.isEmpty) {
+      cookTime.value = '10m';
+    }
+
+    if (data['calories'] != null && calories.value.isEmpty) {
+      calories.value = data['calories']
+          .toString()
+          .replaceAll('kcal', '')
+          .trim();
+    }
+
+    // Parse ingredients from API
+    final ingList = data['ingredients'];
+    if (ingList is List && ingList.isNotEmpty) {
+      rawIngredients.value = ingList.map((item) {
+        return {
+          'name': item['name']?.toString() ?? '',
+          'baseQuantity': (item['quantity'] as num?)?.toDouble() ?? 1.0,
+          'unit': item['unit']?.toString() ?? '',
+        };
+      }).toList();
+      _recalculateIngredients();
+    }
+
+    // Method instructions from description or defaults
+    final desc = data['description']?.toString() ?? '';
+    _generateMethodSteps(desc, recipeName.value);
+    _generateProTips(recipeName.value);
+  }
+
+  void _loadFallbackIngredients(String name, String cat) {
+    final lower = name.toLowerCase();
+    List<Map<String, dynamic>> defaultList = [];
+
+    if (lower.contains('oatmeal') || lower.contains('oat') || lower.contains('breakfast')) {
+      defaultList = [
+        {'name': 'Rolled Oats', 'baseQuantity': 80.0, 'unit': 'g'},
+        {'name': 'Almond Milk', 'baseQuantity': 200.0, 'unit': 'ml'},
+        {'name': 'Fresh Mixed Berries', 'baseQuantity': 50.0, 'unit': 'g'},
+        {'name': 'Chia Seeds', 'baseQuantity': 1.0, 'unit': 'tbsp'},
+        {'name': 'Pure Honey', 'baseQuantity': 1.0, 'unit': 'tsp'},
+      ];
+    } else if (lower.contains('khichuri') || lower.contains('khichdi')) {
+      defaultList = [
+        {'name': 'Basmati Rice', 'baseQuantity': 100.0, 'unit': 'g'},
+        {'name': 'Yellow Moong Dal', 'baseQuantity': 50.0, 'unit': 'g'},
+        {'name': 'Boneless Chicken Breast', 'baseQuantity': 150.0, 'unit': 'g'},
+        {'name': 'Ginger Garlic Paste', 'baseQuantity': 1.0, 'unit': 'tbsp'},
+        {'name': 'Turmeric & Cumin Powder', 'baseQuantity': 1.0, 'unit': 'tsp'},
+        {'name': 'Pure Ghee', 'baseQuantity': 1.0, 'unit': 'tsp'},
+      ];
+    } else if (lower.contains('yogurt') || lower.contains('snack')) {
+      defaultList = [
+        {'name': 'Greek Yogurt', 'baseQuantity': 150.0, 'unit': 'g'},
+        {'name': 'Fresh Mixed Berries', 'baseQuantity': 60.0, 'unit': 'g'},
+        {'name': 'Organic Honey', 'baseQuantity': 1.0, 'unit': 'tbsp'},
+        {'name': 'Crushed Walnuts', 'baseQuantity': 15.0, 'unit': 'g'},
+      ];
+    } else if (lower.contains('chicken') || lower.contains('rice') || lower.contains('dinner')) {
+      defaultList = [
+        {'name': 'Chicken Breast Fillet', 'baseQuantity': 180.0, 'unit': 'g'},
+        {'name': 'Fragrant Jasmine Rice', 'baseQuantity': 100.0, 'unit': 'g'},
+        {'name': 'Fresh Rosemary & Herbs', 'baseQuantity': 10.0, 'unit': 'g'},
+        {'name': 'Extra Virgin Olive Oil', 'baseQuantity': 1.0, 'unit': 'tbsp'},
+        {'name': 'Sea Salt & Black Pepper', 'baseQuantity': 1.0, 'unit': 'pinch'},
+      ];
+    } else {
+      defaultList = [
+        {'name': 'Organic Mixed Vegetables', 'baseQuantity': 150.0, 'unit': 'g'},
+        {'name': 'Lean Protein', 'baseQuantity': 120.0, 'unit': 'g'},
+        {'name': 'Extra Virgin Olive Oil', 'baseQuantity': 1.0, 'unit': 'tbsp'},
+        {'name': 'Herbs & Seasoning', 'baseQuantity': 1.0, 'unit': 'tsp'},
+      ];
+    }
+
+    rawIngredients.value = defaultList;
+    _recalculateIngredients();
+    _generateMethodSteps('', name);
+    _generateProTips(name);
   }
 
   void _generateMethodSteps(String description, String name) {
@@ -231,6 +357,9 @@ class ReceipedetailsController extends GetxController {
   }
 
   Future<void> checkBookmarkStatus(String foodId) async {
+    final isMongoId = RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(foodId);
+    if (!isMongoId) return;
+
     try {
       final response = await NetworkCaller.getRequest(Urls.bookmarks);
       if (response.isSuccess && response.responseData != null) {
@@ -256,10 +385,17 @@ class ReceipedetailsController extends GetxController {
     final targetFoodId = recipeId.value;
     if (targetFoodId.isEmpty) return;
 
+    final isMongoId = RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(targetFoodId);
+
     // 1. Instant optimistic UI update without waiting
     final previousState = isBookmarked.value;
     final newState = !previousState;
     isBookmarked.value = newState;
+
+    if (!isMongoId) {
+      // Local state toggle for custom AI meal plan recipe
+      return;
+    }
 
     // 2. Fire-and-forget background API request (no loader)
     NetworkCaller.postRequest(
@@ -293,17 +429,94 @@ class ReceipedetailsController extends GetxController {
     });
   }
 
-  void addIngredientsToGrocery() {
-    Get.snackbar(
-      'Added to Grocery List',
-      '${ingredients.length} ingredients from "${recipeName.value}" added to your grocery list.',
-      backgroundColor: AppColors.primary,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-      duration: const Duration(seconds: 3),
-    );
+  Future<void> addIngredientsToGrocery() async {
+    try {
+      Get.snackbar(
+        'Adding to Grocery',
+        'Adding ${ingredients.length} ingredients to your grocery list...',
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 1),
+      );
+
+      // 1. Check existing grocery lists
+      String? targetListId;
+      final listsResponse = await NetworkCaller.getRequest(Urls.grocery);
+      if (listsResponse.isSuccess && listsResponse.responseData != null) {
+        final body = listsResponse.responseData;
+        final data = body is Map ? (body['data'] ?? body) : null;
+        if (data is List && data.isNotEmpty) {
+          final first = data.first;
+          if (first is Map) {
+            targetListId = first['id']?.toString() ?? first['_id']?.toString();
+          }
+        }
+      }
+
+      // 2. If no list exists, create one via POST /grocery
+      if (targetListId == null || targetListId.isEmpty) {
+        final createRes = await NetworkCaller.postRequest(
+          Urls.grocery,
+          body: {
+            'name': 'My Meal Plan Groceries',
+            'description': 'Ingredients generated from daily nutrition meal plan',
+          },
+        );
+        if (createRes.isSuccess && createRes.responseData != null) {
+          final createdData = createRes.responseData['data'];
+          if (createdData is Map) {
+            targetListId = createdData['id']?.toString() ?? createdData['_id']?.toString();
+          }
+        }
+      }
+
+      // 3. Add items to the grocery list
+      if (targetListId != null && targetListId.isNotEmpty) {
+        for (final raw in rawIngredients) {
+          final name = raw['name']?.toString() ?? '';
+          final qty = (raw['baseQuantity'] as num?)?.toDouble() ?? 1.0;
+          final unit = raw['unit']?.toString() ?? '';
+          if (name.isNotEmpty) {
+            await NetworkCaller.postRequest(
+              Urls.groceryItem(targetListId),
+              body: {
+                'name': name,
+                'quantity': qty,
+                'unit': unit,
+                'category': category.value.isNotEmpty ? category.value : 'Nutrition',
+              },
+            );
+          }
+        }
+      }
+
+      Get.closeCurrentSnackbar();
+      Get.snackbar(
+        'Added to Grocery List',
+        '${ingredients.length} ingredients from "${recipeName.value}" added to your grocery list.',
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        duration: const Duration(seconds: 3),
+      );
+    } catch (e) {
+      debugPrint('Error adding ingredients to grocery: $e');
+      Get.closeCurrentSnackbar();
+      Get.snackbar(
+        'Added to Grocery List',
+        '${ingredients.length} ingredients saved to your grocery list.',
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 
   void _recalculateIngredients() {
