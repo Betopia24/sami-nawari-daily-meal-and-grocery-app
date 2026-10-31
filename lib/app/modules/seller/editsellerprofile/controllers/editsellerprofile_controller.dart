@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import '../../../../data/models/seller_profile_model.dart';
+import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../widgets/custom_time_dropdown.dart';
@@ -95,6 +96,10 @@ class EditsellerprofileController extends GetxController {
             SellerProfileResponseModel.fromJson(response.responseData);
         final data = profileResponse.data;
         if (data != null) {
+          final sellerRole = data.user?.role;
+          if (sellerRole != null && sellerRole.isNotEmpty) {
+            await LocalStorage.saveRole(sellerRole);
+          }
           if (data.ownerName?.isNotEmpty == true) {
             fullNameController.text = data.ownerName!;
           } else if (data.user?.name?.isNotEmpty == true) {

@@ -27,7 +27,7 @@ class LocalStorage {
   static const String tokenKey = 'auth_token';
   static const String refreshTokenKey = 'refreshToken';
   static const String userKey = 'user_data';
-  static const String roleKey = 'user_role';
+  static const String roleKey = 'role';
   static const String onboardingCompletedKey = 'onboarding_completed';
 
   // ---------------------------------------------------------------------------
@@ -125,8 +125,7 @@ class LocalStorage {
     await saveRefreshToken(refreshToken);
     await saveId(id);
     if (role != null) {
-      final prefs = await _instance;
-      await prefs.setString(roleKey, role);
+      await saveRole(role);
     }
     if (userData != null) {
       await saveUser(userData);
@@ -139,20 +138,21 @@ class LocalStorage {
     return await prefs.setString(userKey, jsonEncode(userData));
   }
 
-  /// Save user role
+  /// Save user role under SharedPreferences key 'role'
   static Future<bool> saveRole(String role) async {
     final prefs = await _instance;
+    await prefs.setString('user_role', role);
     return await prefs.setString(roleKey, role);
   }
 
   /// Get user role
   static Future<String?> getRole() async {
     final prefs = await _instance;
-    return prefs.getString(roleKey);
+    return prefs.getString(roleKey) ?? prefs.getString('user_role');
   }
 
   /// Synchronous role getter
-  static String? get roleSync => _prefs?.getString(roleKey);
+  static String? get roleSync => _prefs?.getString(roleKey) ?? _prefs?.getString('user_role');
 
   /// Get user data as Map / JSON
   static Future<Map<String, dynamic>?> getUser() async {
@@ -181,6 +181,8 @@ class LocalStorage {
     await prefs.remove('refresh_token');
     await prefs.remove(userKey);
     await prefs.remove(roleKey);
+    await prefs.remove('user_role');
+    await prefs.remove('role');
     await prefs.remove('pending_seller_approval');
   }
 

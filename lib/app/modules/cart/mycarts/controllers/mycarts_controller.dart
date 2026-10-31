@@ -5,6 +5,7 @@ import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../data/models/cart_model.dart';
+import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../routes/app_routes.dart';
@@ -32,6 +33,11 @@ class MycartsController extends GetxController
   final RxList<Map<String, dynamic>> historyOrders =
       <Map<String, dynamic>>[].obs;
 
+  // Role & seller status update state
+  final RxString userRole = 'BUYER'.obs;
+  bool get isSeller => userRole.value.toUpperCase() == 'SELLER';
+  final RxBool isUpdatingStatus = false.obs;
+
   // Active Orders (Tracking & Review)
   final selectedRating = 0.obs;
 
@@ -51,8 +57,14 @@ class MycartsController extends GetxController
       currentTabIndex.value = tabController.index;
     });
 
+    loadUserRole();
     fetchCart();
     fetchOrders();
+  }
+
+  Future<void> loadUserRole() async {
+    final role = (await LocalStorage.getRole()) ?? LocalStorage.roleSync ?? 'BUYER';
+    userRole.value = role;
   }
 
   @override
@@ -312,7 +324,15 @@ class MycartsController extends GetxController
   Future<void> fetchOrders() async {
     try {
       isLoadingOrders.value = true;
-      final response = await NetworkCaller.getRequest(Urls.orders);
+      final role = (await LocalStorage.getRole()) ?? LocalStorage.roleSync ?? 'BUYER';
+      userRole.value = role;
+
+      final isSellerRole = role.toUpperCase() == 'SELLER';
+      final endpoint = isSellerRole
+          ? '${Urls.sellerOrders}?page=1&limit=10'
+          : '${Urls.orders}?page=1&limit=10';
+
+      final response = await NetworkCaller.getRequest(endpoint);
       if (response.isSuccess && response.responseData != null) {
         final body = response.responseData;
         dynamic rawData = body is Map ? (body['data'] ?? body) : null;
@@ -502,15 +522,329 @@ class MycartsController extends GetxController
   }
 
   void onContactSeller([Map<String, dynamic>? order]) {
-    final phone = order?['contactPhone']?.toString() ??
-        order?['seller']?['phone']?.toString() ??
-        '';
+    final phone = isSeller
+        ? (order?['contactPhone']?.toString() ??
+            (order?['deliveryAddress'] is Map
+                ? (order?['deliveryAddress'] as Map)['phone']?.toString()
+                : null) ??
+            '')
+        : (order?['seller']?['phone']?.toString() ??
+            order?['contactPhone']?.toString() ??
+            '');
+    final label = isSeller ? 'Contact Customer' : 'Contact Seller';
+    final target = isSeller ? 'Customer' : 'Seller';
     Get.snackbar(
-      'Contact Seller',
-      phone.isNotEmpty ? 'Seller contact: $phone' : 'Connecting to seller...',
+      label,
+      phone.isNotEmpty ? '$target contact: $phone' : 'Connecting to $target...',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.black87,
       colorText: Colors.white,
+    );
+  }
+
+  /// Update order status for seller (PATCH /orders/seller/:orderId/status)
+  Future<bool> updateOrderStatus(String orderId, String newStatus) async {
+    if (orderId.isEmpty) return false;
+    try {
+      isUpdatingStatus.value = true;
+      final endpoint = Urls.getOrderStatusUpdateUrl(orderId);
+      final response = await NetworkCaller.patchRequest(
+        endpoint,
+        body: {'status': newStatus},
+      );
+      if (response.isSuccess) {
+        final display = formatStatusTitle(newStatus);
+        Get.snackbar(
+          'Status Updated',
+          response.successMessage ?? 'Order status updated to $display',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1B5E37),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        await fetchOrders();
+        return true;
+      } else {
+        Get.snackbar(
+          'Update Failed',
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to update order status',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade600,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not update order status: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+      );
+      return false;
+    } finally {
+      isUpdatingStatus.value = false;
+    }
+  }
+
+  /// Displays interactive status selection bottom sheet for seller
+  void showUpdateStatusSheet(Map<String, dynamic> order) {
+    final orderId = order['id']?.toString() ?? '';
+    if (orderId.isEmpty) return;
+
+    final currentStatus = (order['status']?.toString() ?? 'CONFIRMED').toUpperCase();
+    final selectedStatus = currentStatus.obs;
+
+    final statusOptions = const [
+      _OrderStatusOption(
+        key: 'ACCEPTED',
+        label: 'Accepted',
+        description: 'Order accepted, awaiting preparation',
+        icon: Icons.check_circle_outline,
+        color: Color(0xFF10B981),
+      ),
+      _OrderStatusOption(
+        key: 'PREPARING',
+        label: 'Preparing',
+        description: 'Kitchen is currently preparing food',
+        icon: Icons.soup_kitchen_outlined,
+        color: Color(0xFFF59E0B),
+      ),
+      _OrderStatusOption(
+        key: 'OUT_FOR_DELIVERY',
+        label: 'Out for Delivery',
+        description: 'Order is on the way to customer',
+        icon: Icons.delivery_dining_outlined,
+        color: Color(0xFF3B82F6),
+      ),
+      _OrderStatusOption(
+        key: 'DELIVERED',
+        label: 'Delivered',
+        description: 'Order delivered to customer',
+        icon: Icons.done_all_rounded,
+        color: Color(0xFF8B5CF6),
+      ),
+      _OrderStatusOption(
+        key: 'COMPLETED',
+        label: 'Completed',
+        description: 'Order fulfilled and completed',
+        icon: Icons.verified_outlined,
+        color: Color(0xFF059669),
+      ),
+      _OrderStatusOption(
+        key: 'CANCELLED',
+        label: 'Cancelled',
+        description: 'Reject or cancel this order',
+        icon: Icons.cancel_outlined,
+        color: Color(0xFFEF4444),
+      ),
+    ];
+
+    Get.bottomSheet(
+      Container(
+        constraints: BoxConstraints(
+          maxHeight: Get.height * 0.85,
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Update Order Status',
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Order #${order['orderNumber'] ?? orderId}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close, color: Colors.grey),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: statusOptions.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final opt = statusOptions[index];
+                  return Obx(() {
+                    final isSelected = selectedStatus.value == opt.key;
+                    final isCurrent = currentStatus == opt.key;
+                    return InkWell(
+                      onTap: () {
+                        selectedStatus.value = opt.key;
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? opt.color.withValues(alpha: 0.08)
+                              : const Color(0xFFFAFAFA),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected ? opt.color : Colors.grey.shade200,
+                            width: isSelected ? 1.5 : 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: opt.color.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(opt.icon, size: 20, color: opt.color),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        opt.label,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: isSelected ? opt.color : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      if (isCurrent) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            'Current',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    opt.description,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected ? opt.color : Colors.grey.shade400,
+                                  width: isSelected ? 6.5 : 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 18),
+            Obx(() => SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isUpdatingStatus.value
+                    ? null
+                    : () async {
+                        final success = await updateOrderStatus(orderId, selectedStatus.value);
+                        if (success) {
+                          Get.back();
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: isUpdatingStatus.value
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        'Confirm Status Update',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            )),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 
@@ -954,4 +1288,20 @@ class MycartsController extends GetxController
     );
     selectedRating.value = 0;
   }
+}
+
+class _OrderStatusOption {
+  final String key;
+  final String label;
+  final String description;
+  final IconData icon;
+  final Color color;
+
+  const _OrderStatusOption({
+    required this.key,
+    required this.label,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
 }

@@ -303,13 +303,15 @@ class MycartsView extends GetView<MycartsController> {
                 ? '$foodName + ${items.length - 1} more'
                 : foodName;
 
-            final restaurantName = order['seller']?['sellerProfile']
-                        ?['businessName']
-                    ?.toString() ??
-                order['seller']?['name']?.toString() ??
-                order['sellerName']?.toString() ??
-                firstItem?['sellerName']?.toString() ??
-                'Kitchen';
+            final restaurantName = controller.isSeller
+                ? (order['recipientName']?.toString() ??
+                    order['userName']?.toString() ??
+                    'Customer')
+                : (order['seller']?['sellerProfile']?['businessName']?.toString() ??
+                    order['seller']?['name']?.toString() ??
+                    order['sellerName']?.toString() ??
+                    firstItem?['sellerName']?.toString() ??
+                    'Kitchen');
 
             final foodImage = firstItem?['image']?.toString() ??
                 firstItem?['foodImage']?.toString() ??
@@ -350,9 +352,19 @@ class MycartsView extends GetView<MycartsController> {
                 controller.formatTimeAgo(order['createdAt']?.toString());
             final timelineSteps = controller.buildTimelineSteps(order);
 
-            final canCancel = statusRaw.toUpperCase() == 'CONFIRMED' ||
-                statusRaw.toUpperCase() == 'PENDING_PAYMENT' ||
-                statusRaw.toUpperCase() == 'ACCEPTED';
+            final cleanStatus = statusRaw.toUpperCase().trim().replaceAll(' ', '_');
+            final isSeller = controller.isSeller;
+
+            // Buyer can cancel up to PREPARING:
+            // PENDING_PAYMENT, CONFIRMED, NEW, ORDER_PLACED, ACCEPTED, PREPARING.
+            // After PREPARING (OUT_FOR_DELIVERY, DELIVERED, COMPLETED, CANCELLED): button disappears.
+            final canCancel = !isSeller &&
+                (cleanStatus == 'CONFIRMED' ||
+                    cleanStatus == 'NEW' ||
+                    cleanStatus == 'ORDER_PLACED' ||
+                    cleanStatus == 'PENDING_PAYMENT' ||
+                    cleanStatus == 'ACCEPTED' ||
+                    cleanStatus == 'PREPARING');
 
             return Column(
               children: [
@@ -377,10 +389,22 @@ class MycartsView extends GetView<MycartsController> {
                         child: PrimaryButton(
                           text: 'Refresh Status',
                           showArrow: false,
+                          isOutlined: isSeller || canCancel,
                           onPressed: controller.onRefreshStatus,
                         ),
                       ),
-                      if (canCancel) ...[
+                      if (isSeller) ...[
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: PrimaryButton(
+                            text: 'Update Status',
+                            showArrow: false,
+                            backgroundColor: AppColors.primary,
+                            onPressed: () =>
+                                controller.showUpdateStatusSheet(order),
+                          ),
+                        ),
+                      ] else if (canCancel) ...[
                         const SizedBox(width: 12),
                         Expanded(
                           child: OutlinedButton(

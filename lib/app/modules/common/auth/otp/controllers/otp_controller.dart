@@ -149,6 +149,12 @@ class OtpController extends GetxController {
 
           final accessToken = responseData?['accessToken']?.toString();
           final refreshToken = responseData?['refreshToken']?.toString();
+          final role = responseData?['user']?['role']?.toString() ??
+              responseData?['role']?.toString();
+
+          if (role != null && role.isNotEmpty) {
+            await LocalStorage.saveRole(role);
+          }
 
           if (accessToken != null && accessToken.isNotEmpty) {
             await LocalStorage.saveAccessToken(accessToken);
@@ -258,7 +264,7 @@ class OtpController extends GetxController {
           LocalStorage.saveId(userId.toString());
         }
         if (map['role'] != null) {
-          LocalStorage.setString(LocalStorage.roleKey, map['role'].toString());
+          LocalStorage.saveRole(map['role'].toString());
         }
       }
     } catch (_) {}
