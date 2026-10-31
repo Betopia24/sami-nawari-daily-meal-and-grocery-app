@@ -89,13 +89,18 @@ class PermissionSetView extends GetView<PermissionSetController> {
               // Bottom Sticky Button
               Padding(
                 padding: EdgeInsets.all(20.w),
-                child: PrimaryButton(
-                  text: 'Send Invitation',
+                child: Obx(() => PrimaryButton(
+                  text: controller.isSending.value
+                      ? 'Sending...'
+                      : 'Send Invitation',
                   showArrow: false,
+                  isEnabled: !controller.isSending.value,
                   onPressed: () {
-                    controller.sendInvitations();
+                    if (!controller.isSending.value) {
+                      controller.sendInvitations();
+                    }
                   },
-                ),
+                )),
               ),
             ],
           );

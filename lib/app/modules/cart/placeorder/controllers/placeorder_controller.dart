@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../data/models/cart_model.dart';
 import '../../../../data/network/network.dart';
@@ -9,6 +10,7 @@ import '../../deliveryaddress/controllers/deliveryaddress_controller.dart';
 import '../../deliveryselection/controllers/deliveryselection_controller.dart';
 import '../../mycarts/controllers/mycarts_controller.dart';
 import '../../revieworder/controllers/revieworder_controller.dart';
+import '../../views/stripe_payment_view.dart';
 
 class PlaceorderController extends GetxController {
   final RxBool isLoading = true.obs;
@@ -210,56 +212,189 @@ class PlaceorderController extends GetxController {
     try {
       isSubmitting.value = true;
 
-      // Extract delivery address if DeliveryaddressController is available
-      String streetAddress = '123 Main Street';
-      String apt = 'Apt 4B';
-      String city = 'San Francisco';
+      // 1. Extract delivery address dynamically from DeliveryaddressController (no static data)
+      String streetAddress = '';
+      String apt = '';
+      String city = '';
       String note = '';
 
       if (Get.isRegistered<DeliveryaddressController>()) {
         final addressCtrl = Get.find<DeliveryaddressController>();
-        if (addressCtrl.streetController.text.trim().isNotEmpty) {
-          streetAddress = addressCtrl.streetController.text.trim();
-        }
-        if (addressCtrl.aptController.text.trim().isNotEmpty) {
-          apt = addressCtrl.aptController.text.trim();
-        }
-        if (addressCtrl.cityController.text.trim().isNotEmpty) {
-          city = addressCtrl.cityController.text.trim();
-        }
-        if (addressCtrl.notesController.text.trim().isNotEmpty) {
-          note = addressCtrl.notesController.text.trim();
-        }
+        streetAddress = addressCtrl.streetController.text.trim();
+        apt = addressCtrl.aptController.text.trim();
+        city = addressCtrl.cityController.text.trim();
+        note = addressCtrl.notesController.text.trim();
       }
 
-      final String methodStr =
-          selectedPaymentMethod.value == 0 ? 'PAY_ONLINE' : 'CASH_ON_DELIVERY';
+      // If order requires delivery and address is missing, alert user
+      if (!allPickup && streetAddress.isEmpty) {
+        Get.snackbar(
+          'Delivery Address Required',
+          'Please enter your delivery street address before proceeding.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orangeAccent,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // 2. Fetch buyer's real recipient name and phone from profile
+      String recipientName = 'Customer';
+      String contactPhone = '+1000000000';
+      try {
+        final profileRes = await NetworkCaller.getRequest(Urls.userMe);
+        if (profileRes.isSuccess && profileRes.responseData != null) {
+          final pData = profileRes.responseData['data'];
+          if (pData is Map) {
+            final name = pData['name']?.toString() ?? '';
+            final phone = (pData['phone'] ?? pData['phoneNumber'])?.toString() ?? '';
+            if (name.isNotEmpty) recipientName = name;
+            if (phone.isNotEmpty) contactPhone = phone;
+          }
+        }
+      } catch (e) {
+        debugPrint('Error getting buyer profile for order: $e');
+      }
+
+      // 3. Payment Method: ONLINE or CASH_ON_DELIVERY (matches backend API spec)
+      final bool isOnline = selectedPaymentMethod.value == 0;
+      final String methodStr = isOnline ? 'ONLINE' : 'CASH_ON_DELIVERY';
 
       final Map<String, dynamic> body = {
         'deliveryAddress': {
-          'streetAddress': streetAddress,
+          'streetAddress': streetAddress.isNotEmpty ? streetAddress : 'Pickup At Seller Kitchen',
           if (apt.isNotEmpty) 'apt': apt,
-          'city': city,
-          'state': 'California',
-          'postalCode': '94101',
+          'city': city.isNotEmpty ? city : 'City',
+          'state': 'State',
+          'postalCode': '1000',
           'country': 'USA',
         },
-        'recipientName': 'Customer',
-        'contactPhone': '+1000000000',
+        'recipientName': recipientName,
+        'contactPhone': contactPhone,
         if (note.isNotEmpty) 'note': note,
         'paymentMethod': methodStr,
       };
 
+      debugPrint('➡️ [PlaceorderController] Submitting order via POST ${Urls.orders}');
       final response = await NetworkCaller.postRequest(Urls.orders, body: body);
-      if (response.isSuccess) {
-        Get.offAllNamed('/orderplaced');
+
+      if (response.isSuccess && response.responseData != null) {
+        final bodyData = response.responseData;
+        final d = bodyData is Map ? (bodyData['data'] ?? bodyData) : null;
+        final orderId = d is Map ? (d['id'] ?? d['_id'] ?? '').toString() : '';
+        final orderNumber = d is Map ? (d['orderNumber'] ?? '').toString() : '';
+
+        final firstGroup = cartGroups.isNotEmpty ? cartGroups.first : null;
+        final totalCount = cartGroups.fold<int>(
+          0,
+          (sum, g) => sum + g.items.fold<int>(0, (s, i) => s + i.quantity),
+        );
+
+        // 4. If Online Payment selected, create Stripe Checkout Session
+        if (isOnline && orderId.isNotEmpty) {
+          String checkoutUrl = '';
+          debugPrint('➡️ [PlaceorderController] Creating Stripe session via ${Urls.createCheckoutSession}');
+          final sessionRes = await NetworkCaller.postRequest(
+            Urls.createCheckoutSession,
+            body: {'orderId': orderId},
+          );
+
+          if (sessionRes.isSuccess && sessionRes.responseData != null) {
+            final sData = sessionRes.responseData['data'];
+            if (sData is Map) {
+              checkoutUrl = sData['url']?.toString() ?? '';
+            }
+          }
+
+          // Refresh Cart and Orders in memory
+          if (Get.isRegistered<MycartsController>()) {
+            final mc = Get.find<MycartsController>();
+            mc.fetchCart();
+            mc.fetchOrders();
+          }
+
+          if (checkoutUrl.isNotEmpty) {
+            debugPrint('💳 [PlaceorderController] Opening in-app Stripe Checkout: $checkoutUrl');
+            Get.off(
+              () => StripePaymentView(
+                checkoutUrl: checkoutUrl,
+                orderId: orderId,
+                orderNumber: orderNumber,
+                restaurantName: firstGroup?.sellerName ?? "Seller's Kitchen",
+                restaurantImage: firstGroup?.restaurantImage ?? AppAssets.homeRecipeCardImage1,
+                itemsCountText: '$totalCount item${totalCount > 1 ? 's' : ''}',
+                priceText: formattedTotalPayable,
+              ),
+            );
+            return;
+          } else {
+            // Failed to generate checkout url, navigate to orderplaced with retry button
+            Get.offAllNamed(
+              '/orderplaced',
+              arguments: {
+                'orderId': orderId,
+                'orderNumber': orderNumber,
+                'restaurantName': firstGroup?.sellerName ?? "Seller's Kitchen",
+                'restaurantImage': firstGroup?.restaurantImage ?? AppAssets.homeRecipeCardImage1,
+                'itemsCountText': '$totalCount item${totalCount > 1 ? 's' : ''}',
+                'priceText': formattedTotalPayable,
+                'paymentMethodTitle': 'Payment Method',
+                'paymentMethodSubtitle': 'Online (Stripe - Pending)',
+                'isOnline': true,
+                'isSuccess': false,
+                'paymentStatus': 'PENDING',
+                'checkoutUrl': '',
+              },
+            );
+            return;
+          }
+        }
+
+        // 5. Cash on Delivery / Pickup Flow
+        if (Get.isRegistered<MycartsController>()) {
+          final mc = Get.find<MycartsController>();
+          mc.fetchCart();
+          mc.fetchOrders();
+        }
+
+        Get.offAllNamed(
+          '/orderplaced',
+          arguments: {
+            'orderId': orderId,
+            'orderNumber': orderNumber,
+            'restaurantName': firstGroup?.sellerName ?? "Seller's Kitchen",
+            'restaurantImage': firstGroup?.restaurantImage ?? AppAssets.homeRecipeCardImage1,
+            'itemsCountText': '$totalCount item${totalCount > 1 ? 's' : ''}',
+            'priceText': formattedTotalPayable,
+            'paymentMethodTitle': 'Payment Method',
+            'paymentMethodSubtitle':
+                allPickup ? 'Cash on Pickup' : 'Cash on Delivery',
+            'isOnline': false,
+            'isSuccess': true,
+            'paymentStatus': 'COD',
+            'checkoutUrl': '',
+          },
+        );
       } else {
-        // If API fails due to server requirements or test mode, still allow user to view order placed screen
-        Get.offAllNamed('/orderplaced');
+        Get.snackbar(
+          'Order Placement Failed',
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to place order. Please check your items and try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       debugPrint('Error placing order: $e');
-      Get.offAllNamed('/orderplaced');
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred while placing order. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
       isSubmitting.value = false;
     }

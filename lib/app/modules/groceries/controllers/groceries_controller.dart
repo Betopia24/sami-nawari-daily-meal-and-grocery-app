@@ -97,12 +97,18 @@ class GroceryItemModel {
     final formattedSize = '$parsedQty $formattedUnit'.trim();
 
     String tag = '';
-    if (rawPriority.isNotEmpty && rawPriority != 'NO_PRIORITY') {
-      tag = rawPriority;
-    } else if (rawCategory.isNotEmpty && rawCategory != 'OTHER') {
-      tag = rawCategory;
-    } else if (rawNotes.isNotEmpty) {
-      tag = rawNotes.length > 12 ? '${rawNotes.substring(0, 10)}...' : rawNotes;
+    final cleanPriority = rawPriority.trim();
+    final cleanCategory = rawCategory.trim();
+    if (cleanPriority.isNotEmpty &&
+        cleanPriority.toUpperCase() != 'NO_PRIORITY' &&
+        cleanPriority.toLowerCase() != 'no priority') {
+      tag = cleanPriority;
+    } else if (cleanCategory.isNotEmpty &&
+        cleanCategory.toUpperCase() != 'OTHER') {
+      tag = cleanCategory;
+    } else if (rawNotes.trim().isNotEmpty) {
+      final n = rawNotes.trim();
+      tag = n.length > 12 ? '${n.substring(0, 10)}...' : n;
     }
 
     String addedByName = 'Me';
@@ -228,6 +234,14 @@ class GroceriesController extends GetxController {
   // Backward compatibility alias for views referencing completedItems
   RxList<GroceryItemModel> get completedItems => recentlyUsedItems;
 
+  /// Returns the currently active GroceryListModel
+  GroceryListModel? get activeGroceryList {
+    if (groceryLists.isEmpty) return null;
+    final found = groceryLists
+        .firstWhereOrNull((l) => l.id == activeGroceryListId.value);
+    return found ?? groceryLists.first;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -337,6 +351,16 @@ class GroceriesController extends GetxController {
         final data =
             body is Map && body['data'] is Map ? body['data'] as Map : null;
         if (data != null) {
+          // Update the grocery list model with fresh details (name, members, stats)
+          final updatedList =
+              GroceryListModel.fromJson(Map<String, dynamic>.from(data));
+          final idx = groceryLists.indexWhere((l) => l.id == updatedList.id);
+          if (idx != -1) {
+            groceryLists[idx] = updatedList;
+          } else {
+            groceryLists.add(updatedList);
+          }
+
           final rawItems = data['items'] is List ? data['items'] as List : [];
           final newPending = <GroceryItemModel>[];
           final newCompleted = <GroceryItemModel>[];
@@ -513,11 +537,13 @@ class GroceriesController extends GetxController {
     String? priority,
     String? notes,
     IconData? fallbackIcon,
+    bool showSuccessSnackbar = false,
   }) async {
     if (name.trim().isEmpty) return false;
 
     // Ensure valid active list
-    if (activeGroceryListId.value.isEmpty) {
+    if (activeGroceryListId.value.isEmpty ||
+        !groceryLists.any((l) => l.id == activeGroceryListId.value)) {
       if (groceryLists.isNotEmpty) {
         activeGroceryListId.value = groceryLists.first.id;
       } else {
@@ -573,19 +599,21 @@ class GroceriesController extends GetxController {
           final newItem =
               GroceryItemModel.fromJson(Map<String, dynamic>.from(data));
           pendingItems.insert(0, newItem);
-        } else {
-          await fetchGroceryListDetails(listId);
         }
+        await fetchGroceryListDetails(listId);
 
-        Get.snackbar(
-          'Added to list',
-          '$name added to ${groceryLists.isNotEmpty ? groceryLists.first.name : "grocery list"}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.primary,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-          margin: EdgeInsets.only(bottom: 80.h, left: 16.w, right: 16.w),
-        );
+        if (showSuccessSnackbar) {
+          Get.snackbar(
+            'Added to list',
+            '$name added to ${groceryLists.isNotEmpty ? groceryLists.first.name : "grocery list"}',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: AppColors.primary,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+            margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+          );
+        }
         return true;
       } else {
         Get.snackbar(
@@ -593,14 +621,26 @@ class GroceriesController extends GetxController {
           response.message.isNotEmpty
               ? response.message
               : 'Failed to add item',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red.shade700,
           colorText: Colors.white,
-          margin: EdgeInsets.only(bottom: 80.h, left: 16.w, right: 16.w),
+          duration: const Duration(seconds: 3),
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          icon: const Icon(Icons.error_outline, color: Colors.white),
         );
       }
     } catch (e) {
       debugPrint('Error adding grocery item: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to add item: $e',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.shade700,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        icon: const Icon(Icons.error_outline, color: Colors.white),
+      );
     } finally {
       isActionLoading.value = false;
     }
@@ -652,9 +692,32 @@ class GroceriesController extends GetxController {
       if (response.isSuccess) {
         await fetchGroceryListDetails(listId);
         return true;
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message.isNotEmpty
+              ? response.message
+              : 'Failed to update item',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red.shade700,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          icon: const Icon(Icons.error_outline, color: Colors.white),
+        );
       }
     } catch (e) {
       debugPrint('Error updating grocery item: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to update item: $e',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.shade700,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        icon: const Icon(Icons.error_outline, color: Colors.white),
+      );
     } finally {
       isActionLoading.value = false;
     }

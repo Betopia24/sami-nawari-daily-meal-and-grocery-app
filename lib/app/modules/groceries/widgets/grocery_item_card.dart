@@ -37,105 +37,112 @@ class GroceryItemCard extends StatelessWidget {
 
     return Material(
       color: bgColor,
-      borderRadius: BorderRadius.circular(16.r),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.r),
+        side: BorderSide(color: borderColor, width: 1.w),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
         splashColor: AppColors.primary.withValues(alpha: 0.1),
         highlightColor: AppColors.primary.withValues(alpha: 0.05),
-        child: Stack(
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: borderColor, width: 1.w),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Icon
-                  _buildIcon(),
-                  SizedBox(height: 4.h),
+        child: SizedBox.expand(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Icon
+                    _buildIcon(),
+                    SizedBox(height: 4.h),
 
-                  // Title
-                  Text(
-                    title,
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12.sp,
-                      color: titleColor,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 2.h),
-
-                  // Tags
-                  if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (sizeInfo.isNotEmpty)
-                            _buildTag(
-                              sizeInfo,
-                              isCompleted ? const Color(0xFF6B756B) : Colors.white,
-                              isCompleted ? const Color(0xFFE2E7E2) : AppColors.primary,
-                              isCompleted,
-                            ),
-                          if (sizeInfo.isNotEmpty && tagInfo.isNotEmpty)
-                            SizedBox(width: 4.w),
-                          if (tagInfo.isNotEmpty)
-                            _buildTag(
-                              tagInfo,
-                              isCompleted ? const Color(0xFF6B756B) : Colors.white,
-                              isCompleted ? const Color(0xFFE2E7E2) : AppColors.primary,
-                              isCompleted,
-                            ),
-                        ],
+                    // Title
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      child: Text(
+                        title,
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.sp,
+                          color: titleColor,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 3.h),
 
-                  // Footer
-                  Text(
-                    isCompleted
-                        ? 'Completed by $addedBy\n${completedAgo ?? ''}'
-                        : 'Added by $addedBy',
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 8.sp,
-                      color: isCompleted ? const Color(0xFF8A948A) : AppColors.primary,
+                    // Tags
+                    if (sizeInfo.isNotEmpty || tagInfo.isNotEmpty)
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (sizeInfo.isNotEmpty)
+                              _buildTag(
+                                sizeInfo.toUpperCase(),
+                                isCompleted ? const Color(0xFF6B756B) : Colors.white,
+                                isCompleted ? const Color(0xFFE2E7E2) : AppColors.primary,
+                                isCompleted,
+                              ),
+                            if (sizeInfo.isNotEmpty && tagInfo.isNotEmpty)
+                              SizedBox(width: 4.w),
+                            if (tagInfo.isNotEmpty)
+                              _buildTag(
+                                tagInfo,
+                                isCompleted ? const Color(0xFF6B756B) : Colors.white,
+                                isCompleted ? const Color(0xFFE2E7E2) : AppColors.primary,
+                                isCompleted,
+                              ),
+                          ],
+                        ),
+                      ),
+                    SizedBox(height: 3.h),
+
+                    // Footer
+                    Text(
+                      isCompleted
+                          ? 'Completed by $addedBy\n${completedAgo ?? ''}'
+                          : 'Added by $addedBy',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 8.sp,
+                        color: isCompleted ? const Color(0xFF8A948A) : AppColors.primary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: isCompleted ? 2 : 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            if (isCompleted)
-              Positioned(
-                top: 6.h,
-                right: 6.w,
-                child: Container(
-                  width: 16.w,
-                  height: 16.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.8),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check,
-                    size: 11.sp,
-                    color: Colors.white,
-                  ),
+                  ],
                 ),
               ),
-          ],
+              if (isCompleted)
+                Positioned(
+                  top: 6.h,
+                  right: 6.w,
+                  child: Container(
+                    width: 16.w,
+                    height: 16.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.8),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      size: 11.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

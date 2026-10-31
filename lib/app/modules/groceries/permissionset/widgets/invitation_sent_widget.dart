@@ -143,7 +143,7 @@ class InvitationSentWidget extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'james@gmail.com', // Should ideally come from the model, mocking for now
+                  member.email.isNotEmpty ? member.email : 'Invited Member',
                   style: GoogleFonts.outfit(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,

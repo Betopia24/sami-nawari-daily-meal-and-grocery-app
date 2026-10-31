@@ -40,12 +40,33 @@ class OrderPlacedSummaryCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    restaurantImage,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
+                  child: restaurantImage.startsWith('http')
+                      ? Image.network(
+                          restaurantImage,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Image.asset(
+                            AppAssets.homeRecipeCardImage1,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          restaurantImage.isNotEmpty
+                              ? restaurantImage
+                              : AppAssets.homeRecipeCardImage1,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Image.asset(
+                            AppAssets.homeRecipeCardImage1,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -250,13 +250,9 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                   );
                                 }
 
-                                final lists = controller.groceryLists;
-                                final activeTitle = lists.isNotEmpty
-                                    ? lists[0].name
-                                    : "Groceries";
-                                final activeCount = lists.isNotEmpty
-                                    ? lists[0].memberCount
-                                    : 1;
+                                final activeList = controller.activeGroceryList;
+                                final activeTitle = activeList?.name ?? "Groceries";
+                                final activeMembers = activeList?.members ?? [];
                                 final pending = controller.pendingItems;
                                 final recent = controller.recentlyUsedItems;
 
@@ -271,7 +267,7 @@ class GroceriesBoardView extends GetView<GroceriesController> {
                                         Expanded(
                                           child: GroceriesSectionHeader(
                                             title: activeTitle,
-                                            peopleCount: activeCount,
+                                            members: activeMembers,
                                           ),
                                         ),
                                       ],

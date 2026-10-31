@@ -14,6 +14,7 @@ class PrimaryButton extends StatelessWidget {
 
   final bool isOutlined;
   final bool isEnabled;
+  final bool isLoading;
   final IconData? prefixIcon;
   final String? svgPrefix;
   final String? trailingText;
@@ -29,6 +30,7 @@ class PrimaryButton extends StatelessWidget {
     this.showArrow = true,
     this.isOutlined = false,
     this.isEnabled = true,
+    this.isLoading = false,
     this.prefixIcon,
     this.svgPrefix,
     this.trailingText,
@@ -38,20 +40,27 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = textColor ?? (isOutlined ? AppColors.primary : Colors.white);
+    final effectiveBgColor = backgroundColor ?? (isOutlined ? Colors.white : AppColors.primary);
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height ?? 51.h,
       child: ElevatedButton(
-        onPressed: isEnabled ? onPressed : null,
+        onPressed: (isEnabled && !isLoading) ? onPressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: !isEnabled
               ? const Color(0xFFE0DFDB) // Disabled background color matching design
-              : (backgroundColor ?? (isOutlined ? Colors.white : AppColors.primary)),
+              : effectiveBgColor,
           foregroundColor: !isEnabled
               ? AppColors.textSecondary
-              : (textColor ?? (isOutlined ? AppColors.primary : Colors.white)),
-          disabledBackgroundColor: const Color(0xFFE0DFDB),
-          disabledForegroundColor: AppColors.textSecondary,
+              : effectiveColor,
+          disabledBackgroundColor: isLoading
+              ? effectiveBgColor
+              : const Color(0xFFE0DFDB),
+          disabledForegroundColor: isLoading
+              ? effectiveColor
+              : AppColors.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
             side: isOutlined && isEnabled
@@ -60,8 +69,17 @@ class PrimaryButton extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        child: trailingText != null
-            ? Padding(
+        child: isLoading
+            ? SizedBox(
+                width: 22.w,
+                height: 22.w,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(effectiveColor),
+                ),
+              )
+            : trailingText != null
+                ? Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../data/network/network.dart';
+import '../../../../data/network/url.dart';
 
 class DeliveryaddressController extends GetxController {
   final streetController = TextEditingController();
@@ -8,6 +10,7 @@ class DeliveryaddressController extends GetxController {
   final notesController = TextEditingController();
 
   final isFormValid = false.obs;
+  final isLoadingProfile = false.obs;
 
   @override
   void onInit() {
@@ -15,12 +18,34 @@ class DeliveryaddressController extends GetxController {
     streetController.addListener(_validateForm);
     cityController.addListener(_validateForm);
     
-    // Pre-fill mock data from design
-    streetController.text = '123 Main Street';
-    aptController.text = 'Apt 4B';
-    cityController.text = 'San Francisco';
-    notesController.text = 'Ring doorbell, leave at door...';
-    _validateForm();
+    // Dynamically load user's saved profile address (NO static dummy data)
+    _loadUserSavedAddress();
+  }
+
+  Future<void> _loadUserSavedAddress() async {
+    try {
+      isLoadingProfile.value = true;
+      final response = await NetworkCaller.getRequest(Urls.userMe);
+      if (response.isSuccess && response.responseData != null) {
+        final body = response.responseData;
+        final data = body is Map ? (body['data'] ?? body) : null;
+        if (data is Map) {
+          final addr = (data['address'] ?? data['streetAddress'] ?? '').toString();
+          final userCity = (data['city'] ?? '').toString();
+          if (addr.isNotEmpty) {
+            streetController.text = addr;
+          }
+          if (userCity.isNotEmpty) {
+            cityController.text = userCity;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user address: $e');
+    } finally {
+      isLoadingProfile.value = false;
+      _validateForm();
+    }
   }
 
   void _validateForm() {

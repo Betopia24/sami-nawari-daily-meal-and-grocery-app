@@ -21,6 +21,7 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController(text: '1');
   
+  bool _isLoading = false;
   String _selectedUnit = 'Piece (pcs)';
   String _selectedCategory = 'Other';
   String _selectedPriority = 'No priority';
@@ -78,9 +79,8 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
   Widget build(BuildContext context) {
     // Get the active list name if available
     final GroceriesController controller = Get.find();
-    final activeListName = controller.groceryLists.isNotEmpty 
-        ? controller.groceryLists[0].name 
-        : "Grocery List";
+    final activeListName = controller.activeGroceryList?.name ??
+        (controller.groceryLists.isNotEmpty ? controller.groceryLists[0].name : "Grocery List");
 
     return Container(
       decoration: BoxDecoration(
@@ -105,7 +105,7 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
                 Align(
                   alignment: Alignment.topRight,
                   child: GestureDetector(
-                    onTap: () => Get.back(),
+                    onTap: _isLoading ? null : () => Get.back(),
                     child: Icon(Icons.close, color: AppColors.textPrimary, size: 20.sp),
                   ),
                 ),
@@ -230,37 +230,86 @@ class _AddGroceryItemBottomSheetState extends State<AddGroceryItemBottomSheet> {
             PrimaryButton(
               text: widget.itemToEdit != null ? 'Save Item' : 'Add Item',
               showArrow: false,
+              isLoading: _isLoading,
               prefixIcon: widget.itemToEdit != null ? Icons.save : Icons.add,
               onPressed: () async {
                 final name = _nameController.text.trim();
-                if (name.isEmpty) return;
+                if (name.isEmpty) {
+                  Get.snackbar(
+                    'Item Name Required',
+                    'Please enter a name for the item',
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.amber.shade800,
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 2),
+                    margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  );
+                  return;
+                }
+
+                setState(() {
+                  _isLoading = true;
+                });
 
                 final qty = num.tryParse(_quantityController.text.trim()) ?? 1;
                 final controller = Get.find<GroceriesController>();
 
-                if (widget.itemToEdit != null) {
-                  await controller.updateGroceryItem(
-                    oldItem: widget.itemToEdit!,
-                    name: name,
-                    quantity: qty,
-                    unit: _selectedUnit,
-                    category: _selectedCategory,
-                    priority: _selectedPriority,
-                    notes: _notesController.text.trim(),
-                  );
-                } else {
-                  await controller.addGroceryItem(
-                    name: name,
-                    quantity: qty,
-                    unit: _selectedUnit,
-                    category: _selectedCategory,
-                    priority: _selectedPriority,
-                    notes: _notesController.text.trim(),
-                    fallbackIcon: widget.initialItemIcon,
-                  );
+                bool success = false;
+                try {
+                  if (widget.itemToEdit != null) {
+                    success = await controller.updateGroceryItem(
+                      oldItem: widget.itemToEdit!,
+                      name: name,
+                      quantity: qty,
+                      unit: _selectedUnit,
+                      category: _selectedCategory,
+                      priority: _selectedPriority,
+                      notes: _notesController.text.trim(),
+                    );
+                  } else {
+                    success = await controller.addGroceryItem(
+                      name: name,
+                      quantity: qty,
+                      unit: _selectedUnit,
+                      category: _selectedCategory,
+                      priority: _selectedPriority,
+                      notes: _notesController.text.trim(),
+                      fallbackIcon: widget.initialItemIcon,
+                      showSuccessSnackbar: false,
+                    );
+                  }
+                } catch (e) {
+                  debugPrint('Error saving item: $e');
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
                 }
 
-                Get.back();
+                if (success) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+
+                  // 1. MUST close the bottom sheet first
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+
+                  // 2. MUST show success message after closing
+                  Get.snackbar(
+                    widget.itemToEdit != null ? 'Item Updated' : 'Item Added',
+                    widget.itemToEdit != null
+                        ? '$name updated successfully'
+                        : '$name added to $activeListName successfully',
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: AppColors.primary,
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 3),
+                    margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  );
+                }
               },
             ),
           ],

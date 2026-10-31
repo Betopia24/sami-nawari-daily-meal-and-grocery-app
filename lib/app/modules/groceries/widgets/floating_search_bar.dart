@@ -29,6 +29,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
 
   bool _isExpanded = false;
   bool _hasText = false;
+  bool _isAdding = false;
 
   @override
   void initState() {
@@ -82,14 +83,44 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
     });
   }
 
-  void _submitAdd() {
+  Future<void> _submitAdd() async {
+    if (_isAdding) return;
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
     HapticFeedback.mediumImpact();
-    final controller = Get.find<GroceriesController>();
-    controller.addGroceryItem(name: text);
-    _collapse();
+    setState(() {
+      _isAdding = true;
+    });
+
+    try {
+      final controller = Get.find<GroceriesController>();
+      final success = await controller.addGroceryItem(
+        name: text,
+        showSuccessSnackbar: false,
+      );
+      if (success) {
+        _collapse();
+        Get.snackbar(
+          'Item Added',
+          '$text added to list successfully',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.primary,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error adding grocery item in floating search bar: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAdding = false;
+        });
+      }
+    }
   }
 
   @override
@@ -302,6 +333,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
               child: TextField(
                 controller: _textController,
                 focusNode: _focusNode,
+                enabled: !_isAdding,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _submitAdd(),
                 style: GoogleFonts.outfit(
@@ -324,7 +356,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
             ),
 
             // Clear icon when text is entered
-            if (_hasText)
+            if (_hasText && !_isAdding)
               GestureDetector(
                 onTap: () => _textController.clear(),
                 child: Padding(
@@ -344,7 +376,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
             // When text empty -> Tune (full dialog) + Close (✕) button
             if (_hasText)
               GestureDetector(
-                onTap: _submitAdd,
+                onTap: _isAdding ? null : _submitAdd,
                 behavior: HitTestBehavior.opaque,
                 child: Container(
                   height: 44.w,
@@ -361,25 +393,34 @@ class _FloatingSearchBarState extends State<FloatingSearchBar>
                     ],
                   ),
                   child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 17.sp,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          'Add',
-                          style: GoogleFonts.outfit(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                    child: _isAdding
+                        ? SizedBox(
+                            width: 18.w,
+                            height: 18.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_rounded,
+                                color: Colors.white,
+                                size: 17.sp,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Add',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               )

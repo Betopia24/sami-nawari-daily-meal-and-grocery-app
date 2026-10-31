@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -6,12 +7,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
+import '../../widgets/explore_filter_bottom_sheet.dart';
 
 class ExploreboardController extends GetxController {
   GoogleMapController? mapController;
 
-  // Search controller
+  // Search controller and debounce
   final searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   // Initial center position (San Francisco default matching app address)
   final Rx<LatLng> initialPosition = const LatLng(37.7749, -122.4194).obs;
@@ -20,6 +23,22 @@ class ExploreboardController extends GetxController {
   final RxBool isMapReady = false.obs;
   final RxBool isLoadingSellers = true.obs;
   final RxSet<Marker> markers = <Marker>{}.obs;
+
+  // Filter States
+  final RxString selectedCuisine = ''.obs;
+  final RxBool filterDeliveryAvailable = false.obs;
+  final RxBool filterPickupAvailable = false.obs;
+  final RxDouble filterRadius = 10.0.obs; // in km
+  final RxBool filterByLocation = false.obs;
+
+  int get activeFilterCount {
+    int count = 0;
+    if (selectedCuisine.value.isNotEmpty) count++;
+    if (filterDeliveryAvailable.value) count++;
+    if (filterPickupAvailable.value) count++;
+    if (filterByLocation.value) count++;
+    return count;
+  }
 
   // Dynamic restaurants list from API
   final RxList<Map<String, dynamic>> restaurants = <Map<String, dynamic>>[].obs;
@@ -40,22 +59,93 @@ class ExploreboardController extends GetxController {
     isMapReady.value = true;
   }
 
+  /// Opens the Filter Bottom Sheet
+  void openFilterBottomSheet() {
+    Get.bottomSheet(
+      const ExploreFilterBottomSheet(),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  /// Applies filters selected in the bottom sheet and calls the API
+  void applyFilters({
+    required String cuisine,
+    required bool delivery,
+    required bool pickup,
+    required double radius,
+    required bool useLocation,
+  }) {
+    selectedCuisine.value = cuisine;
+    filterDeliveryAvailable.value = delivery;
+    filterPickupAvailable.value = pickup;
+    filterRadius.value = radius;
+    filterByLocation.value = useLocation;
+
+    fetchNearbySellers();
+  }
+
+  /// Resets all filters and search query
+  void resetFilters() {
+    selectedCuisine.value = '';
+    filterDeliveryAvailable.value = false;
+    filterPickupAvailable.value = false;
+    filterRadius.value = 10.0;
+    filterByLocation.value = false;
+    searchController.clear();
+
+    fetchNearbySellers();
+  }
+
+  /// Debounced search listener calling the live backend API
+  void onSearchChanged(String query) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 350), () {
+      fetchNearbySellers();
+    });
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    fetchNearbySellers();
+  }
+
   /// Connects to live API: GET /explore/sellers from Postman collection
+  /// Supports: ?cuisine=ITALIAN&deliveryAvailable=true
+  /// Supports: ?searchTerm=Alex&latitude=37.7749&longitude=-122.4194&radius=5000
   Future<void> fetchNearbySellers() async {
     try {
       isLoadingSellers.value = true;
-      restaurants.clear();
-      allRestaurants.clear();
 
       final Map<String, dynamic> queryParams = {
         'limit': 20,
       };
 
-      if (currentPosition.value != null) {
-        queryParams['latitude'] = currentPosition.value!.latitude.toString();
-        queryParams['longitude'] = currentPosition.value!.longitude.toString();
-        queryParams['radius'] = '10000';
+      final term = searchController.text.trim();
+      if (term.isNotEmpty) {
+        queryParams['searchTerm'] = term;
       }
+
+      if (selectedCuisine.value.isNotEmpty) {
+        queryParams['cuisine'] = selectedCuisine.value.toUpperCase();
+      }
+
+      if (filterDeliveryAvailable.value) {
+        queryParams['deliveryAvailable'] = 'true';
+      }
+
+      if (filterPickupAvailable.value) {
+        queryParams['pickupAvailable'] = 'true';
+      }
+
+      if (filterByLocation.value) {
+        final pos = currentPosition.value ?? initialPosition.value;
+        queryParams['latitude'] = pos.latitude.toString();
+        queryParams['longitude'] = pos.longitude.toString();
+        queryParams['radius'] = (filterRadius.value * 1000).toInt().toString();
+      }
+
+      debugPrint('➡️ [ExploreboardController] Calling GET ${Urls.exploreSellers} with params: $queryParams');
 
       final response = await NetworkCaller.getRequest(
         Urls.exploreSellers,
@@ -76,7 +166,7 @@ class ExploreboardController extends GetxController {
           rawData = body;
         }
 
-        if (rawData is List && rawData.isNotEmpty) {
+        if (rawData is List) {
           final List<Map<String, dynamic>> parsedList = [];
           for (int i = 0; i < rawData.length; i++) {
             final item = rawData[i];
@@ -109,9 +199,9 @@ class ExploreboardController extends GetxController {
                 distStr = d > 100 ? '${(d / 1000).toStringAsFixed(1)} km' : '${d.toStringAsFixed(1)} km';
               }
 
-              // Location coords (if missing, distribute nicely around map center)
-              final double latOffset = ((i % 2 == 0 ? 1 : -1) * (0.0025 * ((i ~/ 2) + 1)));
-              final double lngOffset = ((i % 3 == 0 ? 1 : -1) * (0.0035 * ((i ~/ 3) + 1)));
+              // Location coords (if missing or 0, distribute around map center)
+              final double latOffset = ((i % 2 == 0 ? 1 : -1) * (0.0035 * ((i ~/ 2) + 1)));
+              final double lngOffset = ((i % 3 == 0 ? 1 : -1) * (0.0045 * ((i ~/ 3) + 1)));
               final double lat = (s['latitude'] as num?)?.toDouble() ??
                   (initialPosition.value.latitude + latOffset);
               final double lng = (s['longitude'] as num?)?.toDouble() ??
@@ -142,25 +232,20 @@ class ExploreboardController extends GetxController {
             }
           }
 
-          if (parsedList.isNotEmpty) {
-            allRestaurants.assignAll(parsedList);
-            restaurants.assignAll(parsedList);
-            _initMarkers();
-            return;
-          }
+          allRestaurants.assignAll(parsedList);
+          restaurants.assignAll(parsedList);
+          _initMarkers();
+          return;
         }
       }
 
-      if (restaurants.isEmpty) {
-        _loadFallbackRestaurants();
-        _initMarkers();
-      }
+      // If empty or failed response
+      restaurants.clear();
+      _initMarkers();
     } catch (e) {
       debugPrint('Error fetching nearby sellers from API: $e');
-      if (restaurants.isEmpty) {
-        _loadFallbackRestaurants();
-        _initMarkers();
-      }
+      restaurants.clear();
+      _initMarkers();
     } finally {
       isLoadingSellers.value = false;
     }
@@ -177,7 +262,7 @@ class ExploreboardController extends GetxController {
       final String name = restaurant['name'].toString();
       final String owner = restaurant['owner'].toString();
       final double rating =
-          (restaurant['rating'] as num?)?.toDouble() ?? 4.5;
+          (restaurant['rating'] as num?)?.toDouble() ?? 4.8;
       final String time = restaurant['time'].toString();
 
       loadedMarkers.add(
@@ -308,23 +393,6 @@ class ExploreboardController extends GetxController {
     }
   }
 
-  void onSearchChanged(String query) {
-    if (query.trim().isEmpty) {
-      restaurants.assignAll(allRestaurants);
-    } else {
-      final lower = query.toLowerCase();
-      restaurants.assignAll(
-        allRestaurants.where((r) {
-          final name = (r['name'] ?? '').toString().toLowerCase();
-          final desc = (r['description'] ?? '').toString().toLowerCase();
-          final owner = (r['owner'] ?? '').toString().toLowerCase();
-          return name.contains(lower) || desc.contains(lower) || owner.contains(lower);
-        }).toList(),
-      );
-    }
-    _initMarkers();
-  }
-
   void animateToRestaurant(double lat, double lng) {
     if (mapController != null) {
       mapController!.animateCamera(
@@ -338,89 +406,6 @@ class ExploreboardController extends GetxController {
     }
   }
 
-  void _loadFallbackRestaurants() {
-    final list = [
-      {
-        'id': '6a86bec0da330f33e60f935a',
-        'sellerId': '6a7804181dc04f6bd575f7e0',
-        'name': "Rafi's Kitchen Pro",
-        'owner': 'Rafiul Islam',
-        'rating': 4.9,
-        'reviews': 412,
-        'distance': '0.4 km',
-        'time': '25 min',
-        'deliveryFee': 'Delivery \$2.50',
-        'isOpen': true,
-        'hasPickup': true,
-        'hasDelivery': true,
-        'latitude': 37.7765,
-        'longitude': -122.4170,
-        'description':
-            'Premium home-cooked Mediterranean and Italian meals prepared with love and organic ingredients.',
-        'image': 'https://res.cloudinary.com/dgk8lgdzb/image/upload/v1787216596/uploads/dcmbp9qlrgl0rybjpnaw.webp',
-      },
-      {
-        'id': '6a8d5923b0849aa545857175',
-        'sellerId': '6a8d58bab0849aa545857173',
-        'name': "Nayeem Kitchen",
-        'owner': 'Seller Nayeem',
-        'rating': 4.7,
-        'reviews': 1027,
-        'distance': '0.8 km',
-        'time': '30 min',
-        'deliveryFee': 'Delivery \$3.50',
-        'isOpen': true,
-        'hasPickup': true,
-        'hasDelivery': false,
-        'latitude': 37.7790,
-        'longitude': -122.4230,
-        'description':
-            'Healthy homemade meals with fresh ingredients. Dumplings, pasta, and comfort foods.',
-        'image': 'assets/images/homedinnercardimage.png',
-      },
-      {
-        'id': '6a8e6fd99b955a97a74b15bd',
-        'sellerId': '6a8e6df185d3f55f0f1a6783',
-        'name': "Spice Garden Cafe",
-        'owner': 'Priya Sharma',
-        'rating': 4.8,
-        'reviews': 821,
-        'distance': '1.2 km',
-        'time': '40 min',
-        'deliveryFee': 'Delivery \$3.00',
-        'isOpen': false,
-        'hasPickup': true,
-        'hasDelivery': true,
-        'latitude': 37.7710,
-        'longitude': -122.4140,
-        'description':
-            'Experience the authentic taste of home-cooked spices and delicious Chinese fusion.',
-        'image': 'assets/images/homereceipecardimage1.jpg',
-      },
-      {
-        'id': '4',
-        'sellerId': '4',
-        'name': "Luca's Pasta Club",
-        'owner': 'Luca Bianchi',
-        'rating': 4.9,
-        'reviews': 640,
-        'distance': '1.6 km',
-        'time': '30 min',
-        'deliveryFee': 'Delivery \$2.00',
-        'isOpen': true,
-        'hasPickup': true,
-        'hasDelivery': true,
-        'latitude': 37.7680,
-        'longitude': -122.4260,
-        'description':
-            '"Cacio e Pepe (Fresh Pasta)" — Hand-rolled tonnarelli pasta with Pecorino Romano, Parmesan, and black pepper.',
-        'image': 'assets/images/homereceipecardimage2.jpg',
-      },
-    ];
-    allRestaurants.assignAll(list);
-    restaurants.assignAll(list);
-  }
-
   static const List<String> _fallbackImages = [
     'assets/images/homelunchcardimage.png',
     'assets/images/homedinnercardimage.png',
@@ -430,6 +415,7 @@ class ExploreboardController extends GetxController {
 
   @override
   void onClose() {
+    _debounceTimer?.cancel();
     searchController.dispose();
     mapController?.dispose();
     super.onClose();

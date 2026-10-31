@@ -26,7 +26,7 @@ class NavbarView extends GetView<NavbarController> {
             const DashboardView(),
             const GroceriesBoardView(),
             const ExploreboardView(),
-            const NutritionboardView(),
+            const NutritionboardView(showBackButton: false),
             const SystempreferenceView(),
           ],
         ),

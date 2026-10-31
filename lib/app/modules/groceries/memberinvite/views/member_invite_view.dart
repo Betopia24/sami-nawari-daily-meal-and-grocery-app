@@ -71,6 +71,9 @@ class MemberInviteView extends GetView<MemberInviteController> {
                           ),
                           Expanded(
                             child: TextField(
+                              controller: controller.searchController,
+                              onChanged: (val) =>
+                                  controller.searchQuery.value = val,
                               decoration: InputDecoration(
                                 hintText: 'Search family members...',
                                 hintStyle: GoogleFonts.outfit(
@@ -100,14 +103,69 @@ class MemberInviteView extends GetView<MemberInviteController> {
                     ),
                     SizedBox(height: 12.h),
                     
-                    Obx(() => Column(
-                      children: controller.familyMembers.map((member) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _buildMemberCard(member),
+                    Obx(() {
+                      final items = controller.filteredMembers;
+                      if (controller.familyMembers.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: AppColors.borderLight, width: 1.w),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.group_add_outlined,
+                                size: 36.sp,
+                                color: AppColors.textSecondary.withValues(alpha: 0.5),
+                              ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                'No collaborators yet',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                'Invite members below using "Invite by Email".',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12.sp,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         );
-                      }).toList(),
-                    )),
+                      }
+                      if (items.isEmpty) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          child: Center(
+                            child: Text(
+                              'No members found matching "${controller.searchQuery.value}"',
+                              style: GoogleFonts.outfit(
+                                fontSize: 13.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return Column(
+                        children: items.map((member) {
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: _buildMemberCard(member),
+                          );
+                        }).toList(),
+                      );
+                    }),
 
                     SizedBox(height: 24.h),
 
@@ -124,29 +182,32 @@ class MemberInviteView extends GetView<MemberInviteController> {
                     SizedBox(height: 12.h),
 
                     // Invite by Email Card
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: AppColors.borderLight, width: 1.w),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.mail_outline, color: AppColors.textDark, size: 24.sp),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: Text(
-                              'Invite by Email',
-                              style: GoogleFonts.outfit(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark,
+                    GestureDetector(
+                      onTap: () => _showInviteByEmailBottomSheet(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: AppColors.borderLight, width: 1.w),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.mail_outline, color: AppColors.textDark, size: 24.sp),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                'Invite by Email',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textDark,
+                                ),
                               ),
                             ),
-                          ),
-                          Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 24.sp),
-                        ],
+                            Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 24.sp),
+                          ],
+                        ),
                       ),
                     ),
                     
@@ -163,12 +224,19 @@ class MemberInviteView extends GetView<MemberInviteController> {
                 text: 'Continue',
                 showArrow: false,
                 onPressed: () {
-                  if (controller.familyMembers.any((m) => m.isSelected)) {
-                    Get.toNamed(Routes.PERMISSIONSET);
+                  final selected = controller.selectedMembers;
+                  if (selected.isNotEmpty) {
+                    Get.toNamed(
+                      Routes.PERMISSIONSET,
+                      arguments: {
+                        'listId': controller.activeGroceryListId,
+                        'members': selected,
+                      },
+                    );
                   } else {
                     Get.snackbar(
                       'No Member Selected',
-                      'Please select at least one family member to invite.',
+                      'Please select at least one family member or invite by email.',
                       snackPosition: SnackPosition.BOTTOM,
                       backgroundColor: AppColors.primary,
                       colorText: Colors.white,
@@ -183,6 +251,98 @@ class MemberInviteView extends GetView<MemberInviteController> {
       ),
     );
   }
+
+  void _showInviteByEmailBottomSheet(BuildContext context) {
+    final emailTextController = TextEditingController();
+    final nameTextController = TextEditingController();
+
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.only(
+          left: 20.w,
+          right: 20.w,
+          top: 20.h,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              'Invite by Email',
+              style: GoogleFonts.outfit(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              'Enter the email address of the person you want to invite to this grocery list.',
+              style: GoogleFonts.outfit(
+                fontSize: 13.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            TextField(
+              controller: nameTextController,
+              decoration: InputDecoration(
+                labelText: 'Name (Optional)',
+                hintText: 'e.g. Alex',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.borderLight),
+                ),
+              ),
+            ),
+            SizedBox(height: 12.h),
+            TextField(
+              controller: emailTextController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email Address *',
+                hintText: 'e.g. friend@example.com',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.borderLight),
+                ),
+              ),
+            ),
+            SizedBox(height: 20.h),
+            PrimaryButton(
+              text: 'Add & Select',
+              showArrow: false,
+              onPressed: () {
+                final email = emailTextController.text.trim();
+                final name = nameTextController.text.trim();
+                if (controller.addCustomEmail(email, name: name)) {
+                  Get.back();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
 
   Widget _buildMemberCard(FamilyMember member) {
     return GestureDetector(
