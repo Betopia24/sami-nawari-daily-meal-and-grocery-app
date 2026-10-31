@@ -7,6 +7,7 @@ import '../../../../data/network/url.dart';
 import 'package:daily_meal_and_grocery_app/app/modules/cart/mycarts/controllers/mycarts_controller.dart' as import_mycarts;
 import 'package:daily_meal_and_grocery_app/app/modules/navbar/controllers/navbar_controller.dart' as import_navbar;
 import 'package:daily_meal_and_grocery_app/app/modules/cart/views/stripe_payment_view.dart';
+import 'package:daily_meal_and_grocery_app/app/routes/app_routes.dart';
 
 class OrderplacedController extends GetxController {
   final RxString restaurantName = "Seller's Kitchen".obs;
@@ -146,17 +147,16 @@ class OrderplacedController extends GetxController {
   }
 
   void onTrackMyOrder() {
-    // If controllers are already in memory, update them directly
-    if (Get.isRegistered<import_navbar.NavbarController>()) {
-      Get.find<import_navbar.NavbarController>().changePage(3);
-    }
     if (Get.isRegistered<import_mycarts.MycartsController>()) {
-      Get.find<import_mycarts.MycartsController>().tabController.animateTo(1);
+      final cartController = Get.find<import_mycarts.MycartsController>();
+      cartController.tabController.animateTo(1);
+      cartController.currentTabIndex.value = 1;
+      cartController.fetchOrders();
     }
     
-    Get.offAllNamed(
-      '/navbar',
-      arguments: {'tab': 3, 'mycarts_tab': 1},
+    Get.toNamed(
+      Routes.mycarts,
+      arguments: {'mycarts_tab': 1},
     );
   }
 
