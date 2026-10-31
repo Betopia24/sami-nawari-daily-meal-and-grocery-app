@@ -69,6 +69,9 @@ class SystempreferenceController extends GetxController {
           final fetchedUser = UserModel.fromJson(data);
           user.value = fetchedUser;
           await LocalStorage.saveUser(data);
+          if (fetchedUser.role != null && fetchedUser.role!.isNotEmpty) {
+            await LocalStorage.saveRole(fetchedUser.role!);
+          }
           final isApproved =
               fetchedUser.isSeller == true || (fetchedUser.role?.toUpperCase() == 'SELLER');
           isRegisteredSeller.value = isApproved;
@@ -104,6 +107,11 @@ class SystempreferenceController extends GetxController {
                   hasPendingSellerRequest.value = true;
                   await LocalStorage.setPendingSellerApproval(fetchedUser.id, true);
                 }
+
+                final sellerRole = profileResponse.data?.user?.role;
+                if (sellerRole != null && sellerRole.isNotEmpty) {
+                  await LocalStorage.saveRole(sellerRole);
+                }
               } else {
                 // 404 or profile not found: user has NOT submitted any seller request
                 hasPendingSellerRequest.value = false;
@@ -138,6 +146,10 @@ class SystempreferenceController extends GetxController {
           if (status == 'APPROVED') {
             isRegisteredSeller.value = true;
             hasPendingSellerRequest.value = false;
+          }
+          final role = profileResponse.data?.user?.role;
+          if (role != null && role.isNotEmpty) {
+            await LocalStorage.saveRole(role);
           }
         }
       }

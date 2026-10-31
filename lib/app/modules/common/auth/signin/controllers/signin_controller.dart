@@ -103,6 +103,12 @@ class SigninController extends GetxController {
         final id = responseData?['id']?.toString() ??
             responseData?['userId']?.toString() ??
             responseData?['user']?['id']?.toString();
+        final role = responseData?['user']?['role']?.toString() ??
+            responseData?['role']?.toString();
+
+        if (role != null && role.isNotEmpty) {
+          await LocalStorage.saveRole(role);
+        }
 
         if (accessToken != null && accessToken.isNotEmpty) {
           await LocalStorage.saveAccessToken(accessToken);
@@ -182,9 +188,9 @@ class SigninController extends GetxController {
         if (userId != null) {
           LocalStorage.saveId(userId);
         }
-        final role = JwtHelper.getRole(token);
-        if (role != null) {
-          LocalStorage.setString(LocalStorage.roleKey, role);
+        final role = JwtHelper.getRole(token) ?? map['role']?.toString();
+        if (role != null && role.isNotEmpty) {
+          LocalStorage.saveRole(role);
         }
       }
     } catch (_) {}
