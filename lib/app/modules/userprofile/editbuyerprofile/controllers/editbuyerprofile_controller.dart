@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../data/models/user_model.dart';
@@ -21,6 +23,7 @@ class EditbuyerprofileController extends GetxController {
   final Rx<String?> profileImagePath = Rx<String?>(null);
   final Rx<String?> networkProfileImageUrl = Rx<String?>(null);
   final RxBool isLoading = false.obs;
+  final RxBool isFetchingLocation = false.obs;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -172,6 +175,119 @@ class EditbuyerprofileController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
+    }
+  }
+
+  Future<void> fetchCurrentLocation() async {
+    if (isFetchingLocation.value) return;
+    isFetchingLocation.value = true;
+
+    try {
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        Get.snackbar(
+          'Location Disabled',
+          'Please turn on your device location service.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: AppColors.textPrimary,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          Get.snackbar(
+            'Permission Denied',
+            'Location permission is required to detect your address.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.white,
+            colorText: AppColors.textPrimary,
+            margin: const EdgeInsets.all(16),
+          );
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        Get.snackbar(
+          'Permission Blocked',
+          'Location permissions are permanently denied. Please enable them in app settings.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: AppColors.textPrimary,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      final List<Placemark> placemarks =
+          await Geocoding().placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        final List<String> addressParts = [];
+        if (place.street != null && place.street!.trim().isNotEmpty) {
+          addressParts.add(place.street!.trim());
+        }
+        if (place.subLocality != null &&
+            place.subLocality!.trim().isNotEmpty &&
+            !addressParts.contains(place.subLocality!.trim())) {
+          addressParts.add(place.subLocality!.trim());
+        }
+        if (place.locality != null &&
+            place.locality!.trim().isNotEmpty &&
+            !addressParts.contains(place.locality!.trim())) {
+          addressParts.add(place.locality!.trim());
+        }
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.trim().isNotEmpty &&
+            !addressParts.contains(place.administrativeArea!.trim())) {
+          addressParts.add(place.administrativeArea!.trim());
+        }
+
+        final formattedAddress = addressParts.isNotEmpty
+            ? addressParts.join(', ')
+            : '${position.latitude}, ${position.longitude}';
+        addressController.text = formattedAddress;
+      } else {
+        addressController.text = '${position.latitude}, ${position.longitude}';
+      }
+
+      Get.snackbar(
+        'Location Detected',
+        'Your current address has been updated.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      Get.snackbar(
+        'Location Error',
+        'Failed to fetch current location. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    } finally {
+      isFetchingLocation.value = false;
     }
   }
 

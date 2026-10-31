@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart' hide Response;
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import '../../../../data/models/seller_profile_model.dart';
@@ -10,6 +12,7 @@ import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../widgets/custom_time_dropdown.dart';
+import '../../../../../core/utils/app_colors.dart';
 import '../../../userprofile/systempreference/controllers/systempreference_controller.dart';
 
 class EditsellerprofileController extends GetxController {
@@ -19,6 +22,7 @@ class EditsellerprofileController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   final RxBool isLoading = false.obs;
   final RxBool isSaving = false.obs;
+  final RxBool isFetchingLocation = false.obs;
 
   // Basic Info
   final fullNameController = TextEditingController();
@@ -65,17 +69,30 @@ class EditsellerprofileController extends GetxController {
 
   final timeOptions = [
     'Closed',
-    '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
-    '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM',
-    '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM',
-    '07:00 PM', '08:00 PM', '09:00 PM', '10:00 PM',
-    '11:00 PM', '12:00 AM'
+    '07:00 AM',
+    '08:00 AM',
+    '09:00 AM',
+    '10:00 AM',
+    '11:00 AM',
+    '12:00 PM',
+    '01:00 PM',
+    '02:00 PM',
+    '03:00 PM',
+    '04:00 PM',
+    '05:00 PM',
+    '06:00 PM',
+    '07:00 PM',
+    '08:00 PM',
+    '09:00 PM',
+    '10:00 PM',
+    '11:00 PM',
+    '12:00 AM',
   ];
 
   // Services
   final deliverySupportEnabled = true.obs;
   final pickupSupportEnabled = true.obs;
-  
+
   final deliveryFeeController = TextEditingController(text: "50");
   final deliveryTimeController = TextEditingController(text: "45");
   final pickupTimeController = TextEditingController(text: "30");
@@ -90,10 +107,13 @@ class EditsellerprofileController extends GetxController {
     isLoading.value = true;
     try {
       final response = await NetworkCaller.getRequest(Urls.sellerProfileMe);
-      debugPrint('[GET /seller/profile/me] Server Data: ${response.responseData}');
+      debugPrint(
+        '[GET /seller/profile/me] Server Data: ${response.responseData}',
+      );
       if (response.isSuccess && response.responseData != null) {
-        final profileResponse =
-            SellerProfileResponseModel.fromJson(response.responseData);
+        final profileResponse = SellerProfileResponseModel.fromJson(
+          response.responseData,
+        );
         final data = profileResponse.data;
         if (data != null) {
           final sellerRole = data.user?.role;
@@ -144,34 +164,41 @@ class EditsellerprofileController extends GetxController {
             if (data.workingHours!.monFri != null) {
               monToFriEnabled.value = data.workingHours!.monFri!.isOpen ?? true;
               if (data.workingHours!.monFri!.open?.isNotEmpty == true) {
-                monToFriStartTime.value =
-                    CustomTimeDropdown.formatTo12Hour(data.workingHours!.monFri!.open!);
+                monToFriStartTime.value = CustomTimeDropdown.formatTo12Hour(
+                  data.workingHours!.monFri!.open!,
+                );
               }
               if (data.workingHours!.monFri!.close?.isNotEmpty == true) {
-                monToFriEndTime.value =
-                    CustomTimeDropdown.formatTo12Hour(data.workingHours!.monFri!.close!);
+                monToFriEndTime.value = CustomTimeDropdown.formatTo12Hour(
+                  data.workingHours!.monFri!.close!,
+                );
               }
             }
             if (data.workingHours!.saturday != null) {
-              saturdayEnabled.value = data.workingHours!.saturday!.isOpen ?? true;
+              saturdayEnabled.value =
+                  data.workingHours!.saturday!.isOpen ?? true;
               if (data.workingHours!.saturday!.open?.isNotEmpty == true) {
-                saturdayStartTime.value =
-                    CustomTimeDropdown.formatTo12Hour(data.workingHours!.saturday!.open!);
+                saturdayStartTime.value = CustomTimeDropdown.formatTo12Hour(
+                  data.workingHours!.saturday!.open!,
+                );
               }
               if (data.workingHours!.saturday!.close?.isNotEmpty == true) {
-                saturdayEndTime.value =
-                    CustomTimeDropdown.formatTo12Hour(data.workingHours!.saturday!.close!);
+                saturdayEndTime.value = CustomTimeDropdown.formatTo12Hour(
+                  data.workingHours!.saturday!.close!,
+                );
               }
             }
             if (data.workingHours!.sunday != null) {
               sundayEnabled.value = data.workingHours!.sunday!.isOpen ?? false;
               if (data.workingHours!.sunday!.open?.isNotEmpty == true) {
-                sundayStartTime.value =
-                    CustomTimeDropdown.formatTo12Hour(data.workingHours!.sunday!.open!);
+                sundayStartTime.value = CustomTimeDropdown.formatTo12Hour(
+                  data.workingHours!.sunday!.open!,
+                );
               }
               if (data.workingHours!.sunday!.close?.isNotEmpty == true) {
-                sundayEndTime.value =
-                    CustomTimeDropdown.formatTo12Hour(data.workingHours!.sunday!.close!);
+                sundayEndTime.value = CustomTimeDropdown.formatTo12Hour(
+                  data.workingHours!.sunday!.close!,
+                );
               }
             }
           }
@@ -236,6 +263,116 @@ class EditsellerprofileController extends GetxController {
     }
   }
 
+  Future<void> fetchCurrentLocation() async {
+    if (isFetchingLocation.value) return;
+    isFetchingLocation.value = true;
+
+    try {
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        Get.snackbar(
+          'Location Disabled',
+          'Please turn on your device location service.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: AppColors.textPrimary,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          Get.snackbar(
+            'Permission Denied',
+            'Location permission is required to detect your address.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.white,
+            colorText: AppColors.textPrimary,
+            margin: const EdgeInsets.all(16),
+          );
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        Get.snackbar(
+          'Permission Blocked',
+          'Location permissions are permanently denied. Please enable them in app settings.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: AppColors.textPrimary,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      final List<Placemark> placemarks = await Geocoding()
+          .placemarkFromCoordinates(position.latitude, position.longitude);
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        final List<String> addressParts = [];
+        if (place.street != null && place.street!.trim().isNotEmpty) {
+          addressParts.add(place.street!.trim());
+        }
+        if (place.subLocality != null &&
+            place.subLocality!.trim().isNotEmpty &&
+            !addressParts.contains(place.subLocality!.trim())) {
+          addressParts.add(place.subLocality!.trim());
+        }
+        if (place.locality != null &&
+            place.locality!.trim().isNotEmpty &&
+            !addressParts.contains(place.locality!.trim())) {
+          addressParts.add(place.locality!.trim());
+        }
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.trim().isNotEmpty &&
+            !addressParts.contains(place.administrativeArea!.trim())) {
+          addressParts.add(place.administrativeArea!.trim());
+        }
+
+        final formattedAddress = addressParts.isNotEmpty
+            ? addressParts.join(', ')
+            : '${position.latitude}, ${position.longitude}';
+        locationController.text = formattedAddress;
+      } else {
+        locationController.text = '${position.latitude}, ${position.longitude}';
+      }
+
+      Get.snackbar(
+        'Location Detected',
+        'Your current kitchen address has been updated.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      Get.snackbar(
+        'Location Error',
+        'Failed to fetch current location. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    } finally {
+      isFetchingLocation.value = false;
+    }
+  }
+
   String _to24Hour(String timeStr) {
     if (timeStr.trim().isEmpty || timeStr.trim().toLowerCase() == 'closed') {
       return '';
@@ -244,8 +381,10 @@ class EditsellerprofileController extends GetxController {
       final trimmed = timeStr.trim().toUpperCase();
       final isPm = trimmed.contains('PM');
       final isAm = trimmed.contains('AM');
-      final cleanTime =
-          trimmed.replaceAll('AM', '').replaceAll('PM', '').trim();
+      final cleanTime = trimmed
+          .replaceAll('AM', '')
+          .replaceAll('PM', '')
+          .trim();
       final parts = cleanTime.split(':');
       if (parts.isNotEmpty) {
         int hour = int.parse(parts[0]);
@@ -406,7 +545,9 @@ class EditsellerprofileController extends GetxController {
       log('JSON Payload: ${jsonEncode(body)}');
       log('Has Selected Image: ${selectedImage.value != null}');
       log('====================================================');
-      debugPrint('[PATCH /seller/profile/me] Request Payload: ${jsonEncode(body)}');
+      debugPrint(
+        '[PATCH /seller/profile/me] Request Payload: ${jsonEncode(body)}',
+      );
 
       final response = await NetworkCaller.patchRequest(
         Urls.sellerProfileMe,
@@ -422,8 +563,11 @@ class EditsellerprofileController extends GetxController {
       log('Error Message: ${response.errorMessage}');
       log('====================================================');
       debugPrint(
-          '[PATCH /seller/profile/me] StatusCode: ${response.statusCode}, isSuccess: ${response.isSuccess}');
-      debugPrint('[PATCH /seller/profile/me] Response: ${response.responseData}');
+        '[PATCH /seller/profile/me] StatusCode: ${response.statusCode}, isSuccess: ${response.isSuccess}',
+      );
+      debugPrint(
+        '[PATCH /seller/profile/me] Response: ${response.responseData}',
+      );
       debugPrint('[PATCH /seller/profile/me] Error: ${response.errorMessage}');
 
       if (response.isSuccess) {
