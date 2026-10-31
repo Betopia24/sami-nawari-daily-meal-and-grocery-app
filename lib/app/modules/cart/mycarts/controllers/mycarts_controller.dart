@@ -83,11 +83,6 @@ class MycartsController extends GetxController
     }
   }
 
-  Future<void> loadUserRole() async {
-    final role = (await LocalStorage.getRole()) ?? LocalStorage.roleSync ?? 'BUYER';
-    userRole.value = role;
-  }
-
   @override
   void onClose() {
     tabController.dispose();
