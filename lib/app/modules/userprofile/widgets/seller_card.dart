@@ -17,6 +17,7 @@ class SellerCard extends StatelessWidget {
   final bool hasPickup;
   final bool hasDelivery;
   final String description;
+  final bool isBookmarked;
   final VoidCallback? onBookmarkTap;
   final VoidCallback? onViewMenuTap;
 
@@ -33,6 +34,7 @@ class SellerCard extends StatelessWidget {
     this.hasPickup = false,
     this.hasDelivery = false,
     required this.description,
+    this.isBookmarked = true,
     this.onBookmarkTap,
     this.onViewMenuTap,
   });
@@ -56,18 +58,7 @@ class SellerCard extends StatelessWidget {
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
-                child: Image.asset(
-                  imagePath,
-                  width: double.infinity,
-                  height: 140,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: double.infinity,
-                    height: 140,
-                    color: AppColors.backgroundGrey,
-                    child: const Icon(Icons.image, color: AppColors.iconGrey),
-                  ),
-                ),
+                child: _buildImage(imagePath),
               ),
               if (isOpen)
                 Positioned(
@@ -297,9 +288,13 @@ class SellerCard extends StatelessWidget {
                       onTap: onBookmarkTap,
                       child: Container(
                         padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Icons.bookmark_border,
-                          color: AppColors.textDark,
+                        child: Icon(
+                          isBookmarked
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: isBookmarked
+                              ? AppColors.primary
+                              : AppColors.textDark,
                           size: 28,
                         ),
                       ),
@@ -342,6 +337,35 @@ class SellerCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: double.infinity,
+        height: 140,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: double.infinity,
+          height: 140,
+          color: AppColors.backgroundGrey,
+          child: const Icon(Icons.image, color: AppColors.iconGrey),
+        ),
+      );
+    }
+    return Image.asset(
+      path.isNotEmpty ? path : AppAssets.homeDinnerCardImage,
+      width: double.infinity,
+      height: 140,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        width: double.infinity,
+        height: 140,
+        color: AppColors.backgroundGrey,
+        child: const Icon(Icons.image, color: AppColors.iconGrey),
       ),
     );
   }

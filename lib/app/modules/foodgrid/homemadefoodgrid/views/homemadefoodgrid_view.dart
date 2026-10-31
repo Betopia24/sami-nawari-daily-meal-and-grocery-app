@@ -41,7 +41,7 @@ class HomemadefoodgridView extends GetView<HomemadefoodgridController> {
             onAddTap: () => controller.addToCart(food),
             onViewDetailsTap: () => Get.toNamed(
               Routes.fooddetails,
-              arguments: food.id,
+              arguments: food,
             ),
           );
         },

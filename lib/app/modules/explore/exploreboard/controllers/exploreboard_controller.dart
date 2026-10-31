@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
+import '../../../userprofile/favouriteseller/controllers/favouriteseller_controller.dart';
 import '../../widgets/explore_filter_bottom_sheet.dart';
 
 class ExploreboardController extends GetxController {
@@ -44,13 +45,19 @@ class ExploreboardController extends GetxController {
   final RxList<Map<String, dynamic>> restaurants = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> allRestaurants = <Map<String, dynamic>>[].obs;
 
+  // Bookmarked seller IDs
+  final RxSet<String> bookmarkedSellerIds = <String>{}.obs;
+
   @override
   void onInit() {
     super.onInit();
     // 1. Fetch live sellers from backend API (Urls.exploreSellers)
     fetchNearbySellers();
 
-    // 2. Try to get current location silently
+    // 2. Fetch bookmarked sellers to sync bookmark icons
+    fetchBookmarkedSellerIds();
+
+    // 3. Try to get current location silently
     _tryGetInitialLocationSilently();
   }
 
@@ -207,9 +214,15 @@ class ExploreboardController extends GetxController {
               final double lng = (s['longitude'] as num?)?.toDouble() ??
                   (initialPosition.value.longitude + lngOffset);
 
+              final String sellerId = s['id']?.toString() ??
+                  s['_id']?.toString() ??
+                  s['sellerId']?.toString() ??
+                  s['userId']?.toString() ??
+                  '$i';
+
               parsedList.add({
-                'id': s['id']?.toString() ?? s['userId']?.toString() ?? '$i',
-                'sellerId': s['id']?.toString() ?? s['userId']?.toString() ?? '',
+                'id': sellerId,
+                'sellerId': sellerId,
                 'userId': s['userId']?.toString() ?? '',
                 'name': s['businessName']?.toString() ?? 'Kitchen',
                 'owner': ownerName,
@@ -248,6 +261,119 @@ class ExploreboardController extends GetxController {
       _initMarkers();
     } finally {
       isLoadingSellers.value = false;
+    }
+  }
+
+  /// Fetches saved bookmark sellers to sync bookmark state
+  Future<void> fetchBookmarkedSellerIds() async {
+    try {
+      final double lat = currentPosition.value?.latitude ?? 23.7509;
+      final double lng = currentPosition.value?.longitude ?? 90.3843;
+
+      final response = await NetworkCaller.getRequest(
+        Urls.getSellerPrifile,
+        queryParameters: {
+          'latitude': lat.toString(),
+          'longitude': lng.toString(),
+        },
+      );
+
+      if (response.isSuccess && response.responseData != null) {
+        dynamic rawData = response.responseData['data'];
+        if (rawData is Map && rawData['data'] is List) {
+          rawData = rawData['data'];
+        } else if (rawData is Map && rawData['sellers'] is List) {
+          rawData = rawData['sellers'];
+        }
+
+        if (rawData is List) {
+          final Set<String> ids = {};
+          for (final item in rawData) {
+            if (item is Map) {
+              final String sId = item['sellerId']?.toString() ??
+                  item['seller']?['id']?.toString() ??
+                  item['seller']?['_id']?.toString() ??
+                  item['id']?.toString() ??
+                  item['_id']?.toString() ??
+                  '';
+              if (sId.isNotEmpty) {
+                ids.add(sId);
+              }
+            }
+          }
+          bookmarkedSellerIds.assignAll(ids);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching bookmarked sellers: $e');
+    }
+  }
+
+  /// Toggles favorite status for a seller
+  Future<void> toggleSellerBookmark(String sellerId, {String? sellerName}) async {
+    if (sellerId.isEmpty) return;
+
+    final bool isCurrentlyBookmarked = bookmarkedSellerIds.contains(sellerId);
+
+    // Optimistic toggle
+    if (isCurrentlyBookmarked) {
+      bookmarkedSellerIds.remove(sellerId);
+    } else {
+      bookmarkedSellerIds.add(sellerId);
+    }
+
+    try {
+      final response = await NetworkCaller.postRequest(
+        Urls.sellerProfileFavourite,
+        body: {'sellerId': sellerId},
+      );
+
+      if (response.isSuccess) {
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          isCurrentlyBookmarked ? 'Removed' : 'Saved',
+          isCurrentlyBookmarked
+              ? '${sellerName ?? "Seller"} removed from Favorite Sellers'
+              : '${sellerName ?? "Seller"} added to Favorite Sellers',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.primary,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.all(16),
+        );
+
+        // Keep FavouritesellerController in sync if it is open/registered
+        if (Get.isRegistered<FavouritesellerController>()) {
+          Get.find<FavouritesellerController>().fetchFavoriteSellers();
+        }
+      } else {
+        // Rollback on failure
+        if (isCurrentlyBookmarked) {
+          bookmarkedSellerIds.add(sellerId);
+        } else {
+          bookmarkedSellerIds.remove(sellerId);
+        }
+
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          'Error',
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Could not update favorite seller',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade700,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+        );
+      }
+    } catch (e) {
+      // Rollback on exception
+      if (isCurrentlyBookmarked) {
+        bookmarkedSellerIds.add(sellerId);
+      } else {
+        bookmarkedSellerIds.remove(sellerId);
+      }
+      debugPrint('Error toggling seller bookmark: $e');
     }
   }
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +22,18 @@ class EarningsChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate dynamic maxY and interval
+    double highestY = 0;
+    if (chartData.isNotEmpty) {
+      highestY = chartData.map((e) => e.y).reduce(max);
+    }
+    double maxVal = highestY > 0 ? (highestY * 1.35) : 50.0;
+    if (maxVal < 20) maxVal = 20;
+
+    double yInterval = (maxVal / 4).ceilToDouble();
+    if (yInterval <= 0) yInterval = 5;
+    maxVal = yInterval * 4;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 16),
@@ -50,14 +64,14 @@ class EarningsChartCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(
-                Icons.trending_up,
+              Icon(
+                percentage >= 0 ? Icons.trending_up : Icons.trending_down,
                 color: Colors.white,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
-                '$percentage% from last month',
+                '${percentage.toStringAsFixed(1)}% from last month',
                 style: GoogleFonts.outfit(
                   color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 14,
@@ -74,7 +88,9 @@ class EarningsChartCard extends StatelessWidget {
               child: Builder(
                 builder: (context) {
                   final lineBarData = LineChartBarData(
-                    spots: chartData,
+                    spots: chartData.isNotEmpty
+                        ? chartData
+                        : const [FlSpot(0, 0)],
                     isCurved: false,
                     color: Colors.white,
                     barWidth: 1.5,
@@ -96,15 +112,17 @@ class EarningsChartCard extends StatelessWidget {
 
                   return LineChart(
                     LineChartData(
-                      showingTooltipIndicators: chartData.isNotEmpty ? [
-                        ShowingTooltipIndicators([
-                          LineBarSpot(lineBarData, 0, chartData.last),
-                        ]),
-                      ] : [],
+                      showingTooltipIndicators: chartData.isNotEmpty
+                          ? [
+                              ShowingTooltipIndicators([
+                                LineBarSpot(lineBarData, 0, chartData.last),
+                              ]),
+                            ]
+                          : [],
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: true,
-                        horizontalInterval: 100,
+                        horizontalInterval: yInterval,
                         verticalInterval: 1,
                         getDrawingHorizontalLine: (value) {
                           return FlLine(
@@ -136,14 +154,15 @@ class EarningsChartCard extends StatelessWidget {
                               int index = value.toInt();
                               if (index >= 0 && index < bottomTitles.length) {
                                 return Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    bottomTitles[index],
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white.withValues(alpha: 0.9),
-                                      fontSize: 10,
-                                    ),
-                                  ),
+                                   padding: const EdgeInsets.only(top: 8.0),
+                                   child: Text(
+                                     bottomTitles[index],
+                                     style: GoogleFonts.outfit(
+                                       color:
+                                           Colors.white.withValues(alpha: 0.9),
+                                       fontSize: 10,
+                                     ),
+                                   ),
                                 );
                               }
                               return const SizedBox.shrink();
@@ -153,8 +172,8 @@ class EarningsChartCard extends StatelessWidget {
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
-                            interval: 100,
-                            reservedSize: 28,
+                            interval: yInterval,
+                            reservedSize: 32,
                             getTitlesWidget: (value, meta) {
                               if (value == 0) return const SizedBox.shrink();
                               return Text(
@@ -172,9 +191,11 @@ class EarningsChartCard extends StatelessWidget {
                         show: false,
                       ),
                       minX: 0,
-                      maxX: bottomTitles.isNotEmpty ? (bottomTitles.length - 1).toDouble() : 0,
+                      maxX: bottomTitles.isNotEmpty
+                          ? (bottomTitles.length - 1).toDouble()
+                          : 0,
                       minY: 0,
-                      maxY: 400,
+                      maxY: maxVal,
                       lineBarsData: [lineBarData],
                       lineTouchData: LineTouchData(
                         touchTooltipData: LineTouchTooltipData(
@@ -196,7 +217,7 @@ class EarningsChartCard extends StatelessWidget {
                       ),
                     ),
                   );
-                }
+                },
               ),
             ),
           ),

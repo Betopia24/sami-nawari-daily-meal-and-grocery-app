@@ -570,13 +570,21 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
           ProfileMenuTile(
             iconPath: AppAssets.dietaryPrefIcon,
             title: 'Dietary Preferences',
-            trailing: _buildTrailingText('No Preference'),
+            trailing: _buildTrailingText(
+              (controller.user.value?.dietaryPreferences.isNotEmpty == true)
+                  ? controller.user.value!.dietaryPreferences.join(', ')
+                  : 'No Preference',
+            ),
             onTap: () => Get.toNamed(Routes.dietarypref),
           ),
           ProfileMenuTile(
             iconPath: AppAssets.allergiesAndIntoleranceIcon,
             title: 'Allergies & Intolerances',
-            trailing: _buildTrailingText('None set'),
+            trailing: _buildTrailingText(
+              (controller.user.value?.allergies.isNotEmpty == true)
+                  ? controller.user.value!.allergies.join(', ')
+                  : 'None set',
+            ),
             onTap: () => Get.toNamed(Routes.alergiesandintolerence),
             showBottomDivider: false,
           ),
@@ -590,17 +598,18 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
       children: [
         ProfileMenuTile(
           iconPath: AppAssets.bankDetailsIcon,
-          title: 'Bank Details',
+          title: 'Stripe Connect',
           onTap: () => Get.toNamed(Routes.BANKDETAILS),
-        ),
-        ProfileMenuTile(
-          iconPath: AppAssets.paymentInformationIcon,
-          title: 'Payment Information',
-          onTap: () {
-            Get.toNamed(Routes.paymentinformation);
-          },
           showBottomDivider: false,
         ),
+        // ProfileMenuTile(
+        //   iconPath: AppAssets.paymentInformationIcon,
+        //   title: 'Payment Information',
+        //   onTap: () {
+        //     Get.toNamed(Routes.paymentinformation);
+        //   },
+        //   showBottomDivider: false,
+        // ),
       ],
     );
   }

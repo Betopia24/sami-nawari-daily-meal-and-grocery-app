@@ -21,12 +21,34 @@ class ImagePickerGrid extends StatefulWidget {
 
 class _ImagePickerGridState extends State<ImagePickerGrid> {
   final ImagePicker _picker = ImagePicker();
+  bool _isPicking = false;
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final updatedList = List<File>.from(widget.selectedImages)..add(File(pickedFile.path));
-      widget.onImagesUpdated(updatedList);
+    if (_isPicking) return;
+    setState(() {
+      _isPicking = true;
+    });
+
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        final updatedList = List<File>.from(widget.selectedImages)
+          ..add(File(pickedFile.path));
+        widget.onImagesUpdated(updatedList);
+      }
+    } catch (e) {
+      debugPrint('Error picking image in ImagePickerGrid: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPicking = false;
+        });
+      } else {
+        _isPicking = false;
+      }
     }
   }
 
@@ -107,7 +129,7 @@ class _ImagePickerGridState extends State<ImagePickerGrid> {
             
             // Add Button
             GestureDetector(
-              onTap: _pickImage,
+              onTap: _isPicking ? null : _pickImage,
               child: CustomPaint(
                 painter: DashedRectPainter(
                   color: Colors.grey.shade400,
@@ -122,12 +144,21 @@ class _ImagePickerGridState extends State<ImagePickerGrid> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.add,
-                      size: 32,
-                      color: AppColors.textSecondary,
-                    ),
+                  child: Center(
+                    child: _isPicking
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.add,
+                            size: 32,
+                            color: AppColors.textSecondary,
+                          ),
                   ),
                 ),
               ),

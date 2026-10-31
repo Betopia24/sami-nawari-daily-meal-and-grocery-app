@@ -96,6 +96,10 @@ class AppStrings {
   static const String scanToJoin = 'Scan to join Daily Meal';
   static const String shareButton = 'Share';
   static const String copyLinkButton = 'Copy Link';
+  static const String appDownloadUrl = 'https://yourdomain.com/download';
+  static const String shareAppMessage =
+      'Check out Daily Meal! Download it here: $appDownloadUrl';
+  static const String shareAppSubject = 'Daily Meal App';
   static const String storeView = 'Store View';
   static const String exploreView = 'Explore View';
   static const String cartView = 'Cart View';

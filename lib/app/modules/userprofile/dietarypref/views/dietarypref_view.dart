@@ -44,9 +44,12 @@ class DietaryprefView extends GetView<DietaryprefController> {
           ),
         ],
       ),
-      bottomNavigationBar: ProfileBottomButton(
-        text: 'Save Preferences',
-        onPressed: controller.savePreferences,
+      bottomNavigationBar: Obx(
+        () => ProfileBottomButton(
+          text: 'Save Preferences',
+          isLoading: controller.isSaving.value,
+          onPressed: controller.savePreferences,
+        ),
       ),
     );
   }

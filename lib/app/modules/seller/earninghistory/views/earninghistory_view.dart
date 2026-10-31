@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../widgets/custom_back_button.dart';
-import '../../../../../app/routes/app_routes.dart';
 import '../controllers/earninghistory_controller.dart';
 import '../widgets/filter_chip_widget.dart';
 import '../widgets/transaction_card.dart';
@@ -24,11 +23,10 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
         centerTitle: false,
         titleSpacing: 16,
         leadingWidth: 72,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 24.0),
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 24.0),
           child: CustomBackButton(
             backgroundColor: Colors.white,
-            onTap: () => Get.offNamed(Routes.earnings),
           ),
         ),
         title: Text(
@@ -46,7 +44,7 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               // Filters and Dropdown Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,7 +58,8 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
                           children: controller.filters.map((filter) {
                             return FilterChipWidget(
                               label: filter,
-                              isSelected: controller.selectedFilter.value == filter,
+                              isSelected:
+                                  controller.selectedFilter.value == filter,
                               onTap: () => controller.changeFilter(filter),
                             );
                           }).toList(),
@@ -70,7 +69,8 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -87,7 +87,8 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
                             borderRadius: BorderRadius.circular(16),
                             icon: const Padding(
                               padding: EdgeInsets.only(left: 4.0),
-                              child: Icon(Icons.keyboard_arrow_down, size: 16),
+                              child:
+                                  Icon(Icons.keyboard_arrow_down, size: 16),
                             ),
                             elevation: 4,
                             style: GoogleFonts.outfit(
@@ -97,11 +98,7 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
                             ),
                             underline: const SizedBox(),
                             isDense: true,
-                            onChanged: (String? value) {
-                              if (value != null) {
-                                controller.selectedMonth.value = value;
-                              }
-                            },
+                            onChanged: controller.onMonthChanged,
                             items: controller.months
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
@@ -116,49 +113,146 @@ class EarninghistoryView extends GetView<EarninghistoryController> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
-              Text(
-                'August 2026',
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
               const SizedBox(height: 16),
+
+              // Transaction List Grouped by Month
               Expanded(
                 child: Obx(() {
-                  // Basic filtering logic
-                  var filteredTransactions = controller.transactions;
-                  if (controller.selectedFilter.value == 'Orders') {
-                    filteredTransactions = filteredTransactions
-                        .where((t) => t.isPositive)
-                        .toList();
-                  } else if (controller.selectedFilter.value == 'Withdraw') {
-                    filteredTransactions = filteredTransactions
-                        .where((t) => !t.isPositive)
-                        .toList();
+                  if (controller.isLoading.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    );
                   }
 
-                  return ListView.builder(
-                    itemCount: filteredTransactions.length,
-                    itemBuilder: (context, index) {
-                      final transaction = filteredTransactions[index];
-                      return TransactionCard(
-                        id: transaction.id,
-                        amount: transaction.amount,
-                        date: transaction.date,
-                        time: transaction.time,
-                        type: transaction.type,
-                        isPositive: transaction.isPositive,
-                      );
-                    },
+                  if (controller.errorMessage.value.isNotEmpty &&
+                      controller.transactions.isEmpty) {
+                    return _buildErrorState();
+                  }
+
+                  final grouped = controller.getFilteredGroupedTransactions();
+                  if (grouped.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: controller.fetchEarningsHistory,
+                    color: AppColors.primary,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: grouped.keys.length,
+                      itemBuilder: (context, monthIndex) {
+                        final monthName = grouped.keys.elementAt(monthIndex);
+                        final items = grouped[monthName] ?? [];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 16, bottom: 12),
+                              child: Text(
+                                monthName,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            ...items.map(
+                              (tx) => TransactionCard(
+                                id: tx.orderNumber.isNotEmpty
+                                    ? tx.orderNumber
+                                    : tx.id,
+                                amount: tx.formattedAmount,
+                                date: tx.displayDate,
+                                time: tx.displayTime,
+                                type: tx.paymentLabel.isNotEmpty
+                                    ? tx.paymentLabel
+                                    : tx.paymentMethod,
+                                isPositive: tx.isPositive,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   );
                 }),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.receipt_long_outlined,
+              size: 48,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Transactions Found',
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Earnings history for this period will appear here.',
+            style: GoogleFonts.outfit(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          const SizedBox(height: 16),
+          Text(
+            controller.errorMessage.value,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: controller.fetchEarningsHistory,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }

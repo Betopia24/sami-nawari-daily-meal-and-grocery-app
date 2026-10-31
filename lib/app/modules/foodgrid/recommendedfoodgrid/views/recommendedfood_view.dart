@@ -40,7 +40,7 @@ class RecommendedfoodView extends GetView<RecommendedfoodController> {
             margin: EdgeInsets.zero,
             onTap: () => Get.toNamed(
               Routes.fooddetails,
-              arguments: food.id,
+              arguments: food,
             ),
           );
         },

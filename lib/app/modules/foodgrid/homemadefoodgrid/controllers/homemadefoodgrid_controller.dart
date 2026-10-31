@@ -5,6 +5,7 @@ import '../../../../data/models/food_item_model.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../../core/utils/app_colors.dart';
+import '../../../dashboard/controllers/dashboard_controller.dart';
 
 class HomemadefoodgridController extends GetxController {
   final isLoading = false.obs;
@@ -13,13 +14,42 @@ class HomemadefoodgridController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadInitialFoods();
+  }
+
+  void _loadInitialFoods() {
+    final args = Get.arguments;
+    if (args is List<FoodItemModel> && args.isNotEmpty) {
+      foods.assignAll(args);
+      isLoading.value = false;
+      return;
+    } else if (args is List && args.isNotEmpty) {
+      final list = args.whereType<FoodItemModel>().toList();
+      if (list.isNotEmpty) {
+        foods.assignAll(list);
+        isLoading.value = false;
+        return;
+      }
+    }
+
+    if (Get.isRegistered<DashboardController>()) {
+      final dashboardCtrl = Get.find<DashboardController>();
+      if (dashboardCtrl.homemadeFoods.isNotEmpty) {
+        foods.assignAll(dashboardCtrl.homemadeFoods);
+        isLoading.value = false;
+        return;
+      }
+    }
+
     fetchHomemadeFoods();
   }
 
   /// Fetches homemade food items from the backend API.
   Future<void> fetchHomemadeFoods() async {
     try {
-      isLoading.value = true;
+      if (foods.isEmpty) {
+        isLoading.value = true;
+      }
 
       // 1. Fetch from /foods with limit
       final response = await NetworkCaller.getRequest(
@@ -29,13 +59,12 @@ class HomemadefoodgridController extends GetxController {
 
       if (response.isSuccess && response.responseData != null) {
         final list = _parseFoodList(response.responseData);
-        foods.assignAll(list);
-      } else {
-        foods.clear();
+        if (list.isNotEmpty) {
+          foods.assignAll(list);
+        }
       }
     } catch (e) {
       debugPrint('Error fetching homemade foods: $e');
-      foods.clear();
     } finally {
       isLoading.value = false;
     }

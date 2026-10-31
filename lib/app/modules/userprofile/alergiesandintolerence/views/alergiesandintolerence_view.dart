@@ -82,9 +82,12 @@ class AlergiesandintolerenceView
           ],
         ),
       ),
-      bottomNavigationBar: ProfileBottomButton(
-        text: 'Save Allergies',
-        onPressed: controller.saveAllergies,
+      bottomNavigationBar: Obx(
+        () => ProfileBottomButton(
+          text: 'Save Allergies',
+          isLoading: controller.isSaving.value,
+          onPressed: controller.saveAllergies,
+        ),
       ),
     );
   }

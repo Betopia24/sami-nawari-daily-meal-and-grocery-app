@@ -59,15 +59,21 @@ class Urls {
   // ---------------------------------------------------------------------------
   static const String exploreSellers = '/explore/sellers';
   static const String exploreFoods = '/explore/foods';
-  static String sellerMenu(String sellerId) => '/explore/sellers/$sellerId/menu';
-  static String sellerAbout(String sellerId) => '/explore/sellers/$sellerId/about';
-  static String sellerReviews(String sellerId) => '/explore/sellers/$sellerId/reviews';
+  static String sellerMenu(String sellerId) =>
+      '/explore/sellers/$sellerId/menu';
+  static String sellerAbout(String sellerId) =>
+      '/explore/sellers/$sellerId/about';
+  static String sellerReviews(String sellerId) =>
+      '/explore/sellers/$sellerId/reviews';
 
   // ---------------------------------------------------------------------------
   // CART
   // ---------------------------------------------------------------------------
   static const String cart = '/cart';
   static const String cartQuantity = '/cart/quantity';
+  static const String profileDietaryPreferences =
+      '/users/update-dietary-preferences';
+  static const String profileAlergies = '/users/update-allergies';
 
   // ---------------------------------------------------------------------------
   // ORDERS & PAYMENTS
@@ -91,6 +97,8 @@ class Urls {
   static const String groceryInvitations = '/grocery/invitations';
   static String groceryListDetails(String listId) => '/grocery/$listId';
   static String groceryItem(String listId) => '/grocery/$listId/item';
+  static String groceryItemUpdate(String listId, String itemId) =>
+      '/grocery/$listId/item/$itemId';
   static String groceryItemUpdate(String listId, String itemId) => '/grocery/$listId/item/$itemId';
   static String groceryInvite(String listId) => '/grocery/$listId/invite';
   static String groceryInvitationRespond(String invitationId) =>
@@ -104,13 +112,16 @@ class Urls {
   static const String bookmarks = '/bookmarks';
   static const String toggleBookmark = '/bookmarks/toggle';
   static const String reviews = '/reviews';
+  static const String sellerProfileFavourite = '/bookmarks/sellers/toggle';
+  static const String getSellerPrifile = '/bookmarks/sellers';
 
   // ---------------------------------------------------------------------------
   // NOTIFICATIONS
   // ---------------------------------------------------------------------------
   static const String notifications = '/notifications';
   static const String readAllNotifications = '/notifications/read-all';
-  static const String singleReadNotification = '/notifications/notification_id/read';
+  static const String singleReadNotification =
+      '/notifications/notification_id/read';
 
   // ---------------------------------------------------------------------------
   // SELLER MODULE
@@ -123,6 +134,9 @@ class Urls {
   static const String updateFood = '/foods/seller/food_id';
   static const String deleteFood = '/foods/seller/:foodId';
   static const String orderStatusUpdate = '/orders/seller/order_id/status';
+  static const String stripeConnect = '/seller/stripe/connect';
+  static const String earningOverview = '/seller/earnings';
+  static const String earningHistory = '/seller/earnings/history';
 
   /// Helper to get the update food endpoint with food ID
   static String getUpdateFoodUrl(String foodId) =>

@@ -4,11 +4,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../routes/app_routes.dart';
+import '../exploreboard/controllers/exploreboard_controller.dart';
 
 class RestaurantCard extends StatelessWidget {
   final Map<String, dynamic> restaurant;
+  final bool? isBookmarked;
+  final VoidCallback? onBookmarkTap;
 
-  const RestaurantCard({super.key, required this.restaurant});
+  const RestaurantCard({
+    super.key,
+    required this.restaurant,
+    this.isBookmarked,
+    this.onBookmarkTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -148,10 +156,45 @@ class RestaurantCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      Icons.bookmark_border,
-                      color: AppColors.textDark,
-                      size: 24.sp,
+                    Builder(
+                      builder: (context) {
+                        final exploreCtrl = Get.isRegistered<ExploreboardController>()
+                            ? Get.find<ExploreboardController>()
+                            : null;
+                        final String sellerId = (restaurant['sellerId'] ??
+                                restaurant['id'] ??
+                                restaurant['_id'] ??
+                                restaurant['userId'] ??
+                                '')
+                            .toString();
+                        final String sellerName =
+                            restaurant['name']?.toString() ?? 'Seller';
+                        final bool bookmarked = isBookmarked ??
+                            (exploreCtrl != null &&
+                                exploreCtrl.bookmarkedSellerIds.contains(sellerId));
+
+                        return GestureDetector(
+                          onTap: onBookmarkTap ??
+                              () {
+                                if (exploreCtrl != null) {
+                                  exploreCtrl.toggleSellerBookmark(
+                                    sellerId,
+                                    sellerName: sellerName,
+                                  );
+                                }
+                              },
+                          child: Container(
+                            padding: EdgeInsets.all(6.w),
+                            child: Icon(
+                              bookmarked ? Icons.bookmark : Icons.bookmark_border,
+                              color: bookmarked
+                                  ? AppColors.primary
+                                  : AppColors.textDark,
+                              size: 24.sp,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     GestureDetector(
                       onTap: () {
