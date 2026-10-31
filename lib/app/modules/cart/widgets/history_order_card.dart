@@ -14,6 +14,7 @@ class HistoryOrderCard extends StatelessWidget {
   final VoidCallback onReceipt;
   final VoidCallback onReview;
   final VoidCallback onReorder;
+  final bool isSeller;
 
   const HistoryOrderCard({
     super.key,
@@ -29,6 +30,7 @@ class HistoryOrderCard extends StatelessWidget {
     required this.onReceipt,
     required this.onReview,
     required this.onReorder,
+    this.isSeller = false,
   });
 
   @override
@@ -130,86 +132,88 @@ class HistoryOrderCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE8E4DF)),
-          // Bottom section
-          IntrinsicHeight(
-            child: Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: onReceipt,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Center(
-                        child: Text(
-                          'Receipt',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF7A7570),
+          if (!isSeller) ...[
+            const Divider(height: 1, color: Color(0xFFE8E4DF)),
+            // Bottom section
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: onReceipt,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Receipt',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF7A7570),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const VerticalDivider(width: 1, color: Color(0xFFE8E4DF), indent: 12, endIndent: 12),
-                Expanded(
-                  child: InkWell(
-                    onTap: isReviewed ? null : onReview,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Center(
-                        child: isReviewed
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.star, color: Color(0xFFFBBF24), size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '$reviewScore/5 Reviewed',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF7A7570),
+                  const VerticalDivider(width: 1, color: Color(0xFFE8E4DF), indent: 12, endIndent: 12),
+                  Expanded(
+                    child: InkWell(
+                      onTap: isReviewed ? null : onReview,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: isReviewed
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.star, color: Color(0xFFFBBF24), size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$reviewScore/5 Reviewed',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF7A7570),
+                                      ),
                                     ),
+                                  ],
+                                )
+                              : Text(
+                                  'Leave Review',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFFE8874A),
                                   ),
-                                ],
-                              )
-                            : Text(
-                                'Leave Review',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFFE8874A),
                                 ),
-                              ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const VerticalDivider(width: 1, color: Color(0xFFE8E4DF), indent: 12, endIndent: 12),
-                Expanded(
-                  child: InkWell(
-                    onTap: onReorder,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Center(
-                        child: Text(
-                          'Reorder',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF3A8F5C),
+                  const VerticalDivider(width: 1, color: Color(0xFFE8E4DF), indent: 12, endIndent: 12),
+                  Expanded(
+                    child: InkWell(
+                      onTap: onReorder,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Reorder',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF3A8F5C),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

@@ -579,6 +579,7 @@ class MycartsView extends GetView<MycartsController> {
                 price: price,
                 quantity: qty,
                 isReviewed: false,
+                isSeller: controller.isSeller,
                 onReceipt: () => controller.showReceipt(order),
                 onReview: () => controller.openReviewDialog(order),
                 onReorder: () => controller.onReorder(orderId),

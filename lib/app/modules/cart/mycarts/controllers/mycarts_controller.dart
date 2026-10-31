@@ -63,7 +63,12 @@ class MycartsController extends GetxController
   }
 
   Future<void> loadUserRole() async {
-    final role = (await LocalStorage.getRole()) ?? LocalStorage.roleSync ?? 'BUYER';
+    String? role = await LocalStorage.getRole();
+    if (role == null || role.isEmpty) {
+      final user = await LocalStorage.getUser();
+      role = user?['role']?.toString();
+    }
+    role ??= LocalStorage.roleSync ?? 'BUYER';
     userRole.value = role;
   }
 
@@ -340,7 +345,12 @@ class MycartsController extends GetxController
   Future<void> fetchOrders() async {
     try {
       isLoadingOrders.value = true;
-      final role = (await LocalStorage.getRole()) ?? LocalStorage.roleSync ?? 'BUYER';
+      String? role = await LocalStorage.getRole();
+      if (role == null || role.isEmpty) {
+        final user = await LocalStorage.getUser();
+        role = user?['role']?.toString();
+      }
+      role ??= LocalStorage.roleSync ?? 'BUYER';
       userRole.value = role;
 
       final isSellerRole = role.toUpperCase() == 'SELLER';
@@ -908,7 +918,7 @@ class MycartsController extends GetxController
     final orderId = order['id']?.toString() ?? '';
     final foodName = firstItem?['foodName']?.toString() ?? 'Meal';
 
-    int dialogRating = 5;
+    int dialogRating = 0;
     final commentController = TextEditingController();
 
     Get.dialog(
@@ -932,10 +942,11 @@ class MycartsController extends GetxController
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {
                     final starIndex = index + 1;
+                    final isFilled = starIndex <= dialogRating;
                     return IconButton(
                       icon: Icon(
-                        starIndex <= dialogRating ? Icons.star : Icons.star_border,
-                        color: AppColors.secondary,
+                        isFilled ? Icons.star_rounded : Icons.star_border_rounded,
+                        color: isFilled ? AppColors.secondary : Colors.grey.shade400,
                         size: 32,
                       ),
                       onPressed: () {
@@ -969,6 +980,16 @@ class MycartsController extends GetxController
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {
+                  if (dialogRating == 0) {
+                    Get.snackbar(
+                      'Rating Required',
+                      'Please select a rating from 1 to 5 stars',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.amber.shade700,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
                   Get.back();
                   await submitReviewApi(
                     orderId: orderId,
