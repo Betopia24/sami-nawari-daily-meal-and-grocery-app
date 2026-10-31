@@ -10,10 +10,11 @@ class HomemadeFoodCard extends StatelessWidget {
   final String distance;
   final String rating;
   final String price;
-  final VoidCallback onAddTap;
+  final VoidCallback? onAddTap;
   final VoidCallback onViewDetailsTap;
   final double? width;
   final EdgeInsetsGeometry? margin;
+  final bool showAddButton;
 
   const HomemadeFoodCard({
     super.key,
@@ -23,10 +24,11 @@ class HomemadeFoodCard extends StatelessWidget {
     required this.distance,
     required this.rating,
     required this.price,
-    required this.onAddTap,
+    this.onAddTap,
     required this.onViewDetailsTap,
     this.width = 260,
     this.margin = const EdgeInsets.only(right: 16.0),
+    this.showAddButton = true,
   });
 
   @override
@@ -118,21 +120,22 @@ class HomemadeFoodCard extends StatelessWidget {
                         color: AppColors.primary,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: onAddTap,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 18,
+                    if (showAddButton && onAddTap != null)
+                      GestureDetector(
+                        onTap: onAddTap,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 12),

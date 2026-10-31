@@ -5,6 +5,7 @@ import 'package:daily_meal_and_grocery_app/app/data/network/local_storage.dart';
 import 'package:daily_meal_and_grocery_app/app/data/network/network.dart';
 import 'package:daily_meal_and_grocery_app/app/data/network/url.dart';
 import '../../../../../routes/app_routes.dart';
+import 'package:daily_meal_and_grocery_app/app/data/services/social_auth_service.dart';
 
 class SignupController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -170,12 +171,22 @@ class SignupController extends GetxController {
     }
   }
 
-  void continueWithGoogle() {
-    // Implement Google sign up
+  Future<void> continueWithGoogle() async {
+    isLoading.value = true;
+    try {
+      await SocialAuthService.signInWithGoogle();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void continueWithApple() {
-    // Implement Apple sign up
+  Future<void> continueWithApple() async {
+    isLoading.value = true;
+    try {
+      await SocialAuthService.signInWithApple();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void goToSignIn() {

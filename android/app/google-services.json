@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1003764253086",
+    "project_id": "sami-nawari",
+    "storage_bucket": "sami-nawari.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1003764253086:android:cd9b84c3c9d8b8bfca968f",
+        "android_client_info": {
+          "package_name": "com.example.daily_meal_and_grocery_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1003764253086-u5pupgn16j6c82k0rlnmul5dv6g9picb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARxMR01Opb4u_ZGWuIKF7jEsYcpOmGc5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1003764253086-u5pupgn16j6c82k0rlnmul5dv6g9picb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

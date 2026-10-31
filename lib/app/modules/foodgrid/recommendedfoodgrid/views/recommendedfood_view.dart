@@ -38,6 +38,8 @@ class RecommendedfoodView extends GetView<RecommendedfoodController> {
             rating: food.rating.isNotEmpty ? food.rating : '4.8',
             width: null,
             margin: EdgeInsets.zero,
+            showAddButton: true,
+            onAddTap: () => controller.addToCart(food),
             onTap: () => Get.toNamed(
               Routes.fooddetails,
               arguments: food,

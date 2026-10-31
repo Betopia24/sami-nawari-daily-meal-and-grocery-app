@@ -564,7 +564,7 @@ class SystempreferenceView extends GetView<SystempreferenceController> {
           ProfileMenuTile(
             iconPath: AppAssets.inviteFamilyIcon,
             title: 'Invite Family',
-            onTap: () => Get.toNamed(Routes.familyinvite),
+            onTap: () => Get.toNamed(Routes.sharedmembers),
             trailing: _buildTrailingText('3 members'),
           ),
           ProfileMenuTile(

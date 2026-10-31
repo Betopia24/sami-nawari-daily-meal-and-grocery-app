@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../data/models/food_item_model.dart';
+import '../../../../data/network/jwt_helper.dart';
+import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../routes/app_routes.dart';
@@ -44,6 +46,10 @@ class FooddetailsController extends GetxController
   // Bookmark state
   final RxBool isBookmarked = false.obs;
 
+  // Seller / Own Food State
+  final RxString sellerUserId = ''.obs;
+  final RxBool isOwnFood = false.obs;
+
   // Cart / Quantity
   final RxInt quantity = 1.obs;
 
@@ -64,6 +70,8 @@ class FooddetailsController extends GetxController
     foodId.value = '';
     foodName.value = '';
     sellerId.value = '';
+    sellerUserId.value = '';
+    isOwnFood.value = false;
     sellerOwnerName.value = '';
     sellerName.value = '';
     sellerProfilePicture.value = '';
@@ -141,8 +149,11 @@ class FooddetailsController extends GetxController
       sellerName.value = data['sellerName'].toString();
     } else if (data['seller'] is Map) {
       final s = data['seller'] as Map;
-      if (s['id'] != null && sellerId.value.isEmpty) {
-        sellerId.value = s['id'].toString();
+      if (s['id'] != null) {
+        sellerUserId.value = s['id'].toString();
+        if (sellerId.value.isEmpty) {
+          sellerId.value = s['id'].toString();
+        }
       }
       if (s['name'] != null) {
         sellerOwnerName.value = s['name'].toString();
@@ -203,6 +214,7 @@ class FooddetailsController extends GetxController
 
       ingredients.assignAll(ingList);
     }
+    _checkIfOwnFood();
   }
 
   void _applyFoodModel(FoodItemModel food) {
@@ -226,6 +238,7 @@ class FooddetailsController extends GetxController
     deliveryAvailable.value = food.deliveryAvailable;
     if (food.description.isNotEmpty) description.value = food.description;
     if (food.rating.isNotEmpty) rating.value = food.rating;
+    _checkIfOwnFood();
   }
 
   Future<void> fetchFoodDetails(String id) async {
@@ -266,6 +279,7 @@ class FooddetailsController extends GetxController
       debugPrint('Error fetching food details: $e');
     } finally {
       isLoading.value = false;
+      await _checkIfOwnFood();
       // Fetch popular dishes and bookmark status
       await _fetchPopularDishes();
       checkBookmarkStatus(id);
@@ -337,8 +351,11 @@ class FooddetailsController extends GetxController
     // Seller
     if (food['seller'] is Map) {
       final seller = food['seller'] as Map;
-      if (seller['id'] != null && sellerId.value.isEmpty) {
-        sellerId.value = seller['id'].toString();
+      if (seller['id'] != null && seller['id'].toString().isNotEmpty) {
+        sellerUserId.value = seller['id'].toString();
+        if (sellerId.value.isEmpty) {
+          sellerId.value = seller['id'].toString();
+        }
       }
       final sellerNameVal = seller['name']?.toString() ?? '';
       sellerOwnerName.value = sellerNameVal;
@@ -394,6 +411,7 @@ class FooddetailsController extends GetxController
     } else {
       ingredients.clear();
     }
+    _checkIfOwnFood();
   }
 
   Future<void> _fetchPopularDishes() async {
@@ -588,6 +606,20 @@ class FooddetailsController extends GetxController
   }
 
   Future<void> addToCart() async {
+    if (isOwnFood.value) {
+      Get.closeCurrentSnackbar();
+      Get.snackbar(
+        'Notice',
+        'You cannot add your own food item to the cart',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
     final targetId = foodId.value;
     if (targetId.isEmpty) return;
 
@@ -637,6 +669,45 @@ class FooddetailsController extends GetxController
   Future<void> refreshFoodDetails() async {
     if (foodId.value.isNotEmpty) {
       await fetchFoodDetails(foodId.value);
+    }
+  }
+
+  Future<void> _checkIfOwnFood() async {
+    try {
+      final currentUserId = LocalStorage.idSync ?? await LocalStorage.getId();
+      final userMap = await LocalStorage.getUser();
+      final cachedUserId = userMap?['id']?.toString() ??
+          userMap?['_id']?.toString() ??
+          userMap?['userId']?.toString() ??
+          userMap?['sub']?.toString();
+
+      final token = LocalStorage.tokenSync ?? await LocalStorage.getToken();
+      String? jwtUserId;
+      if (token != null && token.isNotEmpty) {
+        jwtUserId = JwtHelper.getUserId(token);
+      }
+
+      final Set<String> myIds = {
+        if (currentUserId != null && currentUserId.trim().isNotEmpty)
+          currentUserId.trim(),
+        if (cachedUserId != null && cachedUserId.trim().isNotEmpty)
+          cachedUserId.trim(),
+        if (jwtUserId != null && jwtUserId.trim().isNotEmpty)
+          jwtUserId.trim(),
+      };
+
+      final foodSellerId = sellerId.value.trim();
+      final foodSellerUserId = sellerUserId.value.trim();
+
+      if (myIds.isNotEmpty &&
+          ((foodSellerId.isNotEmpty && myIds.contains(foodSellerId)) ||
+           (foodSellerUserId.isNotEmpty && myIds.contains(foodSellerUserId)))) {
+        isOwnFood.value = true;
+      } else {
+        isOwnFood.value = false;
+      }
+    } catch (e) {
+      debugPrint('Error checking if own food: $e');
     }
   }
 

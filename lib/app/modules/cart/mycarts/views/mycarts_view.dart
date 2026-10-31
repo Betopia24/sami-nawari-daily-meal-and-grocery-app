@@ -77,7 +77,7 @@ class MycartsView extends GetView<MycartsController> {
                   child: TabBarView(
                     controller: controller.tabController,
                     children: [
-                      _buildCartTab(),
+                      _buildCartTab(context),
                       _buildActiveTab(),
                       _buildHistoryTab(),
                     ],
@@ -121,7 +121,7 @@ class MycartsView extends GetView<MycartsController> {
     );
   }
 
-  Widget _buildCartTab() {
+  Widget _buildCartTab(BuildContext context) {
     return Obx(() {
       if (controller.isLoadingCart.value) {
         return const MyCartsShimmer();
@@ -161,7 +161,13 @@ class MycartsView extends GetView<MycartsController> {
                 PrimaryButton(
                   text: 'Browse Foods',
                   width: 180,
-                  onPressed: () => Get.back(),
+                  onPressed: () {
+                    if (Navigator.of(context).canPop()) {
+                      Get.back();
+                    } else {
+                      Get.offAllNamed(Routes.navbar);
+                    }
+                  },
                 ),
               ],
             ),

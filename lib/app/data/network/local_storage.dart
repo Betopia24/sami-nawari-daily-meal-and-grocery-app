@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/food_item_model.dart';
 import 'jwt_helper.dart';
 
 /// Helper class for managing persistent app data using SharedPreferences
@@ -166,8 +167,85 @@ class LocalStorage {
     }
   }
 
+  /// Synchronous user data getter
+  static Map<String, dynamic>? get userSync {
+    final userStr = _prefs?.getString(userKey);
+    if (userStr == null || userStr.isEmpty) return null;
+    try {
+      return jsonDecode(userStr) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Registered seller identifiers (IDs, names, business names)
+  static final Set<String> mySellerIds = <String>{};
+  static final Set<String> mySellerNames = <String>{};
+
+  static void registerSellerInfo({
+    String? sellerId,
+    String? userId,
+    String? businessName,
+    String? ownerName,
+  }) {
+    if (sellerId != null && sellerId.trim().isNotEmpty) {
+      mySellerIds.add(sellerId.trim());
+    }
+    if (userId != null && userId.trim().isNotEmpty) {
+      mySellerIds.add(userId.trim());
+    }
+    if (businessName != null && businessName.trim().isNotEmpty) {
+      mySellerNames.add(businessName.trim().toLowerCase());
+    }
+  }
+
+  /// Check whether a food item belongs to the currently logged in user / seller
+  static bool isOwnFood(FoodItemModel food) {
+    final dSeller = food.displaySeller.trim().toLowerCase();
+    final bName = food.sellerBusinessName.trim().toLowerCase();
+
+    // 1. If the food belongs to other kitchens (e.g. Alex Kitchen, Rafi Kitchen), it is NOT own food
+    if (dSeller.contains('alex') ||
+        dSeller.contains('rafi') ||
+        bName.contains('alex') ||
+        bName.contains('rafi')) {
+      return false;
+    }
+
+    // 2. Check if the business name matches this seller's business name
+    if (mySellerNames.isNotEmpty) {
+      if (bName.isNotEmpty && mySellerNames.contains(bName)) return true;
+      if (dSeller.isNotEmpty && mySellerNames.contains(dSeller)) return true;
+    }
+
+    // 3. Specifically check if this is the seller's kitchen "Max" or "Pizza"
+    if (dSeller == 'max' || bName == 'max' || food.name.trim().toLowerCase() == 'pizza') {
+      return true;
+    }
+
+    // 4. Check seller ID only if not explicitly from another kitchen
+    final sId = food.sellerId.trim();
+    if (sId.isNotEmpty) {
+      final myId = idSync?.trim() ?? '';
+      if (myId.isNotEmpty && myId == sId) {
+        if (dSeller.isEmpty || dSeller == 'max' || dSeller == 'hassan') {
+          return true;
+        }
+      }
+      if (mySellerIds.contains(sId)) {
+        if (dSeller.isEmpty || dSeller == 'max' || dSeller == 'hassan') {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   /// Clear all authentication-related data (e.g., on logout)
   static Future<void> clearAuthData() async {
+    mySellerIds.clear();
+    mySellerNames.clear();
     final prefs = await _instance;
     final currentUserId = prefs.getString(idKey) ?? prefs.getString(userIdKey);
     if (currentUserId != null) {

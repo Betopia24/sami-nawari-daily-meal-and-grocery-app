@@ -39,26 +39,31 @@ class ChefBioCard extends StatelessWidget {
                 backgroundColor: Colors.grey.shade200,
               ),
               SizedBox(width: 12.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: GoogleFonts.outfit(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.outfit(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textDark,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Text(
-                    role,
-                    style: GoogleFonts.outfit(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
+                    SizedBox(height: 2.h),
+                    Text(
+                      role,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -162,14 +167,17 @@ class WorkingHoursCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          entry.key,
-                          style: GoogleFonts.outfit(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                        Expanded(
+                          child: Text(
+                            entry.key,
+                            style: GoogleFonts.outfit(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
+                        SizedBox(width: 8.w),
                         Text(
                           entry.value,
                           style: GoogleFonts.outfit(
@@ -215,15 +223,17 @@ class OrderingInfoCard extends StatelessWidget {
         children: [
           Icon(icon, size: 18.sp, color: iconColor),
           SizedBox(width: 12.w),
-          Text(
-            title,
-            style: GoogleFonts.outfit(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.outfit(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
-          const Spacer(),
+          SizedBox(width: 8.w),
           Text(
             value,
             style: GoogleFonts.outfit(

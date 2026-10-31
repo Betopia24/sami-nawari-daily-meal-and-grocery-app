@@ -13,6 +13,8 @@ class RecipeCard extends StatelessWidget {
   final VoidCallback onTap;
   final double? width;
   final EdgeInsetsGeometry? margin;
+  final VoidCallback? onAddTap;
+  final bool showAddButton;
 
   const RecipeCard({
     super.key,
@@ -23,6 +25,8 @@ class RecipeCard extends StatelessWidget {
     required this.calories,
     required this.rating,
     required this.onTap,
+    this.onAddTap,
+    this.showAddButton = false,
     this.width = 220,
     this.margin = const EdgeInsets.only(right: 16.0),
   });
@@ -59,30 +63,57 @@ class RecipeCard extends StatelessWidget {
                       horizontal: 8.0,
                       vertical: 4.0,
                     ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      tag,
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
                       ),
-                      child: Text(
-                        tag,
-                        style: GoogleFonts.outfit(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      title,
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      if (showAddButton && onAddTap != null) ...[
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: onAddTap,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,

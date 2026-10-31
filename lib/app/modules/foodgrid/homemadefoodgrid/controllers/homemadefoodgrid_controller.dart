@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../data/models/food_item_model.dart';
+import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
 import '../../../../../core/utils/app_colors.dart';
+import '../../../../routes/app_routes.dart';
 import '../../../dashboard/controllers/dashboard_controller.dart';
 
 class HomemadefoodgridController extends GetxController {
@@ -14,7 +16,22 @@ class HomemadefoodgridController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final cachedId = LocalStorage.idSync;
+    if (cachedId != null) {
+      LocalStorage.registerSellerInfo(userId: cachedId);
+    }
+    final user = LocalStorage.userSync;
+    if (user != null) {
+      LocalStorage.registerSellerInfo(
+        userId: user['id']?.toString() ?? user['userId']?.toString(),
+        ownerName: user['name']?.toString(),
+      );
+    }
     _loadInitialFoods();
+  }
+
+  bool isOwnFood(FoodItemModel food) {
+    return LocalStorage.isOwnFood(food);
   }
 
   void _loadInitialFoods() {
@@ -103,14 +120,9 @@ class HomemadefoodgridController extends GetxController {
           margin: const EdgeInsets.all(16),
         );
       }
+      Get.toNamed(Routes.mycarts);
     } catch (e) {
-      Get.snackbar(
-        'Cart',
-        'Could not add item to cart',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade700,
-        colorText: Colors.white,
-      );
+      Get.toNamed(Routes.mycarts);
     }
   }
 

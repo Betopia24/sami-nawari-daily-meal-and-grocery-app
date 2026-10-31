@@ -6,9 +6,19 @@ import '../../../../../core/utils/app_colors.dart';
 
 class DashboardSearchBar extends StatelessWidget {
   final TextEditingController? controller;
-  final Function(String)? onChanged;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onClear;
+  final bool isLoading;
 
-  const DashboardSearchBar({super.key, this.controller, this.onChanged});
+  const DashboardSearchBar({
+    super.key,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+    this.onClear,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +48,8 @@ class DashboardSearchBar extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 onChanged: onChanged,
+                onSubmitted: onSubmitted,
+                textInputAction: TextInputAction.search,
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   color: AppColors.textPrimary,
@@ -53,6 +65,39 @@ class DashboardSearchBar extends StatelessWidget {
                 ),
               ),
             ),
+            if (controller != null)
+              AnimatedBuilder(
+                animation: controller!,
+                builder: (context, _) {
+                  if (isLoading) {
+                    return const Padding(
+                      padding: EdgeInsets.only(right: 14.0),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    );
+                  }
+                  if (controller!.text.isNotEmpty) {
+                    return GestureDetector(
+                      onTap: onClear,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 14.0),
+                        child: Icon(
+                          Icons.cancel_rounded,
+                          size: 20,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
           ],
         ),
       ),

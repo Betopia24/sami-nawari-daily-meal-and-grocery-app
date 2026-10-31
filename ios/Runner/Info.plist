@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.1003764253086-nvq2qdpkkgu09llo9hult5k5a0s0dpbl</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>This app requires access to your location to show nearby food kitchens and recipes on the map.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

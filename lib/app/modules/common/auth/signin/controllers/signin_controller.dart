@@ -6,6 +6,8 @@ import 'package:daily_meal_and_grocery_app/app/data/network/local_storage.dart';
 import 'package:daily_meal_and_grocery_app/app/data/network/network.dart';
 import 'package:daily_meal_and_grocery_app/app/data/network/url.dart';
 import '../../../../../routes/app_routes.dart';
+import 'package:daily_meal_and_grocery_app/app/data/services/social_auth_service.dart';
+import 'package:daily_meal_and_grocery_app/app/data/services/notification_service.dart';
 
 class SigninController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -128,6 +130,9 @@ class SigninController extends GetxController {
           await LocalStorage.remove('saved_signin_email');
         }
 
+        // Sync FCM device token with backend
+        NotificationService.syncFcmToken();
+
         Get.snackbar(
           'Success',
           data?['message']?.toString() ?? 'Logged in successfully!',
@@ -204,11 +209,21 @@ class SigninController extends GetxController {
     Get.toNamed(Routes.forgotpassword);
   }
 
-  void continueWithGoogle() {
-    // Implement Google sign in
+  Future<void> continueWithGoogle() async {
+    isLoading.value = true;
+    try {
+      await SocialAuthService.signInWithGoogle();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void continueWithApple() {
-    // Implement Apple sign in
+  Future<void> continueWithApple() async {
+    isLoading.value = true;
+    try {
+      await SocialAuthService.signInWithApple();
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

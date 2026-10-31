@@ -1,9 +1,12 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../data/models/food_item_model.dart';
+import '../../../../data/network/local_storage.dart';
 import '../../../../data/network/network.dart';
 import '../../../../data/network/url.dart';
+import '../../../../routes/app_routes.dart';
+import '../../../../../core/utils/app_colors.dart';
 import '../../../dashboard/controllers/dashboard_controller.dart';
 
 class RecommendedfoodController extends GetxController {
@@ -14,6 +17,35 @@ class RecommendedfoodController extends GetxController {
   void onInit() {
     super.onInit();
     _loadInitialFoods();
+  }
+
+  bool isOwnFood(FoodItemModel food) => LocalStorage.isOwnFood(food);
+
+  Future<void> addToCart(FoodItemModel food) async {
+    try {
+      final response = await NetworkCaller.postRequest(
+        Urls.cart,
+        body: {
+          'foodId': food.id,
+          'quantity': 1,
+        },
+      );
+      if (response.isSuccess) {
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          'Added to Cart',
+          '${food.name} added to your cart',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.primary,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.all(16),
+        );
+      }
+      Get.toNamed(Routes.mycarts);
+    } catch (e) {
+      Get.toNamed(Routes.mycarts);
+    }
   }
 
   /// Initializes foods from navigation arguments, dashboard cache, or API.

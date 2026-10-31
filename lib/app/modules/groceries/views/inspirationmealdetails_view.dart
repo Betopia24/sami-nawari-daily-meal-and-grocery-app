@@ -5,9 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../widgets/custom_segmented_tab_bar.dart';
-import '../../../widgets/primary_button.dart';
 import '../../../widgets/custom_back_button.dart';
-import '../../receipes/widgets/servings_counter.dart';
 import '../../receipes/widgets/recipe_ingredient_item.dart';
 import '../../receipes/widgets/recipe_method_step_card.dart';
 import '../../receipes/widgets/pro_tips_card.dart';
@@ -47,7 +45,6 @@ class _InspirationmealdetailsViewState extends State<InspirationmealdetailsView>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      bottomNavigationBar: _buildBottomBar(),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -95,7 +92,7 @@ class _InspirationmealdetailsViewState extends State<InspirationmealdetailsView>
 
   Widget _buildCustomHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -188,47 +185,6 @@ class _InspirationmealdetailsViewState extends State<InspirationmealdetailsView>
           ),
           // Back button
           const Positioned(top: 16, left: 16, child: CustomBackButton()),
-          // Bookmark button with interactive toggle
-          Positioned(
-            top: 16,
-            right: 16,
-            child: GestureDetector(
-              onTap: controller.toggleBookmark,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: Center(
-                  child: Obx(
-                    () => Icon(
-                      controller.isBookmarked.value
-                          ? Icons.bookmark_rounded
-                          : Icons.bookmark_border_rounded,
-                      color: controller.isBookmarked.value
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Servings Counter
-          Positioned(
-            bottom: -20, // Overhang
-            right: 20,
-            child: Obx(
-              () => ServingsCounter(
-                count: controller.servings.value,
-                onIncrement: controller.incrementServings,
-                onDecrement: controller.decrementServings,
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -417,31 +373,4 @@ class _InspirationmealdetailsViewState extends State<InspirationmealdetailsView>
     );
   }
 
-  Widget _buildBottomBar() {
-    return Obx(() {
-      // Only show sticky button when Ingredients tab is active
-      if (controller.activeTab.value == 1) {
-        final isAdding = controller.isAddingIngredients.value;
-        final count = controller.missingIngredients.length;
-        final btnText = isAdding
-            ? 'Adding to Grocery List...'
-            : (count == 0
-                ? 'All Ingredients In Pantry'
-                : 'Add Missing Ingredients ($count)');
-
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-            child: PrimaryButton(
-              isEnabled: !isAdding,
-              onPressed: controller.addMissingIngredientsToGrocery,
-              text: btnText,
-              showArrow: false,
-            ),
-          ),
-        );
-      }
-      return const SizedBox.shrink();
-    });
-  }
 }

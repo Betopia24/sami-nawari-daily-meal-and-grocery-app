@@ -24,16 +24,22 @@ class FooddetailsView extends GetView<FooddetailsController> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF9F8),
       bottomNavigationBar: Obx(
-        () => controller.isLoading.value
-            ? const FooddetailsBottomBarShimmer()
-            : StickyCartBottomBar(
-                quantity: controller.quantity.value,
-                price: controller.totalPrice,
-                onDecrement: controller.decrementQuantity,
-                onIncrement: controller.incrementQuantity,
-                onAddToCart: controller.addToCart,
-                onViewCart: controller.viewCart,
-              ),
+        () {
+          if (controller.isLoading.value) {
+            return const FooddetailsBottomBarShimmer();
+          }
+          if (controller.isOwnFood.value) {
+            return const SizedBox.shrink();
+          }
+          return StickyCartBottomBar(
+            quantity: controller.quantity.value,
+            price: controller.totalPrice,
+            onDecrement: controller.decrementQuantity,
+            onIncrement: controller.incrementQuantity,
+            onAddToCart: controller.addToCart,
+            onViewCart: controller.viewCart,
+          );
+        },
       ),
       body: Stack(
         children: [

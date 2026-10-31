@@ -7,6 +7,7 @@ import 'package:daily_meal_and_grocery_app/app/data/network/local_storage.dart';
 import 'package:daily_meal_and_grocery_app/app/data/network/network.dart';
 import 'package:daily_meal_and_grocery_app/app/data/network/url.dart';
 import '../../../../../routes/app_routes.dart';
+import 'package:daily_meal_and_grocery_app/app/data/services/notification_service.dart';
 
 class OtpController extends GetxController {
   final pinController = TextEditingController();
@@ -163,6 +164,9 @@ class OtpController extends GetxController {
           if (refreshToken != null && refreshToken.isNotEmpty) {
             await LocalStorage.saveRefreshToken(refreshToken);
           }
+
+          // Sync FCM device token with backend
+          NotificationService.syncFcmToken();
 
           Get.snackbar(
             'Verified',

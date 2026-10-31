@@ -68,6 +68,27 @@ class MycartsController extends GetxController
   }
 
   @override
+  void onReady() {
+    super.onReady();
+    if (Get.arguments != null &&
+        Get.arguments is Map &&
+        Get.arguments['mycarts_tab'] != null) {
+      final target = Get.arguments['mycarts_tab'];
+      if (target is int && target >= 0 && target < tabController.length) {
+        if (tabController.index != target) {
+          tabController.animateTo(target);
+          currentTabIndex.value = target;
+        }
+      }
+    }
+  }
+
+  Future<void> loadUserRole() async {
+    final role = (await LocalStorage.getRole()) ?? LocalStorage.roleSync ?? 'BUYER';
+    userRole.value = role;
+  }
+
+  @override
   void onClose() {
     tabController.dispose();
     super.onClose();

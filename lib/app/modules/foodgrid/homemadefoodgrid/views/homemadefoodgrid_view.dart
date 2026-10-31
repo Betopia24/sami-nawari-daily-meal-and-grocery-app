@@ -38,6 +38,7 @@ class HomemadefoodgridView extends GetView<HomemadefoodgridController> {
             price: '\$${food.price.toStringAsFixed(2)}',
             width: null,
             margin: EdgeInsets.zero,
+            showAddButton: true,
             onAddTap: () => controller.addToCart(food),
             onViewDetailsTap: () => Get.toNamed(
               Routes.fooddetails,

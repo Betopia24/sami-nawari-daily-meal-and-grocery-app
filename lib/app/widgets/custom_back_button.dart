@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../routes/app_routes.dart';
 
 class CustomBackButton extends StatelessWidget {
   final VoidCallback? onTap;
@@ -19,7 +20,14 @@ class CustomBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return UnconstrainedBox(
       child: InkWell(
-        onTap: onTap ?? () => Get.back(),
+        onTap: onTap ??
+            () {
+              if (Navigator.of(context).canPop()) {
+                Get.back();
+              } else {
+                Get.offAllNamed(Routes.navbar);
+              }
+            },
         borderRadius: BorderRadius.circular(16),
         child: Container(
         width: 40,
