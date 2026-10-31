@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
-
 import '../../../../../core/utils/app_strings.dart';
+
 
 class AppsharingController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -34,10 +34,12 @@ class AppsharingController extends GetxController
 
   Future<void> shareViaPackage({Rect? sharePositionOrigin}) async {
     try {
-      await Share.share(
-        AppStrings.shareAppMessage,
-        subject: AppStrings.shareAppSubject,
-        sharePositionOrigin: sharePositionOrigin,
+      await SharePlus.instance.share(
+        ShareParams(
+          text: AppStrings.shareAppMessage,
+          subject: AppStrings.shareAppSubject,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
       );
     } catch (e) {
       debugPrint('Error sharing via share_plus: $e');

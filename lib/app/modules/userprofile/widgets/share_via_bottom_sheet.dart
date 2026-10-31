@@ -10,9 +10,11 @@ class ShareViaBottomSheet extends StatelessWidget {
 
   void _share() {
     Get.back();
-    Share.share(
-      AppStrings.shareAppMessage,
-      subject: AppStrings.shareAppSubject,
+    SharePlus.instance.share(
+      ShareParams(
+        text: AppStrings.shareAppMessage,
+        subject: AppStrings.shareAppSubject,
+      ),
     );
   }
 

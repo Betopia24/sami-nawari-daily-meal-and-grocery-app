@@ -99,7 +99,6 @@ class Urls {
   static String groceryItem(String listId) => '/grocery/$listId/item';
   static String groceryItemUpdate(String listId, String itemId) =>
       '/grocery/$listId/item/$itemId';
-  static String groceryItemUpdate(String listId, String itemId) => '/grocery/$listId/item/$itemId';
   static String groceryInvite(String listId) => '/grocery/$listId/invite';
   static String groceryInvitationRespond(String invitationId) =>
       '/grocery/invitations/$invitationId/respond';
