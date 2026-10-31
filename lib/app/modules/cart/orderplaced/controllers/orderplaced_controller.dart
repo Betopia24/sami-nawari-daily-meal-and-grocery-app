@@ -147,15 +147,14 @@ class OrderplacedController extends GetxController {
 
   void onTrackMyOrder() {
     if (Get.isRegistered<import_mycarts.MycartsController>()) {
-      final cartController = Get.find<import_mycarts.MycartsController>();
-      if (cartController.tabController.length > 1) {
-        cartController.tabController.animateTo(1);
+      final mc = Get.find<import_mycarts.MycartsController>();
+      if (mc.tabController.length > 1) {
+        mc.tabController.animateTo(1);
       }
-      cartController.currentTabIndex.value = 1;
-      cartController.fetchOrders();
+      mc.currentTabIndex.value = 1;
+      mc.fetchOrders();
     }
-    
-    Get.toNamed(
+    Get.offNamed(
       Routes.mycarts,
       arguments: {'mycarts_tab': 1},
     );
