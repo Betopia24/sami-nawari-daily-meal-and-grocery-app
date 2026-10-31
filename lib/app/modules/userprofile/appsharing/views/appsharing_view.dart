@@ -9,7 +9,6 @@ import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../widgets/profile_app_bar.dart';
-import '../../widgets/share_via_bottom_sheet.dart';
 import '../controllers/appsharing_controller.dart';
 
 class AppsharingView extends GetView<AppsharingController> {
@@ -102,39 +101,23 @@ class AppsharingView extends GetView<AppsharingController> {
               ),
             ),
             SafeArea(
-              child: Column(
-                children: [
-                  PrimaryButton(
-                    text: AppStrings.shareButton,
-                    showArrow: false,
-                    onPressed: () {
-                      Get.bottomSheet(
-                        const ShareViaBottomSheet(),
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Builder(
-                    builder: (btnContext) {
-                      return PrimaryButton(
-                        text: AppStrings.copyLinkButton,
-                        showArrow: false,
-                        isOutlined: true,
-                        prefixIcon: Icons.link,
-                        onPressed: () {
-                          final box = btnContext.findRenderObject() as RenderBox?;
-                          final origin = box != null
-                              ? box.localToGlobal(Offset.zero) & box.size
-                              : null;
-                          controller.copyLink(sharePositionOrigin: origin);
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Builder(
+                  builder: (btnContext) {
+                    return PrimaryButton(
+                      text: AppStrings.shareButton,
+                      showArrow: false,
+                      onPressed: () {
+                        final box = btnContext.findRenderObject() as RenderBox?;
+                        final origin = box != null
+                            ? box.localToGlobal(Offset.zero) & box.size
+                            : null;
+                        controller.shareViaPackage(sharePositionOrigin: origin);
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],
