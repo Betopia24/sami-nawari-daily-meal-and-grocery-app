@@ -132,10 +132,34 @@ class EditsellerprofileView extends GetView<EditsellerprofileController> {
             const SizedBox(height: 12),
             ProfileSectionCard(
               children: [
-                ProfileTextField(
-                  label: 'Address',
-                  controller: controller.locationController,
-                  showBottomDivider: false,
+                Obx(
+                  () => ProfileTextField(
+                    label: 'Address',
+                    hintText: 'Enter your kitchen address',
+                    controller: controller.locationController,
+                    showBottomDivider: false,
+                    trailing: controller.isFetchingLocation.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : InkWell(
+                            onTap: controller.fetchCurrentLocation,
+                            borderRadius: BorderRadius.circular(20),
+                            child: const Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Icon(
+                                Icons.my_location_rounded,
+                                size: 22,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                  ),
                 ),
               ],
             ),
