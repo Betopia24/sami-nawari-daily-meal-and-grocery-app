@@ -74,7 +74,7 @@ class OrderhistoryController extends GetxController {
     final foodId = order.items.isNotEmpty ? order.items.first.foodId : '';
     final orderId = order.id;
 
-    int currentRating = 5;
+    int currentRating = 0;
 
     Get.bottomSheet(
       StatefulBuilder(
@@ -119,12 +119,13 @@ class OrderhistoryController extends GetxController {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {
                     final starIndex = index + 1;
+                    final isFilled = starIndex <= currentRating;
                     return IconButton(
                       icon: Icon(
-                        starIndex <= currentRating
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: Colors.amber,
+                        isFilled
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        color: isFilled ? Colors.amber : Colors.grey.shade400,
                         size: 32,
                       ),
                       onPressed: () {
@@ -145,6 +146,16 @@ class OrderhistoryController extends GetxController {
                     ),
                   ),
                   onPressed: () async {
+                    if (currentRating == 0) {
+                      Get.snackbar(
+                        'Rating Required',
+                        'Please select a rating from 1 to 5 stars',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.amber.shade700,
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
                     Get.back();
                     if (orderId.isNotEmpty && foodId.isNotEmpty) {
                       await NetworkCaller.postRequest(
